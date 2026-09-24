@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>競馬予想アプリ</title>
+
 <style>
   body {
     font-family: sans-serif;
@@ -13,11 +14,16 @@
     padding: 16px;
     color: #222;
   }
+
   .container {
     max-width: 700px;
     margin: auto;
   }
-  h1 { text-align: center; }
+
+  h1 {
+    text-align: center;
+  }
+
   .card {
     background: white;
     padding: 16px;
@@ -25,12 +31,16 @@
     margin: 12px 0;
     box-shadow: 0 2px 8px #0001;
   }
+
   label {
     display: block;
     margin-top: 10px;
     font-weight: bold;
   }
-  input, select, button {
+
+  input,
+  textarea,
+  button {
     box-sizing: border-box;
     width: 100%;
     padding: 10px;
@@ -39,44 +49,69 @@
     border-radius: 8px;
     font-size: 16px;
   }
+
   button {
     background: #146c43;
     color: white;
     border: none;
     font-weight: bold;
     margin-top: 14px;
+    cursor: pointer;
   }
-  button.secondary { background: #555; }
-  .horse {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-top: 8px;
-    border-radius: 8px;
+
+  button.secondary {
+    background: #555;
   }
-  .mark {
-    font-size: 22px;
-    font-weight: bold;
+
+  button.chatgpt {
+    background: #1677ff;
   }
+
+  button:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
+
   #preview {
     max-width: 100%;
     margin-top: 12px;
     border-radius: 8px;
   }
+
   .result {
     background: #fff8d6;
     padding: 12px;
     border-radius: 8px;
     margin-top: 10px;
   }
+
   .small {
     color: #666;
     font-size: 13px;
   }
+
+  .status {
+    padding: 10px;
+    background: #eef5ff;
+    border-radius: 8px;
+    margin-top: 10px;
+    white-space: pre-wrap;
+  }
+
+  textarea {
+    min-height: 180px;
+    resize: vertical;
+  }
 </style>
+
+<!-- OCRライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 </head>
 
 <body>
 <div class="container">
+
   <h1>🏇 競馬予想アプリ</h1>
 
   <div class="card">
@@ -92,7 +127,7 @@
     <input type="number" id="raceNumber" min="1" max="12" placeholder="例：11">
 
     <p class="small">
-      ※開催日・競馬場・レース番号は手動で入力してください。
+      開催日・競馬場・レース番号を入力してください。
     </p>
   </div>
 
@@ -103,31 +138,56 @@
 
     <img id="preview" alt="出馬表プレビュー" hidden>
 
+    <button id="ocrButton" onclick="readImageText()">
+      スクショから文字を読み取る
+    </button>
+
+    <div id="ocrStatus" class="status">
+      まだ文字を読み取っていません。
+    </div>
+
     <p class="small">
-      ※画像はこの画面で確認するために使用します。
-      現在は画像から馬名を自動読み取りする機能はありません。
+      ※日本語OCRを使って画像内の文字を読み取ります。
+      画像の状態によって誤認識する場合があります。
     </p>
   </div>
 
   <div class="card">
-    <h2>出走馬を入力</h2>
+    <h2>読み取った出馬表</h2>
+
+    <textarea id="ocrText"
+      placeholder="読み取った文字がここに表示されます。間違いがあれば修正してください。"></textarea>
+
+    <button class="chatgpt" onclick="sendToChatGPT()">
+      チャッピーに予想してもらう
+    </button>
 
     <p class="small">
-      馬番・馬名・印・評価点を入力してください。
+      ボタンを押すと、レース情報と読み取った文字を含む予想依頼をChatGPTで開きます。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>手動入力・参考予想</h2>
+
+    <p class="small">
+      必要な場合は、馬名と評価点を入力して参考予想を作成できます。
     </p>
 
     <div id="horseInputs"></div>
 
     <button onclick="addHorse()">馬を追加する</button>
-    <button onclick="makePrediction()">予想を作成する</button>
+    <button onclick="makePrediction()">参考予想を作成する</button>
   </div>
 
   <div class="card">
-    <h2>予想結果</h2>
+    <h2>参考予想結果</h2>
+
     <div id="prediction">
       まだ予想を作成していません。
     </div>
   </div>
+
 </div>
 
 <script>
@@ -135,11 +195,19 @@ let horses = [];
 
 const imageInput = document.getElementById("imageInput");
 const preview = document.getElementById("preview");
+const ocrText = document.getElementById("ocrText");
+const ocrStatus = document.getElementById("ocrStatus");
+const ocrButton = document.getElementById("ocrButton");
 
+let selectedImage = null;
+
+// 画像を選択したときの処理
 imageInput.addEventListener("change", function() {
   const file = this.files[0];
 
   if (!file) return;
+
+  selectedImage = file;
 
   const reader = new FileReader();
 
@@ -149,8 +217,121 @@ imageInput.addEventListener("change", function() {
   };
 
   reader.readAsDataURL(file);
+
+  ocrStatus.textContent =
+    "画像を選択しました。「スクショから文字を読み取る」を押してください。";
 });
 
+// OCRで画像から文字を読み取る
+async function readImageText() {
+  if (!selectedImage) {
+    ocrStatus.textContent =
+      "先に出馬表のスクショを選択してください。";
+    return;
+  }
+
+  ocrButton.disabled = true;
+  ocrButton.textContent = "読み取り中...";
+
+  ocrStatus.textContent =
+    "文字を読み取っています。画像によっては時間がかかります。";
+
+  try {
+    const result = await Tesseract.recognize(
+      selectedImage,
+      "jpn",
+      {
+        logger: function(info) {
+          if (info.status === "recognizing text") {
+            const percent = Math.round((info.progress || 0) * 100);
+            ocrStatus.textContent =
+              "文字を読み取り中... " + percent + "%";
+          }
+        }
+      }
+    );
+
+    const text = result.data.text.trim();
+
+    if (!text) {
+      ocrText.value = "";
+      ocrStatus.textContent =
+        "文字を読み取れませんでした。鮮明な画像で再試行してください。";
+    } else {
+      ocrText.value = text;
+      ocrStatus.textContent =
+        "読み取り完了！下の文字を確認・修正してください。";
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    ocrStatus.textContent =
+      "読み取りに失敗しました。画像を変えて再試行してください。";
+
+  } finally {
+    ocrButton.disabled = false;
+    ocrButton.textContent = "スクショから文字を読み取る";
+  }
+}
+
+// ChatGPTへ文字情報を渡す
+function sendToChatGPT() {
+  const date =
+    document.getElementById("raceDate").value || "未入力";
+
+  const track =
+    document.getElementById("track").value || "未入力";
+
+  const raceNumber =
+    document.getElementById("raceNumber").value || "未入力";
+
+  const extractedText = ocrText.value.trim();
+
+  if (!extractedText) {
+    alert("先に出馬表のスクショを読み取り、文字を作成してください。");
+    return;
+  }
+
+  const prompt = `
+あなたは競馬予想アシスタントです。
+
+以下のレース情報と、出馬表スクリーンショットからOCRで読み取った文字を参考に、レースを分析してください。
+
+【レース情報】
+開催日：${date}
+競馬場：${track}
+レース番号：${raceNumber}R
+
+【OCRで読み取った出馬表】
+${extractedText}
+
+【予想してほしい内容】
+1. 出馬表から確認できる馬番と馬名を整理する
+2. ◎本命、○対抗、▲単穴、△連下、☆穴馬の印を付ける
+3. 本命馬・対抗馬の理由を説明する
+4. 穴馬候補を挙げる
+5. 展開予想を説明する
+6. 各馬の強みと不安要素を説明する
+7. 馬連・ワイド・三連複・三連単の参考買い目を提案する
+
+【重要な注意】
+・OCRの誤認識が考えられる箇所は明示してください。
+・読み取れない情報は推測せず「不明」としてください。
+・最新の成績やオッズを確認できていない場合は、そのことを明示してください。
+・存在しないデータや成績を作らないでください。
+・予想は参考情報であり、的中や利益を保証しないでください。
+`;
+
+  // ChatGPTの質問欄に文字を渡す
+  const chatGPTUrl =
+    "https://chatgpt.com/?q=" +
+    encodeURIComponent(prompt);
+
+  window.open(chatGPTUrl, "_blank");
+}
+
+// 手動入力
 function addHorse() {
   const number = horses.length + 1;
 
@@ -170,7 +351,11 @@ function renderHorseInputs() {
 
   horses.forEach((horse, index) => {
     const div = document.createElement("div");
-    div.className = "horse";
+
+    div.style.border = "1px solid #ddd";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
 
     div.innerHTML = `
       <strong>${index + 1}頭目</strong>
@@ -190,6 +375,7 @@ function renderHorseInputs() {
         <option value="◎" ${horse.mark === "◎" ? "selected" : ""}>◎ 本命</option>
         <option value="○" ${horse.mark === "○" ? "selected" : ""}>○ 対抗</option>
         <option value="▲" ${horse.mark === "▲" ? "selected" : ""}>▲ 単穴</option>
+        <option value="△" ${horse.mark === "△" ? "selected" : ""}>△ 連下</option>
         <option value="☆" ${horse.mark === "☆" ? "selected" : ""}>☆ 穴馬</option>
       </select>
 
@@ -211,6 +397,7 @@ function updateHorse(index, key, value) {
   horses[index][key] = value;
 }
 
+// 手動評価による参考予想
 function makePrediction() {
   const validHorses = horses
     .filter(horse => horse.name.trim() !== "")
@@ -222,9 +409,14 @@ function makePrediction() {
     return;
   }
 
-  const date = document.getElementById("raceDate").value || "未入力";
-  const track = document.getElementById("track").value || "未入力";
-  const raceNumber = document.getElementById("raceNumber").value || "未入力";
+  const date =
+    document.getElementById("raceDate").value || "未入力";
+
+  const track =
+    document.getElementById("track").value || "未入力";
+
+  const raceNumber =
+    document.getElementById("raceNumber").value || "未入力";
 
   let html = `
     <p><strong>${date} ${track} ${raceNumber}R</strong></p>
@@ -235,14 +427,15 @@ function makePrediction() {
   `;
 
   validHorses.forEach((horse, index) => {
-    const mark = horse.mark || (index === 0 ? "◎" :
+    const mark = horse.mark || (
+      index === 0 ? "◎" :
       index === 1 ? "○" :
-      index === 2 ? "▲" : "");
+      index === 2 ? "▲" : ""
+    );
 
     html += `
       <div class="result">
-        <span class="mark">${mark}</span>
-        <strong>${horse.number}番 ${escapeHTML(horse.name)}</strong>
+        <strong>${mark} ${horse.number}番 ${escapeHTML(horse.name)}</strong>
         <br>
         評価点：${horse.score}点
       </div>
@@ -261,7 +454,7 @@ function makePrediction() {
 
   if (top.length >= 3) {
     html += `
-      <p>3連複：${top.map(h => h.number + "番").join(" - ")}</p>
+      <p>三連複：${top.map(h => h.number + "番").join(" - ")}</p>
     `;
   }
 
@@ -282,5 +475,6 @@ addHorse();
 addHorse();
 addHorse();
 </script>
+
 </body>
 </html>

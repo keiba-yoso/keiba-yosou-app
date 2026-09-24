@@ -6,150 +6,281 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>競馬予想アプリ</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f3f6fa;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif}
-header{background:#123e70;color:white;padding:22px 16px}
-main{max-width:700px;margin:auto;padding:15px}
-.card{background:white;border-radius:15px;padding:18px;margin:15px 0;box-shadow:0 3px 15px #0001}
-label{display:block;font-weight:bold;margin:12px 0 5px}
-select,input,button{width:100%;padding:12px;font-size:16px;border-radius:9px;border:1px solid #ccd5e3}
-button{background:#1769d2;color:white;border:0;font-weight:bold;margin-top:15px}
-button.sub{background:#e7eef8;color:#173e70}
-.notice{background:#fff1c9;padding:12px;border-radius:10px;font-size:13px}
-.horse{padding:13px 0;border-bottom:1px solid #e6eaf0}
-.rank{font-weight:bold;font-size:20px;color:#1769d2}
-.tag{background:#e9f1ff;color:#1769d2;padding:4px 8px;border-radius:20px;font-size:12px}
-.hidden{display:none}
+  body {
+    font-family: sans-serif;
+    background: #f3f5f7;
+    margin: 0;
+    padding: 16px;
+    color: #222;
+  }
+  .container {
+    max-width: 700px;
+    margin: auto;
+  }
+  h1 { text-align: center; }
+  .card {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px #0001;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input, select, button {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  button {
+    background: #146c43;
+    color: white;
+    border: none;
+    font-weight: bold;
+    margin-top: 14px;
+  }
+  button.secondary { background: #555; }
+  .horse {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+  }
+  .mark {
+    font-size: 22px;
+    font-weight: bold;
+  }
+  #preview {
+    max-width: 100%;
+    margin-top: 12px;
+    border-radius: 8px;
+  }
+  .result {
+    background: #fff8d6;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+  .small {
+    color: #666;
+    font-size: 13px;
+  }
 </style>
 </head>
 
 <body>
-<header>
-<h1>🏇 競馬予想アプリ</h1>
-<p>中央競馬・日本語予想版</p>
-</header>
+<div class="container">
+  <h1>🏇 競馬予想アプリ</h1>
 
-<main>
+  <div class="card">
+    <h2>レース情報</h2>
 
-<div class="notice">
-サンプルデータ版です。JRAの実際の出馬表・成績・オッズは未連携です。
+    <label>開催日</label>
+    <input type="date" id="raceDate">
+
+    <label>競馬場</label>
+    <input type="text" id="track" placeholder="例：中山">
+
+    <label>レース番号</label>
+    <input type="number" id="raceNumber" min="1" max="12" placeholder="例：11">
+
+    <p class="small">
+      ※開催日・競馬場・レース番号は手動で入力してください。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>出馬表スクショ</h2>
+
+    <input type="file" id="imageInput" accept="image/*">
+
+    <img id="preview" alt="出馬表プレビュー" hidden>
+
+    <p class="small">
+      ※画像はこの画面で確認するために使用します。
+      現在は画像から馬名を自動読み取りする機能はありません。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>出走馬を入力</h2>
+
+    <p class="small">
+      馬番・馬名・印・評価点を入力してください。
+    </p>
+
+    <div id="horseInputs"></div>
+
+    <button onclick="addHorse()">馬を追加する</button>
+    <button onclick="makePrediction()">予想を作成する</button>
+  </div>
+
+  <div class="card">
+    <h2>予想結果</h2>
+    <div id="prediction">
+      まだ予想を作成していません。
+    </div>
+  </div>
 </div>
-
-<section class="card">
-<h2>レースを選択</h2>
-
-<label>開催日</label>
-<input id="date" type="date">
-
-<label>競馬場</label>
-<select id="track">
-<option>東京</option>
-<option>中山</option>
-<option>阪神</option>
-<option>京都</option>
-<option>中京</option>
-<option>札幌</option>
-<option>函館</option>
-<option>福島</option>
-<option>新潟</option>
-<option>小倉</option>
-</select>
-
-<label>レース番号</label>
-<select id="race">
-<option>1R</option><option>2R</option>
-<option>3R</option><option>4R</option>
-<option>5R</option><option>6R</option>
-<option>7R</option><option>8R</option>
-<option>9R</option><option>10R</option>
-<option>11R</option><option>12R</option>
-</select>
-
-<button onclick="makePrediction()">予想を作成する</button>
-</section>
-
-<section id="result" class="card hidden">
-<h2 id="raceTitle">予想結果</h2>
-<div id="prediction"></div>
-
-<h3>おすすめ買い目</h3>
-<div id="bets"></div>
-
-<button class="sub" onclick="makePrediction()">予想を更新する</button>
-</section>
-
-</main>
 
 <script>
-const horses=[
-{no:1,name:"サンプルスター",score:88},
-{no:2,name:"ブルーファルコン",score:84},
-{no:3,name:"ミライステップ",score:81},
-{no:4,name:"グリーンハート",score:79},
-{no:5,name:"ナイトブレード",score:76},
-{no:6,name:"ハッピーラン",score:73},
-{no:7,name:"オレンジムーン",score:71},
-{no:8,name:"スピードリンク",score:68}
-];
+let horses = [];
 
-document.getElementById("date").value=
-new Date().toISOString().slice(0,10);
+const imageInput = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
 
-function makePrediction(){
+imageInput.addEventListener("change", function() {
+  const file = this.files[0];
 
-let result=horses.map(h=>({
-...h,
-score:h.score+Math.floor(Math.random()*11)-5
-})).sort((a,b)=>b.score-a.score);
+  if (!file) return;
 
-const date=document.getElementById("date").value;
-const track=document.getElementById("track").value;
-const race=document.getElementById("race").value;
+  const reader = new FileReader();
 
-document.getElementById("result").classList.remove("hidden");
+  reader.onload = function(event) {
+    preview.src = event.target.result;
+    preview.hidden = false;
+  };
 
-document.getElementById("raceTitle").textContent=
-date+" "+track+" "+race+"の予想";
+  reader.readAsDataURL(file);
+});
 
-document.getElementById("prediction").innerHTML=
-result.map((h,i)=>{
+function addHorse() {
+  const number = horses.length + 1;
 
-let mark="";
-let tag="相手候補";
+  horses.push({
+    number: number,
+    name: "",
+    mark: "",
+    score: 50
+  });
 
-if(i===0){mark="◎";tag="本命";}
-else if(i===1){mark="○";tag="対抗";}
-else if(i===2){mark="▲";tag="単穴";}
-else if(i===3){mark="☆";tag="穴馬";}
-
-return `
-<div class="horse">
-<span class="rank">${i+1}位 ${mark}</span>
-<br>
-<strong>${h.no}番 ${h.name}</strong>
-<br>
-スコア：${h.score}
-<span class="tag">${tag}</span>
-</div>
-`;
-
-}).join("");
-
-const a=result.slice(0,3).map(h=>h.no+"番");
-
-document.getElementById("bets").innerHTML=`
-<p><strong>本命：</strong>${a[0]}</p>
-<p><strong>対抗：</strong>${a[1]}</p>
-<p><strong>単穴：</strong>${a[2]}</p>
-<hr>
-<p><strong>ワイド候補：</strong>${a[0]}-${a[1]} / ${a[0]}-${a[2]}</p>
-<p><strong>馬連候補：</strong>${a[0]}-${a[1]}</p>
-<p><strong>三連複候補：</strong>${a.join("-")}</p>
-<p><strong>三連単候補：</strong>${a.join("→")}</p>
-`;
-
+  renderHorseInputs();
 }
-</script>
 
+function renderHorseInputs() {
+  const area = document.getElementById("horseInputs");
+  area.innerHTML = "";
+
+  horses.forEach((horse, index) => {
+    const div = document.createElement("div");
+    div.className = "horse";
+
+    div.innerHTML = `
+      <strong>${index + 1}頭目</strong>
+
+      <label>馬番</label>
+      <input type="number" value="${horse.number}"
+        onchange="updateHorse(${index}, 'number', this.value)">
+
+      <label>馬名</label>
+      <input type="text" placeholder="馬名を入力"
+        value="${horse.name}"
+        onchange="updateHorse(${index}, 'name', this.value)">
+
+      <label>印</label>
+      <select onchange="updateHorse(${index}, 'mark', this.value)">
+        <option value="">印なし</option>
+        <option value="◎" ${horse.mark === "◎" ? "selected" : ""}>◎ 本命</option>
+        <option value="○" ${horse.mark === "○" ? "selected" : ""}>○ 対抗</option>
+        <option value="▲" ${horse.mark === "▲" ? "selected" : ""}>▲ 単穴</option>
+        <option value="☆" ${horse.mark === "☆" ? "selected" : ""}>☆ 穴馬</option>
+      </select>
+
+      <label>評価点（0〜100）</label>
+      <input type="number" min="0" max="100"
+        value="${horse.score}"
+        onchange="updateHorse(${index}, 'score', this.value)">
+    `;
+
+    area.appendChild(div);
+  });
+}
+
+function updateHorse(index, key, value) {
+  if (key === "score" || key === "number") {
+    value = Number(value);
+  }
+
+  horses[index][key] = value;
+}
+
+function makePrediction() {
+  const validHorses = horses
+    .filter(horse => horse.name.trim() !== "")
+    .sort((a, b) => b.score - a.score);
+
+  if (validHorses.length < 2) {
+    document.getElementById("prediction").innerHTML =
+      "馬名を2頭以上入力してください。";
+    return;
+  }
+
+  const date = document.getElementById("raceDate").value || "未入力";
+  const track = document.getElementById("track").value || "未入力";
+  const raceNumber = document.getElementById("raceNumber").value || "未入力";
+
+  let html = `
+    <p><strong>${date} ${track} ${raceNumber}R</strong></p>
+    <p class="small">
+      ※評価点を基準に並べた参考予想です。
+      実際の勝率や的中を保証するものではありません。
+    </p>
+  `;
+
+  validHorses.forEach((horse, index) => {
+    const mark = horse.mark || (index === 0 ? "◎" :
+      index === 1 ? "○" :
+      index === 2 ? "▲" : "");
+
+    html += `
+      <div class="result">
+        <span class="mark">${mark}</span>
+        <strong>${horse.number}番 ${escapeHTML(horse.name)}</strong>
+        <br>
+        評価点：${horse.score}点
+      </div>
+    `;
+  });
+
+  const top = validHorses.slice(0, 3);
+
+  if (top.length >= 2) {
+    html += `
+      <h3>買い目の参考</h3>
+      <p>ワイド：${top.map(h => h.number + "番").join(" - ")}</p>
+      <p>馬連：${top[0].number} - ${top[1].number}</p>
+    `;
+  }
+
+  if (top.length >= 3) {
+    html += `
+      <p>3連複：${top.map(h => h.number + "番").join(" - ")}</p>
+    `;
+  }
+
+  document.getElementById("prediction").innerHTML = html;
+}
+
+function escapeHTML(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// 最初から3頭分の入力欄を用意
+addHorse();
+addHorse();
+addHorse();
+</script>
 </body>
 </html>

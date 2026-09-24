@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競馬予想アプリ</title>
+<style>
+body{font-family:sans-serif;background:#f2f5f9;margin:0;color:#172033}
+header{background:#174477;color:white;padding:24px 16px}
+main{max-width:650px;margin:auto;padding:16px}
+.card{background:white;padding:18px;margin:15px 0;border-radius:15px}
+label{display:block;font-weight:bold;margin:12px 0 5px}
+select,input,button{width:100%;padding:12px;font-size:16px;border-radius:9px;box-sizing:border-box}
+button{background:#1769d2;color:white;border:0;margin-top:15px;font-weight:bold}
+.horse{padding:12px 0;border-bottom:1px solid #ddd}
+.rank{color:#1769d2;font-weight:bold;font-size:20px}
+.notice{background:#fff2c9;padding:12px;border-radius:10px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>🏇 競馬予想アプリ</h1>
+<p>日本語版・サンプル予想</p>
+</header>
+
+<main>
+<div class="notice">
+現在はサンプルデータです。JRAの最新データは未連携です。
+</div>
+
+<div class="card">
+<h2>レース条件</h2>
+
+<label>開催日</label>
+<input id="date" type="date">
+
+<label>競馬場</label>
+<select id="track">
+<option>東京</option>
+<option>中山</option>
+<option>阪神</option>
+<option>京都</option>
+<option>中京</option>
+<option>札幌</option>
+<option>函館</option>
+<option>福島</option>
+<option>新潟</option>
+<option>小倉</option>
+</select>
+
+<label>レース番号</label>
+<select id="race">
+<option>1R</option><option>2R</option>
+<option>3R</option><option>4R</option>
+<option>5R</option><option>6R</option>
+<option>7R</option><option>8R</option>
+<option>9R</option><option>10R</option>
+<option>11R</option><option>12R</option>
+</select>
+
+<button onclick="predict()">予想を作成する</button>
+</div>
+
+<div class="card" id="result" style="display:none">
+<h2 id="title">予想結果</h2>
+<div id="horses"></div>
+</div>
+</main>
+
+<script>
+const horses=[
+["1","サンプルスター",88],
+["2","ブルーファルコン",84],
+["3","ミライステップ",81],
+["4","グリーンハート",79],
+["5","ナイトブレード",76],
+["6","ハッピーラン",73],
+["7","オレンジムーン",71],
+["8","スピードリンク",68]
+];
+
+document.getElementById("date").value=
+new Date().toISOString().slice(0,10);
+
+function predict(){
+let result=horses.map(h=>({
+no:h[0],
+name:h[1],
+score:h[2]+Math.floor(Math.random()*11)-5
+})).sort((a,b)=>b.score-a.score);
+
+document.getElementById("result").style.display="block";
+
+document.getElementById("title").textContent=
+document.getElementById("date").value+" "+
+document.getElementById("track").value+" "+
+document.getElementById("race").value+"の予想";
+
+document.getElementById("horses").innerHTML=
+result.map((h,i)=>`
+<div class="horse">
+<span class="rank">${i+1}位</span>
+${h.no}番 ${h.name}<br>
+スコア：${h.score}　
+${i===0?"本命":i===1?"対抗":i===2?"穴候補":"相手候補"}
+</div>
+`).join("");
+}
+</script>
+</body>
+</html>

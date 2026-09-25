@@ -4,604 +4,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>競馬予想アプリ 中央・地方対応</title>
-
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",sans-serif;background:#f3f5f7;color:#222;margin:0;padding:16px;line-height:1.6}
+.container{max-width:900px;margin:auto;background:#fff;padding:22px;border-radius:16px;box-shadow:0 4px 18px #0001}
+h1{text-align:center;color:#176b3a;font-size:24px}
+h2{font-size:18px;margin-top:26px;padding:10px 12px;background:#e9f5ed;border-left:5px solid #218c4b;border-radius:6px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form-group{display:flex;flex-direction:column}
+.full{grid-column:1/-1}
+label{font-weight:bold;font-size:13px;margin-bottom:5px}
+input,select,textarea,button{font:inherit}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd3d9;border-radius:8px;background:#fff}
+textarea{resize:vertical;min-height:130px}
+button{border:0;border-radius:9px;padding:13px 16px;cursor:pointer;font-weight:bold}
+button:disabled{opacity:.5}
+.primary-button{background:#176b3a;color:#fff}
+.secondary-button{background:#2474c6;color:#fff}
+.copy-button{background:#555;color:#fff}
+.button-area{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.notice{background:#fff8df;border:1px solid #ead38a;padding:12px;border-radius:8px;font-size:13px;margin-top:12px}
+.status{margin-top:12px;padding:10px;border-radius:8px;background:#f0f3f5;font-size:13px;white-space:pre-wrap}
+.progress-wrapper{margin-top:12px;background:#e5e7eb;height:12px;border-radius:999px;overflow:hidden}
+.progress-bar{width:0%;height:100%;background:#218c4b;transition:width .2s}
+.preview{min-height:220px;background:#f7f8fa;border:1px solid #dfe4e8;border-radius:8px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.small-text{font-size:12px;color:#666;margin-top:5px}
+.required{color:#d62828}
+@media(max-width:600px){
+body{padding:8px}
+.container{padding:14px}
+.form-grid,.button-area{grid-template-columns:1fr}
+h1{font-size:21px}
 }
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-  background: #f3f5f7;
-  color: #222;
-  margin: 0;
-  padding: 16px;
-  line-height: 1.6;
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  background: #fff;
-  padding: 22px;
-  border-radius: 16px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-}
-
-h1 {
-  font-size: 24px;
-  text-align: center;
-  margin: 0 0 8px;
-  color: #176b3a;
-}
-
-.subtitle {
-  text-align: center;
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 22px;
-}
-
-h2 {
-  font-size: 18px;
-  margin-top: 26px;
-  padding: 10px 12px;
-  background: #e9f5ed;
-  border-left: 5px solid #218c4b;
-  border-radius: 6px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-label {
-  font-weight: bold;
-  font-size: 13px;
-  margin-bottom: 5px;
-}
-
-input,
-select,
-textarea,
-button {
-  font: inherit;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 11px;
-  border: 1px solid #ccd3d9;
-  border-radius: 8px;
-  background: #fff;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 130px;
-}
-
-button {
-  border: none;
-  border-radius: 9px;
-  padding: 13px 16px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-button:hover {
-  opacity: 0.85;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.primary-button {
-  background: #176b3a;
-  color: #fff;
-}
-
-.secondary-button {
-  background: #2474c6;
-  color: #fff;
-}
-
-.copy-button {
-  background: #555;
-  color: #fff;
-}
-
-.button-area {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.notice {
-  background: #fff8df;
-  border: 1px solid #ead38a;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-top: 12px;
-}
-
-.status {
-  margin-top: 12px;
-  padding: 10px;
-  border-radius: 8px;
-  background: #f0f3f5;
-  font-size: 13px;
-  white-space: pre-wrap;
-}
-
-.progress-wrapper {
-  margin-top: 12px;
-  background: #e5e7eb;
-  height: 12px;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  width: 0%;
-  height: 100%;
-  background: #218c4b;
-  transition: width 0.2s;
-}
-
-.preview {
-  min-height: 220px;
-  background: #f7f8fa;
-  border: 1px solid #dfe4e8;
-  border-radius: 8px;
-  padding: 12px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font-size: 13px;
-}
-
-.small-text {
-  font-size: 12px;
-  color: #666;
-  margin-top: 5px;
-}
-
-.required {
-  color: #d62828;
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 8px;
-  }
-
-  .container {
-    padding: 14px;
-  }
-
-  .form-grid,
-  .button-area {
-    grid-template-columns: 1fr;
-  }
-
-  h1 {
-    font-size: 21px;
-  }
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
-  <h1>競馬予想アプリ</h1>
+<h1>競馬予想アプリ</h1>
+<div style="text-align:center;color:#666;font-size:13px">
+中央競馬・地方競馬対応／OCR／印の頭数増加／買い目作成
+</div>
 
-  <div class="subtitle">
-    中央競馬・地方競馬対応／OCR出馬表読み取り／買い目自動作成
-  </div>
+<h2>レース情報</h2>
 
-  <h2>レース情報</h2>
+<div class="form-grid">
 
-  <div class="form-grid">
+<div class="form-group">
+<label>開催日 *</label>
+<input type="date" id="raceDate">
+</div>
 
-    <div class="form-group">
-      <label for="raceDate">
-        開催日 <span class="required">*</span>
-      </label>
-      <input type="date" id="raceDate">
-    </div>
+<div class="form-group">
+<label>レース番号 *</label>
+<select id="raceNumber">
+<option value="">選択してください</option>
+<option>1</option><option>2</option><option>3</option>
+<option>4</option><option>5</option><option>6</option>
+<option>7</option><option>8</option><option>9</option>
+<option>10</option><option selected>11</option><option>12</option>
+</select>
+</div>
 
-    <div class="form-group">
-      <label for="raceNumber">
-        レース番号 <span class="required">*</span>
-      </label>
-      <select id="raceNumber">
-        <option value="">選択してください</option>
-        <option value="1">1R</option>
-        <option value="2">2R</option>
-        <option value="3">3R</option>
-        <option value="4">4R</option>
-        <option value="5">5R</option>
-        <option value="6">6R</option>
-        <option value="7">7R</option>
-        <option value="8">8R</option>
-        <option value="9">9R</option>
-        <option value="10">10R</option>
-        <option value="11" selected>11R</option>
-        <option value="12">12R</option>
-      </select>
-    </div>
+<div class="form-group">
+<label>開催区分 *</label>
+<select id="category">
+<option value="central">中央競馬（JRA）</option>
+<option value="local">地方競馬</option>
+</select>
+</div>
 
-    <div class="form-group">
-      <label for="category">
-        開催区分 <span class="required">*</span>
-      </label>
-      <select id="category" onchange="updateTrackList()">
-        <option value="central">中央競馬（JRA）</option>
-        <option value="local">地方競馬</option>
-      </select>
-    </div>
+<div class="form-group">
+<label>競馬場 *</label>
+<select id="track"></select>
+</div>
 
-    <div class="form-group">
-      <label for="track">
-        競馬場 <span class="required">*</span>
-      </label>
-      <select id="track"></select>
-    </div>
+<div class="form-group">
+<label>距離</label>
+<select id="distance">
+<option value="">未入力・自動判定</option>
+<option>1000m</option><option>1150m</option><option>1200m</option>
+<option>1300m</option><option>1400m</option><option>1500m</option>
+<option>1600m</option><option>1700m</option><option>1800m</option>
+<option>1900m</option><option>2000m</option><option>2100m</option>
+<option>2200m</option><option>2300m</option><option>2400m</option>
+<option>2500m</option><option>2600m</option><option>3000m</option>
+<option>3200m</option>
+</select>
+</div>
 
-    <div class="form-group">
-      <label for="distance">距離</label>
-      <select id="distance">
-        <option value="">未入力・自動判定</option>
-        <option value="1000m">1000m</option>
-        <option value="1150m">1150m</option>
-        <option value="1200m">1200m</option>
-        <option value="1300m">1300m</option>
-        <option value="1400m">1400m</option>
-        <option value="1500m">1500m</option>
-        <option value="1600m">1600m</option>
-        <option value="1700m">1700m</option>
-        <option value="1800m">1800m</option>
-        <option value="1900m">1900m</option>
-        <option value="2000m">2000m</option>
-        <option value="2100m">2100m</option>
-        <option value="2200m">2200m</option>
-        <option value="2300m">2300m</option>
-        <option value="2400m">2400m</option>
-        <option value="2500m">2500m</option>
-        <option value="2600m">2600m</option>
-        <option value="3000m">3000m</option>
-        <option value="3200m">3200m</option>
-        <option value="芝">芝</option>
-        <option value="ダート">ダート</option>
-      </select>
-    </div>
+<div class="form-group">
+<label>馬場状態</label>
+<select id="trackCondition">
+<option value="">未入力・自動確認</option>
+<option>良</option><option>稍重</option><option>重</option>
+<option>不良</option><option>不明</option>
+</select>
+</div>
 
-    <div class="form-group">
-      <label for="trackCondition">馬場状態</label>
-      <select id="trackCondition">
-        <option value="">未入力・自動確認</option>
-        <option value="良">良</option>
-        <option value="稍重">稍重</option>
-        <option value="重">重</option>
-        <option value="不良">不良</option>
-        <option value="不明">不明</option>
-      </select>
-    </div>
+<div class="form-group">
+<label>天候</label>
+<select id="weather">
+<option value="">未入力・自動確認</option>
+<option>晴</option><option>曇</option><option>雨</option>
+<option>小雨</option><option>雪</option><option>不明</option>
+</select>
+</div>
 
-    <div class="form-group">
-      <label for="weather">天候</label>
-      <select id="weather">
-        <option value="">未入力・自動確認</option>
-        <option value="晴">晴</option>
-        <option value="曇">曇</option>
-        <option value="雨">雨</option>
-        <option value="小雨">小雨</option>
-        <option value="雪">雪</option>
-        <option value="不明">不明</option>
-      </select>
-    </div>
+<div class="form-group">
+<label>コース</label>
+<select id="course">
+<option value="">未入力・自動判定</option>
+<option>芝</option><option>ダート</option><option>障害</option><option>不明</option>
+</select>
+</div>
 
-    <div class="form-group">
-      <label for="course">コース</label>
-      <select id="course">
-        <option value="">未入力・自動判定</option>
-        <option value="芝">芝</option>
-        <option value="ダート">ダート</option>
-        <option value="障害">障害</option>
-        <option value="不明">不明</option>
-      </select>
-    </div>
+</div>
 
-  </div>
+<h2>出馬表OCR</h2>
 
-  <h2>出馬表OCR</h2>
+<label>出馬表スクリーンショット</label>
+<input type="file" id="imageInput" accept="image/*">
 
-  <div class="form-group">
-    <label for="imageInput">
-      出馬表のスクリーンショット
-    </label>
+<div class="small-text">
+画像全体が写っているスクリーンショットを選択してください。
+</div>
 
-    <input
-      type="file"
-      id="imageInput"
-      accept="image/*"
-    />
+<div class="notice">
+<strong>OCR列の順番</strong><br>
+人気 → 馬番 → 馬名 → 単勝オッズ → 複勝オッズ<br><br>
+OCR後は馬番・馬名・オッズの対応を必ず目視確認してください。
+</div>
 
-    <div class="small-text">
-      出馬表全体が写っている画像を選択してください。
-      OCR結果は必ず目視で確認してください。
-    </div>
-  </div>
+<button class="primary-button" onclick="runOCR()" style="margin-top:12px;width:100%">
+出馬表をOCRで読み取る
+</button>
 
-  <button
-    class="primary-button"
-    onclick="runOCR()"
-    style="margin-top:12px;width:100%;"
-  >
-    出馬表をOCRで読み取る
-  </button>
+<div class="progress-wrapper">
+<div id="progressBar" class="progress-bar"></div>
+</div>
 
-  <div class="progress-wrapper">
-    <div id="progressBar" class="progress-bar"></div>
-  </div>
+<div id="ocrStatus" class="status">OCR待機中です。</div>
 
-  <div id="ocrStatus" class="status">
-    OCR待機中です。
-  </div>
+<h2>OCR読み取り結果</h2>
+<textarea id="ocrText" placeholder="OCR結果がここに表示されます。誤認識は修正してください。"></textarea>
 
-  <h2>OCR読み取り結果</h2>
-
-  <div class="form-group">
-    <label for="ocrText">出馬表テキスト</label>
-
-    <textarea
-      id="ocrText"
-      placeholder="OCRで読み取った出馬表がここに表示されます。誤認識があれば手動で修正してください。"
-    ></textarea>
-  </div>
-
-  <h2>追加情報</h2>
-
-  <div class="form-group">
-    <label for="additionalInfo">
-      オッズ・馬体重・直前情報・自分で確認した情報など
-    </label>
-
-    <textarea
-      id="additionalInfo"
-      placeholder="例：
-単勝オッズ：
+<h2>追加情報</h2>
+<textarea id="additionalInfo" placeholder="単勝オッズ：
+複勝オッズ：
 馬体重：
 騎手変更：
-直前の馬場情報：
+天候：
+馬場：
 気になる馬：
 逃げ馬：
-その他の情報："
-    ></textarea>
-  </div>
+その他："></textarea>
 
-  <div class="notice">
-    <strong>注意：</strong>
-    AIは入力された情報を中心に分析します。
-    最新オッズ・天候・馬場・出走取消などを確認できない場合、
-    不明な情報を推測で確定せず、未確認として扱います。
-  </div>
+<div class="notice">
+<strong>注意：</strong>
+入力されていない情報や最新情報を確認できない場合は、
+不明・未確認として扱います。オッズを創作しません。
+</div>
 
-  <div class="button-area">
-    <button
-      class="primary-button"
-      onclick="sendToChatGPT()"
-    >
-      ChatGPTで予想する
-    </button>
+<div class="button-area">
+<button class="primary-button" onclick="sendToChatGPT()">ChatGPTで予想する</button>
+<button class="copy-button" onclick="copyPrompt()">プロンプトをコピー</button>
+</div>
 
-    <button
-      class="copy-button"
-      onclick="copyPrompt()"
-    >
-      プロンプトをコピー
-    </button>
-  </div>
-
-  <h2>作成されたプロンプト</h2>
-
-  <div id="promptPreview" class="preview">
-    ここにChatGPTへ送るプロンプトが表示されます。
-  </div>
+<h2>作成されたプロンプト</h2>
+<div id="promptPreview" class="preview">ここにプロンプトが表示されます。</div>
 
 </div>
 
 <script>
 
-const centralTracks = [
-  "札幌",
-  "函館",
-  "福島",
-  "新潟",
-  "東京",
-  "中山",
-  "中京",
-  "京都",
-  "阪神",
-  "小倉"
+const centralTracks=[
+"札幌","函館","福島","新潟","東京",
+"中山","中京","京都","阪神","小倉"
 ];
 
-const localTracks = [
-  "門別",
-  "帯広ばんえい",
-  "盛岡",
-  "水沢",
-  "浦和",
-  "船橋",
-  "大井",
-  "川崎",
-  "金沢",
-  "笠松",
-  "名古屋",
-  "園田",
-  "姫路",
-  "高知",
-  "佐賀"
+const localTracks=[
+"門別","帯広ばんえい","盛岡","水沢","浦和",
+"船橋","大井","川崎","金沢","笠松",
+"名古屋","園田","姫路","高知","佐賀"
 ];
 
-function updateTrackList() {
+function updateTrackList(){
 
-  const category = document.getElementById("category").value;
-  const trackSelect = document.getElementById("track");
+const category=document.getElementById("category").value;
+const select=document.getElementById("track");
 
-  const tracks =
-    category === "local"
-      ? localTracks
-      : centralTracks;
+select.innerHTML="";
 
-  trackSelect.innerHTML = "";
+const tracks=category==="local"?localTracks:centralTracks;
 
-  tracks.forEach(track => {
+tracks.forEach(track=>{
+const option=document.createElement("option");
+option.value=track;
+option.textContent=track;
+select.appendChild(option);
+});
 
-    const option = document.createElement("option");
-
-    option.value = track;
-    option.textContent = track;
-
-    trackSelect.appendChild(option);
-
-  });
-
-  updatePromptPreview();
+updatePromptPreview();
 
 }
 
-function getJapanDate() {
+document.getElementById("category").addEventListener("change",updateTrackList);
 
-  const now = new Date();
+function getJapanDate(){
 
-  const japanDate = new Intl.DateTimeFormat(
-    "ja-JP",
-    {
-      timeZone: "Asia/Tokyo",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }
-  ).formatToParts(now);
+const parts=new Intl.DateTimeFormat("ja-JP",{
+timeZone:"Asia/Tokyo",
+year:"numeric",
+month:"2-digit",
+day:"2-digit"
+}).formatToParts(new Date());
 
-  const year = japanDate.find(
-    item => item.type === "year"
-  ).value;
+const y=parts.find(x=>x.type==="year").value;
+const m=parts.find(x=>x.type==="month").value;
+const d=parts.find(x=>x.type==="day").value;
 
-  const month = japanDate.find(
-    item => item.type === "month"
-  ).value;
-
-  const day = japanDate.find(
-    item => item.type === "day"
-  ).value;
-
-  return `${year}-${month}-${day}`;
+return `${y}-${m}-${d}`;
 
 }
 
-function getRaceInfo() {
+function getRaceInfo(){
 
-  const categoryValue =
-    document.getElementById("category").value;
+const category=document.getElementById("category").value;
 
-  const categoryName =
-    categoryValue === "central"
-      ? "中央競馬（JRA）"
-      : "地方競馬";
+return{
 
-  return {
+date:document.getElementById("raceDate").value||"未入力",
 
-    date:
-      document.getElementById("raceDate").value
-      || "未入力",
+raceNumber:document.getElementById("raceNumber").value||"未入力",
 
-    raceNumber:
-      document.getElementById("raceNumber").value
-      || "未入力",
+category:category==="central"?"中央競馬（JRA）":"地方競馬",
 
-    category:
-      categoryName,
+track:document.getElementById("track").value||"未入力",
 
-    track:
-      document.getElementById("track").value
-      || "未入力",
+distance:document.getElementById("distance").value||"未入力・自動判定",
 
-    distance:
-      document.getElementById("distance").value
-      || "未入力・自動判定",
+trackCondition:document.getElementById("trackCondition").value||"未入力・要確認",
 
-    trackCondition:
-      document.getElementById("trackCondition").value
-      || "未入力・要確認",
+weather:document.getElementById("weather").value||"未入力・要確認",
 
-    weather:
-      document.getElementById("weather").value
-      || "未入力・要確認",
+course:document.getElementById("course").value||"未入力・自動判定",
 
-    course:
-      document.getElementById("course").value
-      || "未入力・自動判定",
+ocrText:document.getElementById("ocrText").value.trim()||"OCR情報なし",
 
-    ocrText:
-      document.getElementById("ocrText").value.trim()
-      || "OCR情報なし",
+additionalInfo:document.getElementById("additionalInfo").value.trim()||"追加情報なし"
 
-    additionalInfo:
-      document.getElementById("additionalInfo").value.trim()
-      || "追加情報なし"
-
-  };
+};
 
 }
 
-function createPrompt() {
+function createPrompt(){
 
-  const race = getRaceInfo();
+const race=getRaceInfo();
 
-  return `あなたは中央競馬・地方競馬のレース分析に対応した競馬予想アシスタントです。
+return `あなたは中央競馬・地方競馬に対応した競馬予想アシスタントです。
 
-以下のレース情報と、出馬表OCR結果をもとに、可能な範囲で客観的かつ具体的に分析してください。
+以下のレース情報とOCR出馬表を使って、初心者にも分かりやすく具体的に分析してください。
 
 ━━━━━━━━━━━━━━━━━━
 【最重要ルール】
 ━━━━━━━━━━━━━━━━━━
 
-1. 開催日・競馬場・レース番号を最初に確認する
-2. OCRの誤認識が疑われる場合は、確定情報として扱わない
-3. 出馬表に存在しない馬名・馬番・騎手名を作らない
-4. 情報が不足している場合は、不足していると明記する
-5. オッズが入力されていない場合、具体的なオッズを創作しない
-6. 天候・馬場・展開は、確定情報と予測を分けて記載する
-7. 最新情報を確認できない場合は、確認できていないと明記する
-8. 予想は断定ではなく、分析に基づく参考情報として提示する
-9. 買い目は点数が多くなりすぎないように絞る
-10. 馬番と馬名が一致しているか、買い目作成前に再確認する
+1. 開催日・競馬場・レース番号を最初に確認する。
+2. OCRの誤認識が疑われる場合は確定情報にしない。
+3. 出馬表にない馬番・馬名・騎手を作らない。
+4. 馬番と馬名の対応を確認してから印と買い目を作る。
+5. 入力されていないオッズを創作しない。
+6. 確定情報・推測・未確認情報を分ける。
+7. 最新情報を確認できない場合は未確認と記載する。
+8. 買い目は点数を絞る。
+9. 馬番・馬名・オッズの対応を最終確認する。
+
+━━━━━━━━━━━━━━━━━━
+【OCR列の順番】
+━━━━━━━━━━━━━━━━━━
+
+画像の基本列順：
+
+1列目：人気
+2列目：馬番
+3列目：馬名
+4列目：単勝オッズ
+5列目：複勝オッズ
+
+人気と馬番を混同しないこと。
+単勝オッズと複勝オッズを混同しないこと。
+列の位置が不明な場合は要確認とすること。
+数字や馬名を推測で補完しないこと。
 
 ━━━━━━━━━━━━━━━━━━
 【レース情報】
@@ -617,7 +315,7 @@ function createPrompt() {
 天候：${race.weather}
 
 ━━━━━━━━━━━━━━━━━━
-【出馬表OCR結果】
+【OCR出馬表】
 ━━━━━━━━━━━━━━━━━━
 
 ${race.ocrText}
@@ -629,388 +327,307 @@ ${race.ocrText}
 ${race.additionalInfo}
 
 ━━━━━━━━━━━━━━━━━━
-【分析してほしい内容】
+【1. レース情報確認】
 ━━━━━━━━━━━━━━━━━━
 
-以下の順番で、初心者にも分かりやすく分析してください。
-
-■1. レース情報の確認
-
-・開催日
-・競馬場
-・レース番号
-・距離
-・芝またはダート
-・馬場状態
-・天候
-・OCRの誤認識や不足情報
-
-レース情報に矛盾があれば、予想前に指摘してください。
-
-■2. 展開予想
-
-・逃げそうな馬
-・先行馬
-・差し馬
-・追い込み馬
-・ハナを切る可能性がある馬
-・ペース予想
-・前残りになりそうか
-・差しが届きそうか
-・展開で有利になりそうな馬
-・展開で不利になりそうな馬
-
-■3. 各馬の評価
-
-可能な範囲で以下を評価してください。
-
-・近走成績
-・相手関係
-・距離適性
-・競馬場適性
-・芝・ダート適性
-・馬場適性
-・脚質
-・騎手
-・斤量
-・枠順
-・先行力
-・末脚
-・安定感
-・休み明けやローテーション
-・地方競馬の場合は所属・競走条件・クラス実績
-
-情報がない項目は「不明」としてください。
-
-■4. 印の提示
-
-以下の形式で提示してください。
-
-◎ 本命：
-○ 対抗：
-▲ 単穴：
-△ 連下：
-☆ 穴馬：
-注 注意馬：
-
-各馬について、短い理由も記載してください。
-
-出馬表に存在しない馬を選ばないでください。
-
-■5. 軸馬の選定
-
-以下を分けて説明してください。
-
-・勝ち切り期待の軸馬
-・連軸として安定しそうな馬
-・相手に入れたい馬
-・穴として面白い馬
-・人気でも危険性がある可能性の馬
-
-■6. 買い目の作成
-
-必ず以下の買い目を作成してください。
-
-【A. 馬連】
-
-本線を数点。
-押さえがあれば少数提示。
-
-【B. ワイド】
-
-軸馬を中心に、的中可能性と妙味を考慮して提示。
-
-【C. 三連複1頭軸】
-
-軸馬を1頭選び、相手を絞って提示。
-
-【D. 三連複2頭軸】
-
-必ず作成してください。
-
-形式：
-
-三連複2頭軸：
-軸：
-相手：
-買い目：
-
-例：
-軸：1・5
-相手：2・3・7・9
-買い目：
-1-2-5
-1-3-5
-1-5-7
-1-5-9
-
-※例の馬番は実際の出馬表から選び直してください。
-※実際に存在しない馬番は使用しないでください。
-※相手が多すぎる場合は、最大5頭程度までに絞ってください。
-
-【E. 三連単フォーメーション】
-
-必ず作成してください。
-
-以下の形式で提示してください。
-
-三連単フォーメーション：
-
-1着：
-2着：
-3着：
-
-買い目：
-1着→2着→3着の組み合わせを列挙
-
-基本は以下の考え方で作成してください。
-
-・1着固定型
-・1着と2着の入れ替え
-・穴馬を3着に入れる形
-・本命が崩れた場合の押さえ
-・点数が多くなりすぎないようにする
-
-原則として、買い目は最大20点程度を目安にしてください。
-ただし、出走頭数やレース状況により調整してください。
-
-【F. 穴狙いの買い目】
-
-人気薄の可能性がある馬で、以下を提示してください。
-
-・穴馬の理由
-・穴馬を絡めたワイド
-・穴馬を絡めた三連複
-・穴馬を絡めた三連単
-
-人気薄かどうかを判断できるオッズがない場合は、
-「人気薄かどうかは未確認」と記載してください。
-
-■7. 買い目の優先順位
-
-以下のように分類してください。
-
-・最優先買い目
-・本線
-・押さえ
-・穴狙い
-・買いすぎ防止のため削る買い目
-
-■8. 最終結論
-
-最後に短くまとめてください。
-
-・本命馬
-・対抗馬
-・穴馬
-・最も重視する買い目
-・三連複2頭軸
-・三連単フォーメーション
-・展開のポイント
-・予想の不確実な部分
+開催日・競馬場・レース番号・距離・コース・馬場・天候を確認する。
+OCRの誤認識・不足・矛盾があれば最初に指摘する。
 
 ━━━━━━━━━━━━━━━━━━
-【出力上の注意】
+【2. 出馬表整理】
 ━━━━━━━━━━━━━━━━━━
 
-・馬番と馬名を併記する
-・買い目は実際の出馬表にある馬だけで作成する
-・不明な情報は不明と書く
-・存在しないオッズを作らない
-・過度に買い目を増やさない
-・初心者でも分かるように簡潔に説明する
-・最後は「ズバッと」要点をまとめる
+可能な範囲で以下の表に整理する。
 
-以上の条件でレースを分析してください。`;
+人気 | 馬番 | 馬名 | 単勝オッズ | 複勝オッズ
 
-}
+不明な項目は不明とする。
+馬番と馬名の対応が不確実なら要確認とする。
 
-async function runOCR() {
+━━━━━━━━━━━━━━━━━━
+【3. 展開予想】
+━━━━━━━━━━━━━━━━━━
 
-  const fileInput =
-    document.getElementById("imageInput");
+逃げ・先行・差し・追込・ハナを切る可能性・ペース・前残り・差し有利・展開有利馬・展開不利馬を説明する。
 
-  const file = fileInput.files[0];
+━━━━━━━━━━━━━━━━━━
+【4. 各馬の評価】
+━━━━━━━━━━━━━━━━━━
 
-  const status =
-    document.getElementById("ocrStatus");
+近走成績・相手関係・距離適性・競馬場適性・芝ダート適性・馬場適性・脚質・騎手・斤量・枠順・先行力・末脚・安定感・ローテーションを評価する。
+地方競馬は所属・クラス・競走条件も確認する。
+情報がない項目は不明とする。
 
-  const progressBar =
-    document.getElementById("progressBar");
+━━━━━━━━━━━━━━━━━━
+【5. 印の頭数ルール】
+━━━━━━━━━━━━━━━━━━
 
-  const ocrText =
-    document.getElementById("ocrText");
+印は必ず以下の頭数で選ぶこと。
 
-  if (!file) {
+◎ 本命：1頭
+○ 対抗：2頭
+▲ 単穴：3頭
+△ 連下：4頭
+☆ 穴馬：5頭
+注 注意馬：6頭
 
-    alert("先に出馬表の画像を選択してください。");
-    return;
+◎は必ず1頭。
+○は必ず2頭。
+▲は必ず3頭。
+△は必ず4頭。
+☆は必ず5頭。
+注は必ず6頭。
 
-  }
+各印は指定頭数を守る。
+ただし、出走頭数や情報不足により選定できない場合は、
+「該当なし（理由）」と記載する。
 
-  try {
+出馬表に存在しない馬は選ばない。
 
-    status.textContent =
-      "OCRを開始しています。少し待ってください。";
+各馬に馬番・馬名・短い理由をつける。
 
-    progressBar.style.width = "0%";
-    ocrText.value = "";
+━━━━━━━━━━━━━━━━━━
+【6. 軸馬の選定】
+━━━━━━━━━━━━━━━━━━
 
-    const result = await Tesseract.recognize(
-      file,
-      "jpn+eng",
-      {
-        logger: message => {
+勝ち切り期待の軸馬・連軸・相手候補・穴候補・人気でも不安材料がある馬を分けて説明する。
 
-          if (message.status === "recognizing text") {
+━━━━━━━━━━━━━━━━━━
+【7. 買い目】
+━━━━━━━━━━━━━━━━━━
 
-            const progress =
-              Math.round((message.progress || 0) * 100);
+馬連：本線・押さえ
+ワイド：軸中心
+三連複1頭軸：相手を絞る
+三連複2頭軸：必ず作成
+三連単フォーメーション：最大20点程度を目安
+穴狙い：ワイド・三連複・三連単
 
-            progressBar.style.width =
-              progress + "%";
+実際に存在する馬番のみを使用する。
+買い目は増やしすぎない。
 
-            status.textContent =
-              `OCR読み取り中：${progress}%`;
+━━━━━━━━━━━━━━━━━━
+【8. 買い目の優先順位】
+━━━━━━━━━━━━━━━━━━
 
-          } else {
+最優先買い目・本線・押さえ・穴狙い・削る買い目を分ける。
 
-            status.textContent =
-              `処理中：${message.status}`;
+━━━━━━━━━━━━━━━━━━
+【9. 最終結論】
+━━━━━━━━━━━━━━━━━━
 
-          }
+本命・対抗・穴馬・最重視買い目・三連複2頭軸・三連単フォーメーション・展開のポイント・不確実な情報を短くまとめる。
 
-        }
-      }
-    );
+━━━━━━━━━━━━━━━━━━
+【最終チェック】
+━━━━━━━━━━━━━━━━━━
 
-    const text =
-      result.data.text || "";
+□ ◎は1頭
+□ ○は2頭
+□ ▲は3頭
+□ △は4頭
+□ ☆は5頭
+□ 注は6頭
+□ 馬番と馬名が一致
+□ 買い目の馬番が存在
+□ 人気と馬番を混同していない
+□ 単勝・複勝オッズを混同していない
+□ 不明情報を創作していない
 
-    ocrText.value = text.trim();
-
-    progressBar.style.width = "100%";
-
-    status.textContent =
-      "OCRが完了しました。誤認識がないか確認してください。";
-
-    updatePromptPreview();
-
-  } catch (error) {
-
-    console.error(error);
-
-    status.textContent =
-      "OCR中にエラーが発生しました。画像を変えて再試行してください。";
-
-    alert("OCRに失敗しました。画像サイズや画質を確認してください。");
-
-  }
-
-}
-
-function updatePromptPreview() {
-
-  const preview =
-    document.getElementById("promptPreview");
-
-  if (!preview) {
-    return;
-  }
-
-  preview.textContent = createPrompt();
+最後は「ズバッと」要点をまとめてください。`;
 
 }
 
-function sendToChatGPT() {
+async function preprocessImage(file){
 
-  const prompt =
-    createPrompt();
+return new Promise((resolve,reject)=>{
 
-  if (!prompt.trim()) {
+const reader=new FileReader();
 
-    alert("送信する内容がありません。");
-    return;
+reader.onload=e=>{
 
-  }
+const img=new Image();
 
-  const chatGPTUrl =
-    "https://chatgpt.com/?q=" +
-    encodeURIComponent(prompt);
+img.onload=()=>{
 
-  window.open(chatGPTUrl, "_blank");
+const scale=2;
+const canvas=document.createElement("canvas");
 
-}
+canvas.width=img.width*scale;
+canvas.height=img.height*scale;
 
-async function copyPrompt() {
+const ctx=canvas.getContext("2d",{willReadFrequently:true});
 
-  const prompt =
-    createPrompt();
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
-  try {
+const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+const data=imageData.data;
 
-    await navigator.clipboard.writeText(prompt);
+for(let i=0;i<data.length;i+=4){
 
-    alert("プロンプトをコピーしました。ChatGPTに貼り付けてください。");
+const gray=.299*data[i]+.587*data[i+1]+.114*data[i+2];
 
-  } catch (error) {
+const adjusted=Math.max(0,Math.min(255,(gray-128)*1.4+128));
 
-    const temporaryTextarea =
-      document.createElement("textarea");
-
-    temporaryTextarea.value = prompt;
-
-    document.body.appendChild(temporaryTextarea);
-
-    temporaryTextarea.select();
-
-    document.execCommand("copy");
-
-    temporaryTextarea.remove();
-
-    alert("プロンプトをコピーしました。");
-
-  }
+data[i]=adjusted;
+data[i+1]=adjusted;
+data[i+2]=adjusted;
 
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+ctx.putImageData(imageData,0,0);
 
-  document.getElementById("raceDate").value =
-    getJapanDate();
+canvas.toBlob(blob=>{
 
-  updateTrackList();
+if(!blob){
+reject(new Error("画像処理に失敗しました"));
+return;
+}
 
-  updatePromptPreview();
+resolve(blob);
+
+},"image/png");
+
+};
+
+img.onerror=()=>reject(new Error("画像を読み込めませんでした"));
+img.src=e.target.result;
+
+};
+
+reader.onerror=()=>reject(new Error("ファイル読み込みに失敗しました"));
+reader.readAsDataURL(file);
 
 });
 
+}
+
+async function runOCR(){
+
+const file=document.getElementById("imageInput").files[0];
+
+const status=document.getElementById("ocrStatus");
+const progressBar=document.getElementById("progressBar");
+const ocrText=document.getElementById("ocrText");
+
+if(!file){
+alert("先に出馬表の画像を選択してください。");
+return;
+}
+
+try{
+
+status.textContent="OCR用画像を作成しています。";
+progressBar.style.width="0%";
+ocrText.value="";
+
+const image=await preprocessImage(file);
+
+status.textContent="OCRを開始しています。";
+
+const result=await Tesseract.recognize(image,"jpn+eng",{
+
+logger:message=>{
+
+if(message.status==="recognizing text"){
+
+const progress=Math.round((message.progress||0)*100);
+
+progressBar.style.width=progress+"%";
+status.textContent=`OCR読み取り中：${progress}%`;
+
+}else{
+
+status.textContent=`処理中：${message.status}`;
+
+}
+
+}
+
+});
+
+ocrText.value=(result.data.text||"").trim();
+
+progressBar.style.width="100%";
+status.textContent="OCR完了。誤認識を確認してください。";
+
+updatePromptPreview();
+
+}catch(error){
+
+console.error(error);
+status.textContent="OCR中にエラーが発生しました。";
+alert("OCRに失敗しました。画像を変えて再試行してください。");
+
+}
+
+}
+
+function updatePromptPreview(){
+
+document.getElementById("promptPreview").textContent=createPrompt();
+
+}
+
+function sendToChatGPT(){
+
+const prompt=createPrompt();
+
+const url="https://chatgpt.com/?q="+encodeURIComponent(prompt);
+
+window.open(url,"_blank");
+
+}
+
+async function copyPrompt(){
+
+const prompt=createPrompt();
+
+try{
+
+await navigator.clipboard.writeText(prompt);
+alert("プロンプトをコピーしました。");
+
+}catch(error){
+
+const textarea=document.createElement("textarea");
+
+textarea.value=prompt;
+document.body.appendChild(textarea);
+textarea.select();
+document.execCommand("copy");
+textarea.remove();
+
+alert("プロンプトをコピーしました。");
+
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+document.getElementById("raceDate").value=getJapanDate();
+
+updateTrackList();
+updatePromptPreview();
+
 [
-  "raceDate",
-  "raceNumber",
-  "category",
-  "track",
-  "distance",
-  "trackCondition",
-  "weather",
-  "course",
-  "ocrText",
-  "additionalInfo"
-].forEach(id => {
+"raceDate","raceNumber","category","track",
+"distance","trackCondition","weather",
+"course","ocrText","additionalInfo"
+].forEach(id=>{
 
-  const element =
-    document.getElementById(id);
+const element=document.getElementById(id);
 
-  if (!element) {
-    return;
-  }
+if(!element)return;
 
-  element.addEventListener("input", updatePromptPreview);
-  element.addEventListener("change", updatePromptPreview);
+element.addEventListener("input",updatePromptPreview);
+element.addEventListener("change",updatePromptPreview);
+
+});
 
 });
 
 </script>
-
 </body>
 </html>

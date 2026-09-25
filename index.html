@@ -172,13 +172,11 @@ button:hover {
 <div class="card">
   <div class="notice">
     出馬表画像を高解像度加工してOCRします。<br>
-    OCR信頼度を表示し、ChatGPT用の予想プロンプトと印の頭数チェックも利用できます。
+    OCR信頼度を表示し、ChatGPT用の予想プロンプトと印の頭数チェックを利用できます。
   </div>
 </div>
 
-<!-- =========================
-     レース情報
-========================= -->
+<!-- レース情報 -->
 
 <div class="card">
 
@@ -248,9 +246,7 @@ placeholder="例：逃げ馬が多い、内有利、前走内容など"></textar
 
 </div>
 
-<!-- =========================
-     OCR
-========================= -->
+<!-- OCR -->
 
 <div class="card">
 
@@ -283,9 +279,7 @@ OCR結果を整形する
 
 </div>
 
-<!-- =========================
-     予想設定
-========================= -->
+<!-- 予想設定 -->
 
 <div class="card">
 
@@ -310,58 +304,55 @@ placeholder="例：3連複を中心に、穴馬を積極的に入れてくださ
 
 </div>
 
-<!-- =========================
-     印の頭数
-========================= -->
+<!-- 印の頭数 -->
 
 <div class="card">
 
 <h2>④ 印の頭数指定</h2>
 
 <div class="notice">
-◎1頭、○2頭、▲3頭、△4頭、☆5頭、注6頭を指定します。
-同じ印の中では重複禁止です。
+  印の頭数は以下の範囲で指定します。<br>
+  ◎本命は必ず1頭。その他の印は指定範囲内で選択します。<br>
+  同じ印の中で同じ馬を重複させないでください。
 </div>
 
 <div class="grid">
 
 <div>
 <label>◎ 本命</label>
-<input value="1頭" disabled>
+<input value="必ず1頭" disabled>
 </div>
 
 <div>
 <label>○ 対抗</label>
-<input value="2頭" disabled>
+<input value="1～2頭" disabled>
 </div>
 
 <div>
 <label>▲ 単穴</label>
-<input value="3頭" disabled>
+<input value="1～2頭" disabled>
 </div>
 
 <div>
 <label>△ 連下</label>
-<input value="4頭" disabled>
+<input value="2～4頭" disabled>
 </div>
 
 <div>
 <label>☆ 穴馬</label>
-<input value="5頭" disabled>
+<input value="1～2頭" disabled>
 </div>
 
 <div>
 <label>注 注意馬</label>
-<input value="6頭" disabled>
+<input value="1～3頭" disabled>
 </div>
 
 </div>
 
 </div>
 
-<!-- =========================
-     ChatGPT連携
-========================= -->
+<!-- ChatGPT連携 -->
 
 <div class="card">
 
@@ -385,9 +376,7 @@ readonly></textarea>
 
 </div>
 
-<!-- =========================
-     回答チェック
-========================= -->
+<!-- 回答チェック -->
 
 <div class="card">
 
@@ -444,10 +433,6 @@ async function runOCR() {
     const image =
       await loadImage(input.files[0]);
 
-    /*
-      画像を4倍に拡大
-    */
-
     const scale = 4;
 
     const canvas =
@@ -473,10 +458,6 @@ async function runOCR() {
       canvas.width,
       canvas.height
     );
-
-    /*
-      グレースケール・コントラスト調整
-    */
 
     const original =
       ctx.getImageData(
@@ -524,10 +505,6 @@ async function runOCR() {
 
     }
 
-    /*
-      加工画像を作成
-    */
-
     const processedCanvas =
       document.createElement("canvas");
 
@@ -547,10 +524,6 @@ async function runOCR() {
       0,
       0
     );
-
-    /*
-      OCR実行
-    */
 
     progress.textContent =
       "高解像度OCRを実行しています……";
@@ -585,10 +558,6 @@ async function runOCR() {
 
         }
       );
-
-    /*
-      OCR結果
-    */
 
     const raw =
       result.data.text || "";
@@ -794,7 +763,7 @@ function buildPrompt() {
 ${ocr}
 
 ━━━━━━━━━━━━━━━━━━
-【重要】
+【最重要：レース情報の確認】
 ━━━━━━━━━━━━━━━━━━
 
 開催日・競馬場・レース番号を最初に確認してください。
@@ -807,6 +776,9 @@ OCRの誤認識が疑われる場合は、
 
 OCR結果だけで断定できない馬名やオッズを
 勝手に補完しないでください。
+
+実際に確認できない最新情報については、
+確認できていないことを明記してください。
 
 ━━━━━━━━━━━━━━━━━━
 【分析項目】
@@ -833,20 +805,33 @@ OCR結果だけで断定できない馬名やオッズを
 【印の頭数：必ず守る】
 ━━━━━━━━━━━━━━━━━━
 
-◎ 本命：1頭
-○ 対抗：2頭
-▲ 単穴：3頭
-△ 連下：4頭
-☆ 穴馬：5頭
-注 注意馬：6頭
+◎ 本命：必ず1頭
+○ 対抗：1～2頭
+▲ 単穴：1～2頭
+△ 連下：2～4頭
+☆ 穴馬：1～2頭
+注 注意馬：1～3頭
 
-各印の中で同じ馬を重複させないでください。
+◎本命は必ず1頭のみとしてください。
+
+○対抗は最低1頭、最大2頭です。
+▲単穴は最低1頭、最大2頭です。
+△連下は最低2頭、最大4頭です。
+☆穴馬は最低1頭、最大2頭です。
+注注意馬は最低1頭、最大3頭です。
+
+各印は必ず指定された頭数範囲内で選んでください。
+
+同じ印の中で同じ馬を重複させないでください。
 
 異なる印への重複は許可します。
 
-出走頭数が足りない場合は、
-存在する馬のみを記載し、
-不足理由を書いてください。
+OCRに存在しない馬番・馬名を
+勝手に作らないでください。
+
+情報不足で頭数を満たせない場合は、
+無理に馬を作らず、
+「情報不足」と明記してください。
 
 各馬は必ず、
 馬番＋馬名で記載してください。
@@ -855,45 +840,28 @@ OCR結果だけで断定できない馬名やオッズを
 【出力形式】
 ━━━━━━━━━━━━━━━━━━
 
-◎ 本命
+◎ 本命【必ず1頭】
 
 1頭目：馬番○番 馬名
 理由：
 
-○ 対抗
+○ 対抗【1～2頭】
 
 1頭目：馬番○番 馬名
 理由：
 
-2頭目：馬番○番 馬名
+2頭目：必要な場合のみ記載
 理由：
 
-▲ 単穴
+▲ 単穴【1～2頭】
 
 1頭目：馬番○番 馬名
 理由：
 
-2頭目：馬番○番 馬名
+2頭目：必要な場合のみ記載
 理由：
 
-3頭目：馬番○番 馬名
-理由：
-
-△ 連下
-
-1頭目：馬番○番 馬名
-理由：
-
-2頭目：馬番○番 馬名
-理由：
-
-3頭目：馬番○番 馬名
-理由：
-
-4頭目：馬番○番 馬名
-理由：
-
-☆ 穴馬
+△ 連下【2～4頭】
 
 1頭目：馬番○番 馬名
 理由：
@@ -901,33 +869,29 @@ OCR結果だけで断定できない馬名やオッズを
 2頭目：馬番○番 馬名
 理由：
 
-3頭目：馬番○番 馬名
+3頭目：必要な場合のみ記載
 理由：
 
-4頭目：馬番○番 馬名
+4頭目：必要な場合のみ記載
 理由：
 
-5頭目：馬番○番 馬名
-理由：
-
-注 注意馬
+☆ 穴馬【1～2頭】
 
 1頭目：馬番○番 馬名
 理由：
 
-2頭目：馬番○番 馬名
+2頭目：必要な場合のみ記載
 理由：
 
-3頭目：馬番○番 馬名
+注 注意馬【1～3頭】
+
+1頭目：馬番○番 馬名
 理由：
 
-4頭目：馬番○番 馬名
+2頭目：必要な場合のみ記載
 理由：
 
-5頭目：馬番○番 馬名
-理由：
-
-6頭目：馬番○番 馬名
+3頭目：必要な場合のみ記載
 理由：
 
 ━━━━━━━━━━━━━━━━━━
@@ -949,26 +913,31 @@ OCR結果だけで断定できない馬名やオッズを
 想定購入金額に合わせ、
 買い目を広げすぎないでください。
 
+買い目ごとに、
+組み合わせ数・1点あたりの金額・合計金額を記載してください。
+
+最低購入単位は100円としてください。
+50円単位の買い目は作成しないでください。
+
 ━━━━━━━━━━━━━━━━━━
 【最終チェック】
 ━━━━━━━━━━━━━━━━━━
 
-□ ◎が1頭あるか
-□ ○が2頭あるか
-□ ▲が3頭あるか
-□ △が4頭あるか
-□ ☆が5頭あるか
-□ 注が6頭あるか
+□ ◎が必ず1頭あるか
+□ ○が1～2頭の範囲内か
+□ ▲が1～2頭の範囲内か
+□ △が2～4頭の範囲内か
+□ ☆が1～2頭の範囲内か
+□ 注が1～3頭の範囲内か
 □ 同じ印の中に重複馬がないか
 □ 馬番と馬名が一致しているか
 □ 確定情報と推測を区別しているか
 □ 買い目の点数を記載しているか
+□ 購入金額が想定金額を超えていないか
 
 最後に印の頭数チェック結果を記載してください。
 
 `;
-
-}
 
 /* =========================
    プロンプト表示
@@ -1035,19 +1004,15 @@ function openChatGPT() {
   const prompt =
     buildPrompt();
 
-  try {
-
-    navigator.clipboard.writeText(
-      prompt
-    );
-
-  } catch (error) {
+  navigator.clipboard.writeText(
+    prompt
+  ).catch(error => {
 
     console.log(
       "コピーできませんでした。"
     );
 
-  }
+  });
 
   const url =
     "https://chatgpt.com/?q=" +
@@ -1082,13 +1047,54 @@ function checkMarkCounts() {
 
   }
 
+  /*
+    印ごとの許容範囲
+  */
+
   const rules = [
-    ["◎", "本命", 1],
-    ["○", "対抗", 2],
-    ["▲", "単穴", 3],
-    ["△", "連下", 4],
-    ["☆", "穴馬", 5],
-    ["注", "注意馬", 6]
+
+    {
+      mark: "◎",
+      name: "本命",
+      min: 1,
+      max: 1
+    },
+
+    {
+      mark: "○",
+      name: "対抗",
+      min: 1,
+      max: 2
+    },
+
+    {
+      mark: "▲",
+      name: "単穴",
+      min: 1,
+      max: 2
+    },
+
+    {
+      mark: "△",
+      name: "連下",
+      min: 2,
+      max: 4
+    },
+
+    {
+      mark: "☆",
+      name: "穴馬",
+      min: 1,
+      max: 2
+    },
+
+    {
+      mark: "注",
+      name: "注意馬",
+      min: 1,
+      max: 3
+    }
+
   ];
 
   const lines =
@@ -1101,58 +1107,65 @@ function checkMarkCounts() {
 
   let output = "";
 
-  rules.forEach(
-    ([mark, name, expected]) => {
+  rules.forEach(rule => {
 
-      let count = 0;
+    const mark = rule.mark;
+    const name = rule.name;
 
-      const directRegex =
-        new RegExp(
-          "^" +
-          escapeRegExp(mark) +
-          "\\s*(?:\\d+頭目|\\d+[.)：:])"
+    let count = 0;
+
+    /*
+      形式1：
+      ◎ 1頭目：馬番1番 馬名
+      ○ 1頭目：馬番2番 馬名
+    */
+
+    const directRegex =
+      new RegExp(
+        "^" +
+        escapeRegExp(mark) +
+        "\\s*\\d+頭目\\s*[：:]"
+      );
+
+    count =
+      lines.filter(line =>
+        directRegex.test(line)
+      ).length;
+
+    /*
+      形式2：
+      ◎ 本命
+      1頭目：馬番1番 馬名
+    */
+
+    if (count === 0) {
+
+      const index =
+        lines.findIndex(line =>
+          line.startsWith(mark)
         );
 
-      count =
-        lines.filter(line =>
-          directRegex.test(line)
-        ).length;
+      if (index >= 0) {
 
-      if (count === 0) {
+        for (
+          let i = index + 1;
+          i < lines.length;
+          i++
+        ) {
 
-        const index =
-          lines.findIndex(line =>
-            line.startsWith(mark) &&
-            !directRegex.test(line)
-          );
-
-        if (index >= 0) {
-
-          for (
-            let i = index + 1;
-            i < lines.length;
-            i++
+          if (
+            /^[◎○▲△☆注]/.test(lines[i])
           ) {
 
-            if (
-              /^[◎○▲△☆注]/.test(
-                lines[i]
-              )
-            ) {
+            break;
 
-              break;
+          }
 
-            }
+          if (
+            /頭目.*馬番|馬番.*馬名/.test(lines[i])
+          ) {
 
-            if (
-              /頭目|馬番/.test(
-                lines[i]
-              )
-            ) {
-
-              count++;
-
-            }
+            count++;
 
           }
 
@@ -1160,29 +1173,58 @@ function checkMarkCounts() {
 
       }
 
-      const correct =
-        count === expected;
+    }
 
-      if (!correct) {
+    /*
+      形式3：
+      ◎：馬番1番 馬名
+      ◎ 馬番1番 馬名
+    */
 
-        allCorrect = false;
+    if (count === 0) {
 
-      }
+      const simpleRegex =
+        new RegExp(
+          "^" +
+          escapeRegExp(mark) +
+          "\\s*[：:]?\\s*.*馬番.*馬名"
+        );
 
-      output +=
-        mark +
-        " " +
-        name +
-        "：検出" +
-        count +
-        "頭 / 目標" +
-        expected +
-        "頭 " +
-        (correct ? "✓" : "✕") +
-        "\n";
+      count =
+        lines.filter(line =>
+          simpleRegex.test(line)
+        ).length;
 
     }
-  );
+
+    const correct =
+      count >= rule.min &&
+      count <= rule.max;
+
+    if (!correct) {
+
+      allCorrect = false;
+
+    }
+
+    const rangeText =
+      rule.min === rule.max
+        ? rule.min + "頭"
+        : rule.min + "～" + rule.max + "頭";
+
+    output +=
+      mark +
+      " " +
+      name +
+      "：検出" +
+      count +
+      "頭 / 許容範囲" +
+      rangeText +
+      " " +
+      (correct ? "✓" : "✕") +
+      "\n";
+
+  });
 
   result.className =
     allCorrect
@@ -1192,11 +1234,12 @@ function checkMarkCounts() {
   result.textContent =
     (
       allCorrect
-        ? "頭数チェック上は目標を満たしています。\n\n"
-        : "一部の印で目標頭数を満たしていません。\n\n"
+        ? "すべての印が指定範囲内です。\n\n"
+        : "指定範囲外の印があります。\n\n"
     ) +
     output +
-    "\n※簡易判定です。馬番・馬名の重複や正確性は目視でも確認してください。";
+    "\n※簡易判定です。\n" +
+    "馬番・馬名の重複や正確性は目視でも確認してください。";
 
 }
 

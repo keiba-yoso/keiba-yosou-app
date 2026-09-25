@@ -17,8 +17,7 @@
 body {
   margin: 0;
   padding: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP",
-               sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
   background: #f2f4f7;
   color: #222;
 }
@@ -29,8 +28,8 @@ body {
 }
 
 h1 {
-  font-size: 24px;
   text-align: center;
+  font-size: 24px;
   margin: 10px 0 20px;
 }
 
@@ -42,7 +41,7 @@ h2 {
 }
 
 .card {
-  background: white;
+  background: #fff;
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 15px;
@@ -91,20 +90,16 @@ button:hover {
   opacity: 0.9;
 }
 
-button.secondary {
+.secondary {
   background: #555;
 }
 
-button.green {
+.green {
   background: #16803c;
 }
 
-button.orange {
+.orange {
   background: #c46b00;
-}
-
-button.red {
-  background: #b3261e;
 }
 
 .grid {
@@ -128,22 +123,14 @@ button.red {
   line-height: 1.7;
 }
 
-.progress {
+.progress,
+.result {
   white-space: pre-wrap;
   background: #eef3f8;
   border-radius: 8px;
   padding: 12px;
   margin-top: 10px;
   font-size: 14px;
-}
-
-.result {
-  white-space: pre-wrap;
-  line-height: 1.7;
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 10px;
 }
 
 .check-ok {
@@ -184,130 +171,156 @@ button.red {
 
 <div class="card">
   <div class="notice">
-    OCRで出馬表を読み取り、ChatGPTに競馬分析を依頼します。<br>
-    印の頭数を指定し、回答を貼り付けて頭数チェックもできます。
+    出馬表画像を高解像度加工してOCRします。<br>
+    OCR信頼度を表示し、ChatGPT用の予想プロンプトと印の頭数チェックも利用できます。
   </div>
 </div>
+
+<!-- =========================
+     レース情報
+========================= -->
 
 <div class="card">
 
 <h2>① レース情報</h2>
 
-<label for="raceDate">開催日</label>
+<label>開催日</label>
 <input type="date" id="raceDate">
 
 <div class="grid">
 
 <div>
-<label for="category">開催区分</label>
+<label>開催区分</label>
 <select id="category">
-  <option value="中央競馬（JRA）">中央競馬（JRA）</option>
-  <option value="地方競馬">地方競馬</option>
+  <option>中央競馬（JRA）</option>
+  <option>地方競馬</option>
 </select>
 </div>
 
 <div>
-<label for="track">競馬場</label>
-<input type="text" id="track" placeholder="例：中山、笠松、浦和">
+<label>競馬場</label>
+<input id="track" placeholder="例：中山、笠松、浦和">
 </div>
 
 <div>
-<label for="raceNumber">レース番号</label>
+<label>レース番号</label>
 <input type="number" id="raceNumber" placeholder="例：11">
 </div>
 
 <div>
-<label for="distance">距離</label>
-<input type="text" id="distance" placeholder="例：芝2000m、ダート1400m">
+<label>距離</label>
+<input id="distance" placeholder="例：芝2000m、ダート1400m">
 </div>
 
 <div>
-<label for="course">コース・条件</label>
-<input type="text" id="course" placeholder="例：3歳未勝利、重賞">
+<label>コース・条件</label>
+<input id="course" placeholder="例：3歳未勝利、重賞">
 </div>
 
 <div>
-<label for="weather">天気</label>
+<label>天気</label>
 <select id="weather">
-  <option value="未確認">未確認</option>
-  <option value="晴れ">晴れ</option>
-  <option value="曇り">曇り</option>
-  <option value="雨">雨</option>
-  <option value="小雨">小雨</option>
-  <option value="雪">雪</option>
+  <option>未確認</option>
+  <option>晴れ</option>
+  <option>曇り</option>
+  <option>雨</option>
+  <option>小雨</option>
+  <option>雪</option>
 </select>
 </div>
 
 <div>
-<label for="trackCondition">馬場状態</label>
+<label>馬場状態</label>
 <select id="trackCondition">
-  <option value="未確認">未確認</option>
-  <option value="良">良</option>
-  <option value="稍重">稍重</option>
-  <option value="重">重</option>
-  <option value="不良">不良</option>
+  <option>未確認</option>
+  <option>良</option>
+  <option>稍重</option>
+  <option>重</option>
+  <option>不良</option>
 </select>
 </div>
 
 </div>
 
-<label for="additionalInfo">追加情報</label>
+<label>追加情報</label>
 <textarea id="additionalInfo"
-placeholder="例：逃げ馬が多い、内有利、前走内容、騎手情報など"></textarea>
+placeholder="例：逃げ馬が多い、内有利、前走内容など"></textarea>
 
 </div>
+
+<!-- =========================
+     OCR
+========================= -->
 
 <div class="card">
 
 <h2>② 出馬表OCR</h2>
 
-<label for="imageInput">出馬表スクリーンショット</label>
+<label>出馬表スクリーンショット</label>
 <input type="file" id="imageInput" accept="image/*">
 
-<button onclick="runOCR()">📷 OCRを開始する</button>
+<button onclick="runOCR()">
+📷 高解像度OCRを開始
+</button>
 
 <div id="ocrProgress" class="progress">
 OCR待機中です。
 </div>
 
-<label for="ocrText">OCR読み取り結果</label>
+<label>OCR読み取り結果</label>
+
 <textarea id="ocrText"
-placeholder="OCR結果がここに表示されます。誤認識があれば手動で修正してください。"></textarea>
+placeholder="OCR結果がここに表示されます。画像と照合して修正してください。"></textarea>
 
 <button class="secondary" onclick="formatOCRText()">
 OCR結果を整形する
 </button>
 
+<p class="small">
+※信頼度はOCRエンジンの目安です。
+信頼度が高くても馬番・馬名・オッズが正しいとは限りません。
+</p>
+
 </div>
+
+<!-- =========================
+     予想設定
+========================= -->
 
 <div class="card">
 
 <h2>③ 予想設定</h2>
 
-<label for="predictionStyle">予想スタイル</label>
+<label>予想スタイル</label>
+
 <select id="predictionStyle">
-  <option value="バランス型">バランス型</option>
-  <option value="穴狙い">穴狙い</option>
-  <option value="堅実型">堅実型</option>
-  <option value="回収率重視">回収率重視</option>
+  <option>バランス型</option>
+  <option>穴狙い</option>
+  <option>堅実型</option>
+  <option>回収率重視</option>
 </select>
 
-<label for="budget">想定購入金額</label>
-<input type="text" id="budget" placeholder="例：3000円">
+<label>想定購入金額</label>
+<input id="budget" placeholder="例：3000円">
 
-<label for="customPrompt">追加の予想指示</label>
+<label>追加の予想指示</label>
+
 <textarea id="customPrompt"
 placeholder="例：3連複を中心に、穴馬を積極的に入れてください。"></textarea>
 
 </div>
+
+<!-- =========================
+     印の頭数
+========================= -->
 
 <div class="card">
 
 <h2>④ 印の頭数指定</h2>
 
 <div class="notice">
-以下の頭数を必ず満たすように指示します。<br>
-馬の重複は可能ですが、同じ印の中では重複禁止です。
+◎1頭、○2頭、▲3頭、△4頭、☆5頭、注6頭を指定します。
+同じ印の中では重複禁止です。
 </div>
 
 <div class="grid">
@@ -344,18 +357,17 @@ placeholder="例：3連複を中心に、穴馬を積極的に入れてくださ
 
 </div>
 
-<p class="small">
-※出走頭数が指定数に満たない場合は、存在する馬のみを使用し、
-不足理由を記載するよう指示します。
-</p>
-
 </div>
+
+<!-- =========================
+     ChatGPT連携
+========================= -->
 
 <div class="card">
 
 <h2>⑤ ChatGPTへ送信</h2>
 
-<button onclick="copyPrompt()" class="green">
+<button class="green" onclick="copyPrompt()">
 📋 予想プロンプトをコピー
 </button>
 
@@ -363,30 +375,34 @@ placeholder="例：3連複を中心に、穴馬を積極的に入れてくださ
 🤖 ChatGPTで予想する
 </button>
 
-<button onclick="showPrompt()" class="secondary">
-📝 作成したプロンプトを表示
+<button class="secondary" onclick="showPrompt()">
+📝 プロンプトを表示
 </button>
 
 <textarea id="promptPreview"
-style="display:none;"
+style="display:none"
 readonly></textarea>
 
 </div>
+
+<!-- =========================
+     回答チェック
+========================= -->
 
 <div class="card">
 
 <h2>⑥ ChatGPTの回答チェック</h2>
 
 <div class="notice">
-ChatGPTから返ってきた回答を下の欄に貼り付けてください。
-印ごとの頭数を簡易チェックできます。
+ChatGPTの回答を貼り付けると、印ごとの頭数を簡易チェックします。
 </div>
 
-<label for="aiAnswer">ChatGPTの回答</label>
-<textarea id="aiAnswer"
-placeholder="ChatGPTの回答をここに貼り付けてください。"></textarea>
+<label>ChatGPTの回答</label>
 
-<button onclick="checkMarkCounts()" class="orange">
+<textarea id="aiAnswer"
+placeholder="ChatGPTの回答を貼り付けてください。"></textarea>
+
+<button class="orange" onclick="checkMarkCounts()">
 🔍 印の頭数をチェック
 </button>
 
@@ -394,68 +410,61 @@ placeholder="ChatGPTの回答をここに貼り付けてください。"></texta
 
 </div>
 
-<div class="card">
-
-<h2>⑦ 買い目作成用の補助</h2>
-
-<p class="small">
-ChatGPTへの指示には、以下の買い目を含めています。
-</p>
-
-<ul>
-  <li>単勝</li>
-  <li>複勝</li>
-  <li>馬連</li>
-  <li>ワイド</li>
-  <li>3連複</li>
-  <li>3連単フォーメーション</li>
-  <li>穴狙いの買い目</li>
-  <li>点数・購入金額の目安</li>
-</ul>
-
-<div class="notice">
-オッズ・馬場・直前情報が未確認の場合は、
-推測と確定情報を分けて記載するよう指示しています。
-</div>
-
-</div>
-
 </div>
 
 <script>
 
-let lastPrompt = "";
-
 /* =========================
-   OCR
+   高解像度OCR
 ========================= */
 
 async function runOCR() {
 
-  const fileInput = document.getElementById("imageInput");
-  const progress = document.getElementById("ocrProgress");
-  const ocrText = document.getElementById("ocrText");
+  const input =
+    document.getElementById("imageInput");
 
-  if (!fileInput.files || !fileInput.files[0]) {
-    alert("先に出馬表の画像を選択してください。");
+  const progress =
+    document.getElementById("ocrProgress");
+
+  const output =
+    document.getElementById("ocrText");
+
+  if (!input.files || !input.files[0]) {
+
+    alert("先に画像を選択してください。");
     return;
+
   }
-
-  const file = fileInput.files[0];
-
-  progress.textContent = "画像を読み込んでいます……";
 
   try {
 
-    const image = await createImageBitmap(file);
+    progress.textContent =
+      "画像を読み込んでいます……";
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+    const image =
+      await loadImage(input.files[0]);
 
-    const scale = 3;
+    /*
+      画像を4倍に拡大
+    */
 
-    canvas.width = image.width * scale;
-    canvas.height = image.height * scale;
+    const scale = 4;
+
+    const canvas =
+      document.createElement("canvas");
+
+    canvas.width =
+      image.width * scale;
+
+    canvas.height =
+      image.height * scale;
+
+    const ctx =
+      canvas.getContext("2d", {
+        willReadFrequently: true
+      });
+
+    ctx.imageSmoothingEnabled = false;
 
     ctx.drawImage(
       image,
@@ -465,71 +474,236 @@ async function runOCR() {
       canvas.height
     );
 
-    const imageData = ctx.getImageData(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    /*
+      グレースケール・コントラスト調整
+    */
 
-    const data = imageData.data;
+    const original =
+      ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
 
-    for (let i = 0; i < data.length; i += 4) {
+    const processed =
+      new ImageData(
+        new Uint8ClampedArray(original.data),
+        original.width,
+        original.height
+      );
 
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
+    for (
+      let i = 0;
+      i < processed.data.length;
+      i += 4
+    ) {
 
-      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      const r = processed.data[i];
+      const g = processed.data[i + 1];
+      const b = processed.data[i + 2];
 
-      let contrast = (gray - 128) * 1.5 + 128;
+      const gray =
+        0.299 * r +
+        0.587 * g +
+        0.114 * b;
 
-      contrast = Math.max(0, Math.min(255, contrast));
+      let value =
+        (gray - 128) * 2 + 128;
 
-      data[i] = contrast;
-      data[i + 1] = contrast;
-      data[i + 2] = contrast;
+      value =
+        Math.max(
+          0,
+          Math.min(255, value)
+        );
+
+      processed.data[i] = value;
+      processed.data[i + 1] = value;
+      processed.data[i + 2] = value;
+      processed.data[i + 3] = 255;
+
     }
 
-    ctx.putImageData(imageData, 0, 0);
+    /*
+      加工画像を作成
+    */
 
-    progress.textContent = "OCRを実行しています……";
+    const processedCanvas =
+      document.createElement("canvas");
 
-    const result = await Tesseract.recognize(
-      canvas,
-      "jpn+eng",
-      {
-        logger: message => {
+    processedCanvas.width =
+      canvas.width;
 
-          if (message.status && message.progress !== undefined) {
-            progress.textContent =
-              message.status +
-              "\n進行状況：" +
-              Math.round(message.progress * 100) +
-              "%";
-          }
+    processedCanvas.height =
+      canvas.height;
 
-        }
-      }
+    const processedCtx =
+      processedCanvas.getContext("2d", {
+        willReadFrequently: true
+      });
+
+    processedCtx.putImageData(
+      processed,
+      0,
+      0
     );
 
-    ocrText.value = result.data.text;
+    /*
+      OCR実行
+    */
+
+    progress.textContent =
+      "高解像度OCRを実行しています……";
+
+    const result =
+      await Tesseract.recognize(
+        processedCanvas,
+        "jpn+eng",
+        {
+          logger: message => {
+
+            if (
+              message.status &&
+              message.progress !== undefined
+            ) {
+
+              progress.textContent =
+                message.status +
+                "\n進行状況：" +
+                Math.round(
+                  message.progress * 100
+                ) +
+                "%";
+
+            }
+
+          },
+
+          tessedit_pageseg_mode: "6",
+
+          preserve_interword_spaces: "1"
+
+        }
+      );
+
+    /*
+      OCR結果
+    */
+
+    const raw =
+      result.data.text || "";
+
+    const confidence =
+      Number(
+        result.data.confidence || 0
+      );
+
+    const lines =
+      raw
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+
+    output.value =
+      "【OCR信頼度：約" +
+      Math.round(confidence) +
+      "%】\n\n" +
+
+      lines
+        .map((line, index) => {
+
+          return (
+            (index + 1) +
+            ". " +
+            line
+          );
+
+        })
+        .join("\n");
 
     progress.textContent =
       "OCRが完了しました。\n" +
-      "誤認識がないか確認してください。";
+      "信頼度：約" +
+      Math.round(confidence) +
+      "%";
+
+    if (confidence < 60) {
+
+      alert(
+        "OCR信頼度が低いです。\n" +
+        "出馬表部分だけを切り抜き、" +
+        "文字を大きくして再試行してください。"
+      );
+
+    }
 
   } catch (error) {
 
     console.error(error);
 
     progress.textContent =
-      "OCRでエラーが発生しました。\n" +
+      "OCRエラー：" +
       error.message;
 
-    alert("OCRに失敗しました。画像を変更して再試行してください。");
+    alert(
+      "OCRに失敗しました。\n" +
+      "別の画像で再試行してください。"
+    );
 
   }
+
+}
+
+/* =========================
+   画像読み込み
+========================= */
+
+function loadImage(file) {
+
+  return new Promise((resolve, reject) => {
+
+    const reader =
+      new FileReader();
+
+    reader.onload = event => {
+
+      const image =
+        new Image();
+
+      image.onload = () => {
+
+        resolve(image);
+
+      };
+
+      image.onerror = () => {
+
+        reject(
+          new Error(
+            "画像を読み込めませんでした。"
+          )
+        );
+
+      };
+
+      image.src =
+        event.target.result;
+
+    };
+
+    reader.onerror = () => {
+
+      reject(
+        new Error(
+          "ファイルの読み込みに失敗しました。"
+        )
+      );
+
+    };
+
+    reader.readAsDataURL(file);
+
+  });
 
 }
 
@@ -539,28 +713,41 @@ async function runOCR() {
 
 function formatOCRText() {
 
-  const textarea = document.getElementById("ocrText");
-  const text = textarea.value.trim();
+  const area =
+    document.getElementById("ocrText");
+
+  const text =
+    area.value.trim();
 
   if (!text) {
-    alert("先にOCR結果を入力してください。");
+
+    alert(
+      "先にOCR結果を入力してください。"
+    );
+
     return;
+
   }
 
-  const lines = text
-    .split(/\n/)
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
+  area.value =
+    text
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map((line, index) => {
 
-  const formatted = lines.map((line, index) => {
+        return (
+          (index + 1) +
+          ". " +
+          line
+        );
 
-    return `${index + 1}. ${line}`;
+      })
+      .join("\n");
 
-  }).join("\n");
-
-  textarea.value = formatted;
-
-  alert("OCR結果を行ごとに整形しました。");
+  alert(
+    "OCR結果を整形しました。"
+  );
 
 }
 
@@ -570,124 +757,81 @@ function formatOCRText() {
 
 function buildPrompt() {
 
-  const date =
-    document.getElementById("raceDate").value || "未入力";
+  const value =
+    id =>
+      document.getElementById(id).value ||
+      "未入力";
 
-  const category =
-    document.getElementById("category").value || "未入力";
+  const ocr =
+    document.getElementById("ocrText").value.trim() ||
+    "OCR情報なし";
 
-  const track =
-    document.getElementById("track").value || "未入力";
-
-  const raceNumber =
-    document.getElementById("raceNumber").value || "未入力";
-
-  const distance =
-    document.getElementById("distance").value || "未入力";
-
-  const course =
-    document.getElementById("course").value || "未入力";
-
-  const weather =
-    document.getElementById("weather").value || "未確認";
-
-  const trackCondition =
-    document.getElementById("trackCondition").value || "未確認";
-
-  const additionalInfo =
-    document.getElementById("additionalInfo").value || "なし";
-
-  const predictionStyle =
-    document.getElementById("predictionStyle").value || "バランス型";
-
-  const budget =
-    document.getElementById("budget").value || "未指定";
-
-  const customPrompt =
-    document.getElementById("customPrompt").value || "なし";
-
-  const ocrText =
-    document.getElementById("ocrText").value.trim() || "OCR情報なし";
-
-  const prompt = `
+  return `
 
 あなたは中央競馬・地方競馬に対応した競馬予想分析アシスタントです。
 
-以下の情報をもとに、可能な範囲で客観的かつ具体的に分析してください。
-
 ━━━━━━━━━━━━━━━━━━
-【最重要：レース情報の確認】
+【レース情報】
 ━━━━━━━━━━━━━━━━━━
 
-開催日：${date}
-開催区分：${category}
-競馬場：${track}
-レース番号：${raceNumber}R
-距離：${distance}
-コース・条件：${course}
-天気：${weather}
-馬場状態：${trackCondition}
-予想スタイル：${predictionStyle}
-想定購入金額：${budget}
-追加情報：${additionalInfo}
-追加指示：${customPrompt}
+開催日：${value("raceDate")}
+開催区分：${value("category")}
+競馬場：${value("track")}
+レース番号：${value("raceNumber")}R
+距離：${value("distance")}
+コース・条件：${value("course")}
+天気：${value("weather")}
+馬場状態：${value("trackCondition")}
+予想スタイル：${value("predictionStyle")}
+想定購入金額：${value("budget")}
+追加情報：${value("additionalInfo")}
+追加指示：${value("customPrompt")}
 
-まず最初に、開催日・競馬場・レース番号を確認してください。
+━━━━━━━━━━━━━━━━━━
+【OCR結果】
+━━━━━━━━━━━━━━━━━━
+
+${ocr}
+
+━━━━━━━━━━━━━━━━━━
+【重要】
+━━━━━━━━━━━━━━━━━━
+
+開催日・競馬場・レース番号を最初に確認してください。
 
 OCRの誤認識が疑われる場合は、
-馬番・馬名・人気・オッズを可能な範囲で照合してください。
+馬番・馬名・人気・オッズの整合性を確認してください。
 
-情報が不足している場合は、勝手に確定情報として扱わず、
-「未確認」「推測」と明記してください。
+情報がないものは、
+未確認または推測と明記してください。
 
-━━━━━━━━━━━━━━━━━━
-【出馬表OCR】
-━━━━━━━━━━━━━━━━━━
-
-${ocrText}
-
-━━━━━━━━━━━━━━━━━━
-【OCRの列順】
-━━━━━━━━━━━━━━━━━━
-
-基本的な列順は以下を想定してください。
-
-人気 → 馬番 → 馬名 → 単勝オッズ → 複勝オッズ
-
-ただし、実際のOCR結果と合わない場合は、
-列順を断定せず、読み取れる情報を整理してください。
+OCR結果だけで断定できない馬名やオッズを
+勝手に補完しないでください。
 
 ━━━━━━━━━━━━━━━━━━
 【分析項目】
 ━━━━━━━━━━━━━━━━━━
 
-1. レース情報の正誤確認
-2. 出走馬の整理
-3. 各馬の近走成績
-4. 距離・コース適性
-5. 競馬場適性
-6. 枠順の有利不利
-7. 脚質と位置取り
-8. 逃げ・先行馬の数
-9. ペース予測
-10. 展開予測
-11. 騎手・斤量
-12. 血統適性
-13. 馬体重・馬体重増減（情報がある場合）
-14. 天気と馬場状態
-15. 当該コースの傾向
-16. オッズと人気のバランス
-17. 人気薄で注意すべき馬
-18. リスク・不確定要素
-
-天気や馬場が未確認の場合は、
-現在の情報として断定しないでください。
+・近走成績
+・距離適性
+・コース適性
+・脚質
+・枠順
+・展開
+・ペース
+・騎手
+・斤量
+・血統
+・天気
+・馬場
+・人気
+・オッズ
+・穴馬
+・リスク
 
 ━━━━━━━━━━━━━━━━━━
-【印の頭数ルール：絶対遵守】
+【印の頭数：必ず守る】
 ━━━━━━━━━━━━━━━━━━
-
-印は、必ず以下の頭数で出してください。
 
 ◎ 本命：1頭
 ○ 対抗：2頭
@@ -696,78 +840,93 @@ ${ocrText}
 ☆ 穴馬：5頭
 注 注意馬：6頭
 
-重要：
+各印の中で同じ馬を重複させないでください。
 
-・各印は1頭だけで終わらせないでください。
-・○は必ず2頭記載してください。
-・▲は必ず3頭記載してください。
-・△は必ず4頭記載してください。
-・☆は必ず5頭記載してください。
-・注は必ず6頭記載してください。
-・同じ馬が複数の印に入ることは許可します。
-・同じ印の中で同じ馬を重複させないでください。
-・出走頭数が足りない場合は、存在する馬だけを記載し、不足理由を説明してください。
-・馬名だけでなく、必ず馬番も記載してください。
-・OCRから馬名が判別できない場合は、馬番と「馬名判別不能」と記載してください。
-・印の頭数を守ることを、分析内容より優先してください。
+異なる印への重複は許可します。
+
+出走頭数が足りない場合は、
+存在する馬のみを記載し、
+不足理由を書いてください。
+
+各馬は必ず、
+馬番＋馬名で記載してください。
 
 ━━━━━━━━━━━━━━━━━━
-【印の出力フォーマット】
+【出力形式】
 ━━━━━━━━━━━━━━━━━━
-
-以下の形式を必ず使用してください。
 
 ◎ 本命
+
 1頭目：馬番○番 馬名
 理由：
 
 ○ 対抗
+
 1頭目：馬番○番 馬名
 理由：
+
 2頭目：馬番○番 馬名
 理由：
 
 ▲ 単穴
+
 1頭目：馬番○番 馬名
 理由：
+
 2頭目：馬番○番 馬名
 理由：
+
 3頭目：馬番○番 馬名
 理由：
 
 △ 連下
+
 1頭目：馬番○番 馬名
 理由：
+
 2頭目：馬番○番 馬名
 理由：
+
 3頭目：馬番○番 馬名
 理由：
+
 4頭目：馬番○番 馬名
 理由：
 
 ☆ 穴馬
+
 1頭目：馬番○番 馬名
 理由：
+
 2頭目：馬番○番 馬名
 理由：
+
 3頭目：馬番○番 馬名
 理由：
+
 4頭目：馬番○番 馬名
 理由：
+
 5頭目：馬番○番 馬名
 理由：
 
 注 注意馬
+
 1頭目：馬番○番 馬名
 理由：
+
 2頭目：馬番○番 馬名
 理由：
+
 3頭目：馬番○番 馬名
 理由：
+
 4頭目：馬番○番 馬名
 理由：
+
 5頭目：馬番○番 馬名
 理由：
+
 6頭目：馬番○番 馬名
 理由：
 
@@ -775,7 +934,7 @@ ${ocrText}
 【買い目】
 ━━━━━━━━━━━━━━━━━━
 
-以下を、点数と理由付きで作成してください。
+以下を点数と理由付きで作成してください。
 
 1. 単勝
 2. 複勝
@@ -787,20 +946,12 @@ ${ocrText}
 8. オッズを考慮した買い目
 9. 購入金額の配分例
 
-3連単は、可能であれば以下のように示してください。
-
-1着：
-2着：
-3着：
-
-ただし、買い目を広げすぎず、
-想定購入金額に応じて点数を調整してください。
+想定購入金額に合わせ、
+買い目を広げすぎないでください。
 
 ━━━━━━━━━━━━━━━━━━
-【最終出力前のセルフチェック】
+【最終チェック】
 ━━━━━━━━━━━━━━━━━━
-
-回答を出す前に、必ず以下を確認してください。
 
 □ ◎が1頭あるか
 □ ○が2頭あるか
@@ -813,15 +964,9 @@ ${ocrText}
 □ 確定情報と推測を区別しているか
 □ 買い目の点数を記載しているか
 
-頭数が足りない場合は、
-回答を終了する前に不足分を補ってください。
-
-最後に、
-「印の頭数チェック結果」を記載してください。
+最後に印の頭数チェック結果を記載してください。
 
 `;
-
-  return prompt;
 
 }
 
@@ -831,14 +976,13 @@ ${ocrText}
 
 function showPrompt() {
 
-  const prompt = buildPrompt();
+  const area =
+    document.getElementById("promptPreview");
 
-  const preview = document.getElementById("promptPreview");
+  area.style.display = "block";
 
-  preview.style.display = "block";
-  preview.value = prompt;
-
-  lastPrompt = prompt;
+  area.value =
+    buildPrompt();
 
 }
 
@@ -848,31 +992,34 @@ function showPrompt() {
 
 async function copyPrompt() {
 
-  const prompt = buildPrompt();
-
-  lastPrompt = prompt;
+  const prompt =
+    buildPrompt();
 
   try {
 
-    await navigator.clipboard.writeText(prompt);
+    await navigator.clipboard.writeText(
+      prompt
+    );
 
     alert(
-      "プロンプトをコピーしました。\n" +
-      "ChatGPTに貼り付けて使用してください。"
+      "プロンプトをコピーしました。"
     );
 
   } catch (error) {
 
-    const preview = document.getElementById("promptPreview");
+    const area =
+      document.getElementById("promptPreview");
 
-    preview.style.display = "block";
-    preview.value = prompt;
+    area.style.display = "block";
 
-    preview.select();
+    area.value =
+      prompt;
+
+    area.select();
 
     alert(
       "自動コピーに失敗しました。\n" +
-      "表示された文章を手動でコピーしてください。"
+      "表示された文章をコピーしてください。"
     );
 
   }
@@ -885,17 +1032,20 @@ async function copyPrompt() {
 
 function openChatGPT() {
 
-  const prompt = buildPrompt();
-
-  lastPrompt = prompt;
+  const prompt =
+    buildPrompt();
 
   try {
 
-    navigator.clipboard.writeText(prompt);
+    navigator.clipboard.writeText(
+      prompt
+    );
 
   } catch (error) {
 
-    console.log("コピーできませんでした。");
+    console.log(
+      "コピーできませんでした。"
+    );
 
   }
 
@@ -903,11 +1053,9 @@ function openChatGPT() {
     "https://chatgpt.com/?q=" +
     encodeURIComponent(prompt);
 
-  window.open(url, "_blank");
-
-  alert(
-    "プロンプトを作成しました。\n\n" +
-    "ChatGPT側で内容を確認し、必要であればコピーした文章を貼り付けてください。"
+  window.open(
+    url,
+    "_blank"
   );
 
 }
@@ -926,180 +1074,142 @@ function checkMarkCounts() {
 
   if (!answer) {
 
-    alert("ChatGPTの回答を貼り付けてください。");
+    alert(
+      "ChatGPTの回答を貼り付けてください。"
+    );
+
     return;
 
   }
 
   const rules = [
-    {
-      mark: "◎",
-      name: "本命",
-      expected: 1
-    },
-    {
-      mark: "○",
-      name: "対抗",
-      expected: 2
-    },
-    {
-      mark: "▲",
-      name: "単穴",
-      expected: 3
-    },
-    {
-      mark: "△",
-      name: "連下",
-      expected: 4
-    },
-    {
-      mark: "☆",
-      name: "穴馬",
-      expected: 5
-    },
-    {
-      mark: "注",
-      name: "注意馬",
-      expected: 6
-    }
+    ["◎", "本命", 1],
+    ["○", "対抗", 2],
+    ["▲", "単穴", 3],
+    ["△", "連下", 4],
+    ["☆", "穴馬", 5],
+    ["注", "注意馬", 6]
   ];
 
-  const lines = answer
-    .split(/\n/)
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
+  const lines =
+    answer
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean);
 
-  let output = "";
   let allCorrect = true;
 
-  rules.forEach(rule => {
+  let output = "";
 
-    /*
-      以下のような行を優先的に検出します。
+  rules.forEach(
+    ([mark, name, expected]) => {
 
-      1頭目：馬番3番 馬名
-      2頭目：馬番5番 馬名
-
-      ただし、ChatGPTが別形式で出力した場合は、
-      印から始まる行も補助的に数えます。
-    */
-
-    const headingRegex =
-      new RegExp(
-        "^" +
-        escapeRegExp(rule.mark) +
-        "\\s*(?:本命|対抗|単穴|連下|穴馬|注意馬)?\\s*$"
-      );
-
-    const headingIndex = lines.findIndex(line =>
-      headingRegex.test(line)
-    );
-
-    let count = 0;
-
-    if (headingIndex !== -1) {
-
-      for (
-        let i = headingIndex + 1;
-        i < lines.length;
-        i++
-      ) {
-
-        const line = lines[i];
-
-        if (
-          line.startsWith("◎") ||
-          line.startsWith("○") ||
-          line.startsWith("▲") ||
-          line.startsWith("△") ||
-          line.startsWith("☆") ||
-          line.startsWith("注")
-        ) {
-          break;
-        }
-
-        if (
-          /頭目/.test(line) ||
-          /^\d+[.)：:]/.test(line)
-        ) {
-          count++;
-        }
-
-      }
-
-    }
-
-    /*
-      見出し形式で検出できなかった場合の補助判定。
-      例：◎ 1頭目：馬番1番 馬名
-    */
-
-    if (count === 0) {
+      let count = 0;
 
       const directRegex =
         new RegExp(
           "^" +
-          escapeRegExp(rule.mark) +
+          escapeRegExp(mark) +
           "\\s*(?:\\d+頭目|\\d+[.)：:])"
         );
 
-      count = lines.filter(line =>
-        directRegex.test(line)
-      ).length;
+      count =
+        lines.filter(line =>
+          directRegex.test(line)
+        ).length;
+
+      if (count === 0) {
+
+        const index =
+          lines.findIndex(line =>
+            line.startsWith(mark) &&
+            !directRegex.test(line)
+          );
+
+        if (index >= 0) {
+
+          for (
+            let i = index + 1;
+            i < lines.length;
+            i++
+          ) {
+
+            if (
+              /^[◎○▲△☆注]/.test(
+                lines[i]
+              )
+            ) {
+
+              break;
+
+            }
+
+            if (
+              /頭目|馬番/.test(
+                lines[i]
+              )
+            ) {
+
+              count++;
+
+            }
+
+          }
+
+        }
+
+      }
+
+      const correct =
+        count === expected;
+
+      if (!correct) {
+
+        allCorrect = false;
+
+      }
+
+      output +=
+        mark +
+        " " +
+        name +
+        "：検出" +
+        count +
+        "頭 / 目標" +
+        expected +
+        "頭 " +
+        (correct ? "✓" : "✕") +
+        "\n";
 
     }
+  );
 
-    const isCorrect = count === rule.expected;
+  result.className =
+    allCorrect
+      ? "check-ok"
+      : "check-ng";
 
-    if (!isCorrect) {
-      allCorrect = false;
-    }
-
-    output +=
-      rule.mark +
-      " " +
-      rule.name +
-      "：検出 " +
-      count +
-      "頭 / 目標 " +
-      rule.expected +
-      "頭 " +
-      (isCorrect ? "✓" : "✕") +
-      "\n";
-
-  });
-
-  output +=
-    "\n注意：このチェックは文章形式をもとにした簡易判定です。\n" +
-    "実際の馬番・馬名の重複や正確性は目視でも確認してください。";
-
-  if (allCorrect) {
-
-    result.className = "check-ok";
-    result.textContent =
-      "頭数チェック上は目標を満たしています。\n\n" +
-      output;
-
-  } else {
-
-    result.className = "check-ng";
-    result.textContent =
-      "一部の印で目標頭数を満たしていません。\n\n" +
-      output +
-      "\nChatGPTに以下の指示を追加してください。\n" +
-      "「不足している印を、指定頭数になるまで補完してください。各印を1頭だけで終了しないでください。」";
-
-  }
+  result.textContent =
+    (
+      allCorrect
+        ? "頭数チェック上は目標を満たしています。\n\n"
+        : "一部の印で目標頭数を満たしていません。\n\n"
+    ) +
+    output +
+    "\n※簡易判定です。馬番・馬名の重複や正確性は目視でも確認してください。";
 
 }
 
 /* =========================
-   正規表現用エスケープ
+   正規表現エスケープ
 ========================= */
 
 function escapeRegExp(string) {
 
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return string.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
 
 }
 

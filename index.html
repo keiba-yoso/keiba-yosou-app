@@ -1,741 +1,718 @@
 
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>競馬予想アプリ 中央・地方対応</title>
 
-<title>競馬予想AIアプリ 中央・地方対応</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
-* {
-  box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      padding: 12px;
+      background: #f1f3f5;
+      color: #222;
+      font-family: -apple-system, BlinkMacSystemFont, "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.6;
+    }
 
-body {
-  margin: 0;
-  padding: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", sans-serif;
-  background: #f2f4f7;
-  color: #222;
-}
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
 
-.container {
-  max-width: 850px;
-  margin: auto;
-}
+    h1 {
+      text-align: center;
+      color: #176b3a;
+      font-size: 24px;
+      margin: 10px 0 20px;
+    }
 
-h1 {
-  text-align: center;
-  font-size: 24px;
-  margin: 10px 0 20px;
-}
+    h2 {
+      font-size: 19px;
+      color: #176b3a;
+      border-bottom: 2px solid #176b3a;
+      padding-bottom: 7px;
+    }
 
-h2 {
-  font-size: 19px;
-  margin-top: 25px;
-  border-left: 5px solid #1769aa;
-  padding-left: 10px;
-}
+    .card {
+      background: #fff;
+      padding: 17px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #00000012;
+    }
 
-.card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px #00000012;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
 
-label {
-  display: block;
-  font-weight: bold;
-  margin-top: 12px;
-  margin-bottom: 5px;
-}
+    .form-group {
+      margin-bottom: 13px;
+    }
 
-input,
-select,
-textarea,
-button {
-  width: 100%;
-  font-size: 16px;
-  border-radius: 8px;
-  padding: 11px;
-}
+    label {
+      display: block;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
 
-input,
-select,
-textarea {
-  border: 1px solid #c9cdd3;
-  background: #fff;
-}
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #c8cdd2;
+      border-radius: 7px;
+      font-size: 15px;
+      background: #fff;
+    }
 
-textarea {
-  min-height: 150px;
-  resize: vertical;
-}
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
 
-button {
-  border: none;
-  background: #1769aa;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 10px;
-}
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 8px;
+      background: #176b3a;
+      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-button:hover {
-  opacity: 0.9;
-}
+    button:hover {
+      opacity: 0.88;
+    }
 
-.secondary {
-  background: #555;
-}
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-.green {
-  background: #16803c;
-}
+    .blue {
+      background: #356aa8;
+    }
 
-.orange {
-  background: #c46b00;
-}
+    .orange {
+      background: #d4771c;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+    .gray {
+      background: #555;
+    }
 
-.small {
-  font-size: 13px;
-  color: #666;
-  line-height: 1.7;
-}
+    .red {
+      background: #b52c2c;
+    }
 
-.notice {
-  padding: 12px;
-  border-radius: 8px;
-  background: #fff4d6;
-  color: #6a4b00;
-  font-size: 14px;
-  line-height: 1.7;
-}
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
 
-.progress,
-.result {
-  white-space: pre-wrap;
-  background: #eef3f8;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 10px;
-  font-size: 14px;
-}
+    .status {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #edf6ef;
+      color: #176b3a;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
 
-.check-ok {
-  background: #e4f7e9;
-  color: #146c2e;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
-  white-space: pre-wrap;
-}
+    .warning {
+      background: #fff3dc;
+      color: #855500;
+    }
 
-.check-ng {
-  background: #ffe7e7;
-  color: #a40000;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
-  white-space: pre-wrap;
-}
+    .error {
+      background: #ffe7e7;
+      color: #a00000;
+    }
 
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+    .preview {
+      display: none;
+      width: 100%;
+      max-height: 350px;
+      object-fit: contain;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
 
-  h1 {
-    font-size: 21px;
-  }
-}
-</style>
+    .small {
+      color: #666;
+      font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .grid,
+      .button-grid {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 8px;
+      }
+
+      .card {
+        padding: 13px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-<h1>🏇 競馬予想AIアプリ</h1>
+    <h1>🏇 競馬予想分析アプリ</h1>
 
-<div class="card">
-  <div class="notice">
-    出馬表画像を高解像度加工してOCRします。<br>
-    OCR信頼度を表示し、ChatGPT用の予想プロンプトと印の頭数チェックを利用できます。
+    <!-- レース情報 -->
+
+    <section class="card">
+
+      <h2>① レース情報</h2>
+
+      <div class="grid">
+
+        <div class="form-group">
+          <label for="raceDate">開催日</label>
+          <input type="date" id="raceDate">
+        </div>
+
+        <div class="form-group">
+          <label for="category">開催区分</label>
+          <select id="category">
+            <option value="中央競馬（JRA）">中央競馬（JRA）</option>
+            <option value="地方競馬">地方競馬</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="track">競馬場</label>
+          <input id="track" placeholder="例：中山、阪神、笠松、浦和">
+        </div>
+
+        <div class="form-group">
+          <label for="raceNumber">レース番号</label>
+          <input id="raceNumber" type="number" min="1" max="12" placeholder="例：11">
+        </div>
+
+        <div class="form-group">
+          <label for="distance">距離</label>
+          <input id="distance" placeholder="例：芝1600m、ダート1400m">
+        </div>
+
+        <div class="form-group">
+          <label for="course">コース・条件</label>
+          <input id="course" placeholder="例：3歳未勝利、G1、右回り">
+        </div>
+
+        <div class="form-group">
+          <label for="weather">天気</label>
+          <select id="weather">
+            <option value="未確認">未確認</option>
+            <option value="晴れ">晴れ</option>
+            <option value="曇り">曇り</option>
+            <option value="雨">雨</option>
+            <option value="小雨">小雨</option>
+            <option value="雪">雪</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="trackCondition">馬場状態</label>
+          <select id="trackCondition">
+            <option value="未確認">未確認</option>
+            <option value="良">良</option>
+            <option value="稍重">稍重</option>
+            <option value="重">重</option>
+            <option value="不良">不良</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="predictionStyle">予想スタイル</label>
+          <select id="predictionStyle">
+            <option value="バランス型">バランス型</option>
+            <option value="堅実型">堅実型</option>
+            <option value="穴狙い">穴狙い</option>
+            <option value="回収率重視">回収率重視</option>
+            <option value="高配当狙い">高配当狙い</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="budget">想定購入金額</label>
+          <select id="budget">
+            <option value="1000円">1,000円</option>
+            <option value="2000円">2,000円</option>
+            <option value="3000円">3,000円</option>
+            <option value="5000円">5,000円</option>
+            <option value="10000円">10,000円</option>
+            <option value="指定なし">指定なし</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-group">
+        <label for="additionalInfo">追加情報</label>
+        <textarea id="additionalInfo"
+          placeholder="例：逃げ馬が多い、内枠有利、前走不利があった馬など"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="customPrompt">追加指示</label>
+        <textarea id="customPrompt"
+          placeholder="例：3連複を中心に考えて。買い目は少なめに。"></textarea>
+      </div>
+
+    </section>
+
+    <!-- OCR -->
+
+    <section class="card">
+
+      <h2>② 出馬表OCR</h2>
+
+      <p class="small">
+        出馬表のスクリーンショットを選択し、OCRを実行してください。
+      </p>
+
+      <div class="form-group">
+        <label for="imageInput">出馬表画像</label>
+        <input type="file" id="imageInput" accept="image/*">
+      </div>
+
+      <img id="imagePreview" class="preview" alt="出馬表プレビュー">
+
+      <button id="ocrButton" type="button" onclick="runOCR()">
+        🔍 OCRを実行
+      </button>
+
+      <div id="ocrStatus" class="status">
+        OCR待機中
+      </div>
+
+      <div class="form-group">
+        <label for="ocrText">OCR読み取り結果</label>
+        <textarea id="ocrText"
+          placeholder="OCR結果がここに表示されます。誤認識があれば手動で修正できます。"></textarea>
+      </div>
+
+      <button type="button" class="gray" onclick="formatOCRText()">
+        📝 OCR結果を整形
+      </button>
+
+    </section>
+
+    <!-- プロンプト -->
+
+    <section class="card">
+
+      <h2>③ 予想プロンプト</h2>
+
+      <textarea id="promptOutput"
+        placeholder="プロンプト作成ボタンを押すと、ここに予想指示が表示されます。"></textarea>
+
+      <div class="button-grid">
+
+        <button type="button" onclick="showPrompt()">
+          📄 プロンプト作成
+        </button>
+
+        <button type="button" class="blue" onclick="copyPrompt()">
+          📋 プロンプトをコピー
+        </button>
+
+        <button type="button" class="orange" onclick="openChatGPT()">
+          🤖 ChatGPTで予想する
+        </button>
+
+        <button type="button" class="gray" onclick="checkMarkCounts()">
+          🔎 印の頭数チェック
+        </button>
+
+      </div>
+
+      <div id="markCheck" class="status">
+        印のチェック待機中
+      </div>
+
+    </section>
+
   </div>
-</div>
-
-<!-- レース情報 -->
 
-<div class="card">
+  <script>
 
-<h2>① レース情報</h2>
+    "use strict";
 
-<label>開催日</label>
-<input type="date" id="raceDate">
+    let selectedImage = null;
 
-<div class="grid">
+    /*
+      ページ読み込み時
+    */
 
-<div>
-<label>開催区分</label>
-<select id="category">
-  <option>中央競馬（JRA）</option>
-  <option>地方競馬</option>
-</select>
-</div>
+    document.addEventListener("DOMContentLoaded", function () {
 
-<div>
-<label>競馬場</label>
-<input id="track" placeholder="例：中山、笠松、浦和">
-</div>
+      const dateInput = document.getElementById("raceDate");
 
-<div>
-<label>レース番号</label>
-<input type="number" id="raceNumber" placeholder="例：11">
-</div>
+      if (dateInput) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
 
-<div>
-<label>距離</label>
-<input id="distance" placeholder="例：芝2000m、ダート1400m">
-</div>
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
 
-<div>
-<label>コース・条件</label>
-<input id="course" placeholder="例：3歳未勝利、重賞">
-</div>
+      const imageInput = document.getElementById("imageInput");
 
-<div>
-<label>天気</label>
-<select id="weather">
-  <option>未確認</option>
-  <option>晴れ</option>
-  <option>曇り</option>
-  <option>雨</option>
-  <option>小雨</option>
-  <option>雪</option>
-</select>
-</div>
+      if (imageInput) {
+        imageInput.addEventListener("change", function (event) {
 
-<div>
-<label>馬場状態</label>
-<select id="trackCondition">
-  <option>未確認</option>
-  <option>良</option>
-  <option>稍重</option>
-  <option>重</option>
-  <option>不良</option>
-</select>
-</div>
+          const file = event.target.files[0];
 
-</div>
+          if (!file) {
+            selectedImage = null;
+            return;
+          }
 
-<label>追加情報</label>
-<textarea id="additionalInfo"
-placeholder="例：逃げ馬が多い、内有利、前走内容など"></textarea>
+          selectedImage = file;
 
-</div>
+          const preview = document.getElementById("imagePreview");
+          const imageUrl = URL.createObjectURL(file);
 
-<!-- OCR -->
+          preview.src = imageUrl;
+          preview.style.display = "block";
 
-<div class="card">
-
-<h2>② 出馬表OCR</h2>
-
-<label>出馬表スクリーンショット</label>
-<input type="file" id="imageInput" accept="image/*">
-
-<button onclick="runOCR()">
-📷 高解像度OCRを開始
-</button>
-
-<div id="ocrProgress" class="progress">
-OCR待機中です。
-</div>
-
-<label>OCR読み取り結果</label>
-
-<textarea id="ocrText"
-placeholder="OCR結果がここに表示されます。画像と照合して修正してください。"></textarea>
-
-<button class="secondary" onclick="formatOCRText()">
-OCR結果を整形する
-</button>
-
-<p class="small">
-※信頼度はOCRエンジンの目安です。
-信頼度が高くても馬番・馬名・オッズが正しいとは限りません。
-</p>
-
-</div>
-
-<!-- 予想設定 -->
-
-<div class="card">
-
-<h2>③ 予想設定</h2>
-
-<label>予想スタイル</label>
-
-<select id="predictionStyle">
-  <option>バランス型</option>
-  <option>穴狙い</option>
-  <option>堅実型</option>
-  <option>回収率重視</option>
-</select>
-
-<label>想定購入金額</label>
-<input id="budget" placeholder="例：3000円">
-
-<label>追加の予想指示</label>
-
-<textarea id="customPrompt"
-placeholder="例：3連複を中心に、穴馬を積極的に入れてください。"></textarea>
-
-</div>
-
-<!-- 印の頭数 -->
-
-<div class="card">
-
-<h2>④ 印の頭数指定</h2>
-
-<div class="notice">
-  印の頭数は以下の範囲で指定します。<br>
-  ◎本命は必ず1頭。その他の印は指定範囲内で選択します。<br>
-  同じ印の中で同じ馬を重複させないでください。
-</div>
-
-<div class="grid">
-
-<div>
-<label>◎ 本命</label>
-<input value="必ず1頭" disabled>
-</div>
-
-<div>
-<label>○ 対抗</label>
-<input value="1～2頭" disabled>
-</div>
-
-<div>
-<label>▲ 単穴</label>
-<input value="1～2頭" disabled>
-</div>
-
-<div>
-<label>△ 連下</label>
-<input value="2～4頭" disabled>
-</div>
-
-<div>
-<label>☆ 穴馬</label>
-<input value="1～2頭" disabled>
-</div>
-
-<div>
-<label>注 注意馬</label>
-<input value="1～3頭" disabled>
-</div>
-
-</div>
-
-</div>
-
-<!-- ChatGPT連携 -->
-
-<div class="card">
-
-<h2>⑤ ChatGPTへ送信</h2>
-
-<button class="green" onclick="copyPrompt()">
-📋 予想プロンプトをコピー
-</button>
-
-<button onclick="openChatGPT()">
-🤖 ChatGPTで予想する
-</button>
-
-<button class="secondary" onclick="showPrompt()">
-📝 プロンプトを表示
-</button>
-
-<textarea id="promptPreview"
-style="display:none"
-readonly></textarea>
-
-</div>
-
-<!-- 回答チェック -->
-
-<div class="card">
-
-<h2>⑥ ChatGPTの回答チェック</h2>
-
-<div class="notice">
-ChatGPTの回答を貼り付けると、印ごとの頭数を簡易チェックします。
-</div>
-
-<label>ChatGPTの回答</label>
-
-<textarea id="aiAnswer"
-placeholder="ChatGPTの回答を貼り付けてください。"></textarea>
-
-<button class="orange" onclick="checkMarkCounts()">
-🔍 印の頭数をチェック
-</button>
-
-<div id="checkResult"></div>
-
-</div>
-
-</div>
-
-<script>
-
-/* =========================
-   高解像度OCR
-========================= */
-
-async function runOCR() {
-
-  const input =
-    document.getElementById("imageInput");
-
-  const progress =
-    document.getElementById("ocrProgress");
-
-  const output =
-    document.getElementById("ocrText");
-
-  if (!input.files || !input.files[0]) {
-
-    alert("先に画像を選択してください。");
-    return;
-
-  }
-
-  try {
-
-    progress.textContent =
-      "画像を読み込んでいます……";
-
-    const image =
-      await loadImage(input.files[0]);
-
-    const scale = 4;
-
-    const canvas =
-      document.createElement("canvas");
-
-    canvas.width =
-      image.width * scale;
-
-    canvas.height =
-      image.height * scale;
-
-    const ctx =
-      canvas.getContext("2d", {
-        willReadFrequently: true
-      });
-
-    ctx.imageSmoothingEnabled = false;
-
-    ctx.drawImage(
-      image,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    const original =
-      ctx.getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-    const processed =
-      new ImageData(
-        new Uint8ClampedArray(original.data),
-        original.width,
-        original.height
-      );
-
-    for (
-      let i = 0;
-      i < processed.data.length;
-      i += 4
-    ) {
-
-      const r = processed.data[i];
-      const g = processed.data[i + 1];
-      const b = processed.data[i + 2];
-
-      const gray =
-        0.299 * r +
-        0.587 * g +
-        0.114 * b;
-
-      let value =
-        (gray - 128) * 2 + 128;
-
-      value =
-        Math.max(
-          0,
-          Math.min(255, value)
-        );
-
-      processed.data[i] = value;
-      processed.data[i + 1] = value;
-      processed.data[i + 2] = value;
-      processed.data[i + 3] = 255;
-
-    }
-
-    const processedCanvas =
-      document.createElement("canvas");
-
-    processedCanvas.width =
-      canvas.width;
-
-    processedCanvas.height =
-      canvas.height;
-
-    const processedCtx =
-      processedCanvas.getContext("2d", {
-        willReadFrequently: true
-      });
-
-    processedCtx.putImageData(
-      processed,
-      0,
-      0
-    );
-
-    progress.textContent =
-      "高解像度OCRを実行しています……";
-
-    const result =
-      await Tesseract.recognize(
-        processedCanvas,
-        "jpn+eng",
-        {
-          logger: message => {
-
-            if (
-              message.status &&
-              message.progress !== undefined
-            ) {
-
-              progress.textContent =
-                message.status +
-                "\n進行状況：" +
-                Math.round(
-                  message.progress * 100
-                ) +
-                "%";
-
-            }
-
-          },
-
-          tessedit_pageseg_mode: "6",
-
-          preserve_interword_spaces: "1"
-
-        }
-      );
-
-    const raw =
-      result.data.text || "";
-
-    const confidence =
-      Number(
-        result.data.confidence || 0
-      );
-
-    const lines =
-      raw
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(Boolean);
-
-    output.value =
-      "【OCR信頼度：約" +
-      Math.round(confidence) +
-      "%】\n\n" +
-
-      lines
-        .map((line, index) => {
-
-          return (
-            (index + 1) +
-            ". " +
-            line
+          setStatus(
+            "ocrStatus",
+            "画像を読み込みました。OCRを実行してください。",
+            "normal"
           );
 
-        })
-        .join("\n");
+        });
+      }
 
-    progress.textContent =
-      "OCRが完了しました。\n" +
-      "信頼度：約" +
-      Math.round(confidence) +
-      "%";
+    });
 
-    if (confidence < 60) {
+    /*
+      ステータス表示
+    */
 
-      alert(
-        "OCR信頼度が低いです。\n" +
-        "出馬表部分だけを切り抜き、" +
-        "文字を大きくして再試行してください。"
+    function setStatus(elementId, message, type = "normal") {
+
+      const element = document.getElementById(elementId);
+
+      if (!element) {
+        return;
+      }
+
+      element.textContent = message;
+
+      element.classList.remove("warning", "error");
+
+      if (type === "warning") {
+        element.classList.add("warning");
+      }
+
+      if (type === "error") {
+        element.classList.add("error");
+      }
+
+    }
+
+    /*
+      OCR実行
+    */
+
+    async function runOCR() {
+
+      const fileInput = document.getElementById("imageInput");
+      const button = document.getElementById("ocrButton");
+
+      const file = fileInput.files[0];
+
+      if (!file) {
+
+        setStatus(
+          "ocrStatus",
+          "先に出馬表の画像を選択してください。",
+          "warning"
+        );
+
+        return;
+      }
+
+      if (typeof Tesseract === "undefined") {
+
+        setStatus(
+          "ocrStatus",
+          "OCRライブラリの読み込みに失敗しました。ページを再読み込みしてください。",
+          "error"
+        );
+
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "⏳ OCR処理中...";
+
+      setStatus(
+        "ocrStatus",
+        "画像を処理しています。しばらくお待ちください。",
+        "normal"
+      );
+
+      try {
+
+        const image = await loadImage(file);
+
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        const scale = 3;
+
+        canvas.width = image.width * scale;
+        canvas.height = image.height * scale;
+
+        context.drawImage(
+          image,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        const imageData = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          const gray =
+            0.299 * r +
+            0.587 * g +
+            0.114 * b;
+
+          const contrast =
+            gray > 160 ? 255 : 0;
+
+          data[i] = contrast;
+          data[i + 1] = contrast;
+          data[i + 2] = contrast;
+
+        }
+
+        context.putImageData(imageData, 0, 0);
+
+        const result = await Tesseract.recognize(
+          canvas,
+          "jpn+eng",
+          {
+            logger: function (info) {
+
+              if (info.status && info.progress !== undefined) {
+
+                const progress =
+                  Math.round(info.progress * 100);
+
+                setStatus(
+                  "ocrStatus",
+                  `${info.status}\n進行状況：${progress}%`,
+                  "normal"
+                );
+
+              }
+
+            }
+          }
+        );
+
+        const text =
+          result &&
+          result.data &&
+          result.data.text
+            ? result.data.text.trim()
+            : "";
+
+        if (!text) {
+
+          setStatus(
+            "ocrStatus",
+            "文字を読み取れませんでした。画像を大きくするか、鮮明な画像を使用してください。",
+            "warning"
+          );
+
+          document.getElementById("ocrText").value = "";
+
+        } else {
+
+          document.getElementById("ocrText").value = text;
+
+          setStatus(
+            "ocrStatus",
+            "OCRが完了しました。読み取り結果を確認してください。",
+            "normal"
+          );
+
+        }
+
+      } catch (error) {
+
+        console.error("OCR error:", error);
+
+        setStatus(
+          "ocrStatus",
+          "OCR中にエラーが発生しました。\n" + error.message,
+          "error"
+        );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "🔍 OCRを実行";
+
+      }
+
+    }
+
+    /*
+      画像読み込み
+    */
+
+    function loadImage(file) {
+
+      return new Promise(function (resolve, reject) {
+
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+
+        image.onload = function () {
+
+          URL.revokeObjectURL(url);
+          resolve(image);
+
+        };
+
+        image.onerror = function () {
+
+          URL.revokeObjectURL(url);
+          reject(new Error("画像を読み込めませんでした。"));
+
+        };
+
+        image.src = url;
+
+      });
+
+    }
+
+    /*
+      OCR結果の簡易整形
+    */
+
+    function formatOCRText() {
+
+      const textarea = document.getElementById("ocrText");
+
+      const text = textarea.value.trim();
+
+      if (!text) {
+
+        setStatus(
+          "ocrStatus",
+          "整形するOCR結果がありません。",
+          "warning"
+        );
+
+        return;
+      }
+
+      const formatted = text
+        .replace(/\r/g, "")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+      textarea.value = formatted;
+
+      setStatus(
+        "ocrStatus",
+        "OCR結果を整形しました。馬番・馬名・オッズなどを確認してください。",
+        "normal"
       );
 
     }
 
-  } catch (error) {
+    /*
+      入力値取得
+    */
 
-    console.error(error);
+    function getValue(id, defaultValue = "未入力") {
 
-    progress.textContent =
-      "OCRエラー：" +
-      error.message;
+      const element = document.getElementById(id);
 
-    alert(
-      "OCRに失敗しました。\n" +
-      "別の画像で再試行してください。"
-    );
+      if (!element) {
+        return defaultValue;
+      }
 
-  }
+      const value = element.value.trim();
 
-}
+      return value || defaultValue;
 
-/* =========================
-   画像読み込み
-========================= */
+    }
 
-function loadImage(file) {
+    /*
+      プロンプト作成
+    */
 
-  return new Promise((resolve, reject) => {
+    function buildPrompt() {
 
-    const reader =
-      new FileReader();
+      const raceDate = getValue("raceDate");
+      const category = getValue("category");
+      const track = getValue("track");
+      const raceNumber = getValue("raceNumber");
+      const distance = getValue("distance");
+      const course = getValue("course");
+      const weather = getValue("weather");
+      const trackCondition = getValue("trackCondition");
+      const predictionStyle = getValue("predictionStyle");
+      const budget = getValue("budget");
+      const additionalInfo = getValue("additionalInfo");
+      const customPrompt = getValue("customPrompt");
+      const ocrText = getValue("ocrText", "OCR情報なし");
 
-    reader.onload = event => {
-
-      const image =
-        new Image();
-
-      image.onload = () => {
-
-        resolve(image);
-
-      };
-
-      image.onerror = () => {
-
-        reject(
-          new Error(
-            "画像を読み込めませんでした。"
-          )
-        );
-
-      };
-
-      image.src =
-        event.target.result;
-
-    };
-
-    reader.onerror = () => {
-
-      reject(
-        new Error(
-          "ファイルの読み込みに失敗しました。"
-        )
-      );
-
-    };
-
-    reader.readAsDataURL(file);
-
-  });
-
-}
-
-/* =========================
-   OCR整形
-========================= */
-
-function formatOCRText() {
-
-  const area =
-    document.getElementById("ocrText");
-
-  const text =
-    area.value.trim();
-
-  if (!text) {
-
-    alert(
-      "先にOCR結果を入力してください。"
-    );
-
-    return;
-
-  }
-
-  area.value =
-    text
-      .split(/\r?\n/)
-      .map(line => line.trim())
-      .filter(Boolean)
-      .map((line, index) => {
-
-        return (
-          (index + 1) +
-          ". " +
-          line
-        );
-
-      })
-      .join("\n");
-
-  alert(
-    "OCR結果を整形しました。"
-  );
-
-}
-
-/* =========================
-   プロンプト作成
-========================= */
-
-function buildPrompt() {
-
-  const value =
-    id =>
-      document.getElementById(id).value ||
-      "未入力";
-
-  const ocr =
-    document.getElementById("ocrText").value.trim() ||
-    "OCR情報なし";
-
-  return `
+      const prompt = `
 
 あなたは中央競馬・地方競馬に対応した競馬予想分析アシスタントです。
 
@@ -743,66 +720,70 @@ function buildPrompt() {
 【レース情報】
 ━━━━━━━━━━━━━━━━━━
 
-開催日：${value("raceDate")}
-開催区分：${value("category")}
-競馬場：${value("track")}
-レース番号：${value("raceNumber")}R
-距離：${value("distance")}
-コース・条件：${value("course")}
-天気：${value("weather")}
-馬場状態：${value("trackCondition")}
-予想スタイル：${value("predictionStyle")}
-想定購入金額：${value("budget")}
-追加情報：${value("additionalInfo")}
-追加指示：${value("customPrompt")}
+開催日：${raceDate}
+開催区分：${category}
+競馬場：${track}
+レース番号：${raceNumber}R
+距離：${distance}
+コース・条件：${course}
+天気：${weather}
+馬場状態：${trackCondition}
+予想スタイル：${predictionStyle}
+想定購入金額：${budget}
+
+追加情報：
+${additionalInfo}
+
+追加指示：
+${customPrompt}
 
 ━━━━━━━━━━━━━━━━━━
-【OCR結果】
+【OCRで読み取った出馬表】
 ━━━━━━━━━━━━━━━━━━
 
-${ocr}
+${ocrText}
 
 ━━━━━━━━━━━━━━━━━━
-【最重要：レース情報の確認】
+【最重要確認事項】
 ━━━━━━━━━━━━━━━━━━
 
-開催日・競馬場・レース番号を最初に確認してください。
-
-OCRの誤認識が疑われる場合は、
-馬番・馬名・人気・オッズの整合性を確認してください。
-
-情報がないものは、
-未確認または推測と明記してください。
-
-OCR結果だけで断定できない馬名やオッズを
-勝手に補完しないでください。
-
-実際に確認できない最新情報については、
-確認できていないことを明記してください。
+1. 開催日・競馬場・レース番号を最初に確認してください。
+2. OCRの誤認識がないか確認してください。
+3. 馬番・馬名・人気・単勝オッズの整合性を確認してください。
+4. OCRに存在しない馬を勝手に作らないでください。
+5. 確認できない情報は「未確認」と明記してください。
+6. 最新情報を確認できない場合は、そのことを明記してください。
+7. 推測と確認済みの情報を分けてください。
 
 ━━━━━━━━━━━━━━━━━━
 【分析項目】
 ━━━━━━━━━━━━━━━━━━
 
 ・近走成績
+・過去の着順
 ・距離適性
+・競馬場適性
 ・コース適性
 ・脚質
 ・枠順
 ・展開
-・ペース
+・想定ペース
+・逃げ馬と先行馬の数
 ・騎手
 ・斤量
 ・血統
 ・天気
-・馬場
+・馬場状態
 ・人気
 ・オッズ
 ・穴馬
-・リスク
+・不安材料
+・買い時と危険な人気馬
+
+情報が不足している場合は、無理に断定しないでください。
 
 ━━━━━━━━━━━━━━━━━━
-【印の頭数：必ず守る】
+【印のルール】
 ━━━━━━━━━━━━━━━━━━
 
 ◎ 本命：必ず1頭
@@ -812,93 +793,109 @@ OCR結果だけで断定できない馬名やオッズを
 ☆ 穴馬：1～2頭
 注 注意馬：1～3頭
 
-◎本命は必ず1頭のみとしてください。
+◎本命は必ず1頭だけにしてください。
 
-○対抗は最低1頭、最大2頭です。
-▲単穴は最低1頭、最大2頭です。
-△連下は最低2頭、最大4頭です。
-☆穴馬は最低1頭、最大2頭です。
-注注意馬は最低1頭、最大3頭です。
+各馬は必ず
+「馬番＋馬名」
+で記載してください。
 
-各印は必ず指定された頭数範囲内で選んでください。
-
-同じ印の中で同じ馬を重複させないでください。
-
-異なる印への重複は許可します。
-
-OCRに存在しない馬番・馬名を
-勝手に作らないでください。
-
-情報不足で頭数を満たせない場合は、
-無理に馬を作らず、
-「情報不足」と明記してください。
-
-各馬は必ず、
-馬番＋馬名で記載してください。
+OCRにない馬番や馬名を勝手に作成しないでください。
 
 ━━━━━━━━━━━━━━━━━━
 【出力形式】
 ━━━━━━━━━━━━━━━━━━
 
-◎ 本命【必ず1頭】
+【レース確認】
 
-1頭目：馬番○番 馬名
+開催日：
+競馬場：
+レース番号：
+距離：
+馬場：
+天気：
+
+【展開予想】
+
+逃げ：
+先行：
+差し：
+追込：
+
+想定ペース：
+展開のポイント：
+
+【印】
+
+◎ 本命：
+馬番：
+馬名：
 理由：
 
-○ 対抗【1～2頭】
-
-1頭目：馬番○番 馬名
+○ 対抗：
+馬番：
+馬名：
 理由：
 
-2頭目：必要な場合のみ記載
+○ 対抗2：
+必要な場合のみ記載
 理由：
 
-▲ 単穴【1～2頭】
-
-1頭目：馬番○番 馬名
+▲ 単穴：
+馬番：
+馬名：
 理由：
 
-2頭目：必要な場合のみ記載
+▲ 単穴2：
+必要な場合のみ記載
 理由：
 
-△ 連下【2～4頭】
-
-1頭目：馬番○番 馬名
+△ 連下：
+馬番：
+馬名：
 理由：
 
-2頭目：馬番○番 馬名
+△ 連下2：
+馬番：
+馬名：
 理由：
 
-3頭目：必要な場合のみ記載
+△ 連下3：
+必要な場合のみ記載
 理由：
 
-4頭目：必要な場合のみ記載
+△ 連下4：
+必要な場合のみ記載
 理由：
 
-☆ 穴馬【1～2頭】
-
-1頭目：馬番○番 馬名
+☆ 穴馬：
+馬番：
+馬名：
 理由：
 
-2頭目：必要な場合のみ記載
+☆ 穴馬2：
+必要な場合のみ記載
 理由：
 
-注 注意馬【1～3頭】
-
-1頭目：馬番○番 馬名
+注 注意馬：
+馬番：
+馬名：
 理由：
 
-2頭目：必要な場合のみ記載
+注 注意馬2：
+必要な場合のみ記載
 理由：
 
-3頭目：必要な場合のみ記載
+注 注意馬3：
+必要な場合のみ記載
 理由：
 
 ━━━━━━━━━━━━━━━━━━
 【買い目】
 ━━━━━━━━━━━━━━━━━━
 
-以下を点数と理由付きで作成してください。
+想定購入金額は${budget}です。
+
+以下の買い目を検討してください。
 
 1. 単勝
 2. 複勝
@@ -908,266 +905,140 @@ OCRに存在しない馬番・馬名を
 6. 3連単フォーメーション
 7. 穴狙いの買い目
 8. オッズを考慮した買い目
-9. 購入金額の配分例
 
-想定購入金額に合わせ、
-買い目を広げすぎないでください。
+買い目は広げすぎないでください。
 
-買い目ごとに、
-組み合わせ数・1点あたりの金額・合計金額を記載してください。
-
-最低購入単位は100円としてください。
+1点100円単位で計算してください。
 50円単位の買い目は作成しないでください。
 
+各買い目について、
+
+・券種
+・組み合わせ
+・点数
+・1点あたりの金額
+・合計金額
+・狙い
+・リスク
+
+を記載してください。
+
+想定購入金額を超えないようにしてください。
+
 ━━━━━━━━━━━━━━━━━━
-【最終チェック】
+【最終結論】
 ━━━━━━━━━━━━━━━━━━
 
-□ ◎が必ず1頭あるか
-□ ○が1～2頭の範囲内か
-□ ▲が1～2頭の範囲内か
-□ △が2～4頭の範囲内か
-□ ☆が1～2頭の範囲内か
-□ 注が1～3頭の範囲内か
-□ 同じ印の中に重複馬がないか
-□ 馬番と馬名が一致しているか
-□ 確定情報と推測を区別しているか
-□ 買い目の点数を記載しているか
-□ 購入金額が想定金額を超えていないか
+最も期待する馬：
+馬番：
+馬名：
 
-最後に印の頭数チェック結果を記載してください。
+穴で面白い馬：
+馬番：
+馬名：
+
+危険な人気馬：
+馬番：
+馬名：
+
+最もおすすめする券種：
+
+最終購入金額：
+
+━━━━━━━━━━━━━━━━━━
+【印の頭数チェック】
+━━━━━━━━━━━━━━━━━━
+
+◎：1頭
+○：1～2頭
+▲：1～2頭
+△：2～4頭
+☆：1～2頭
+注：1～3頭
+
+最後に、実際に付けた印の頭数がルール内か確認してください。
 
 `;
 
-/* =========================
-   プロンプト表示
-========================= */
+      return prompt;
 
-function showPrompt() {
-
-  const area =
-    document.getElementById("promptPreview");
-
-  area.style.display = "block";
-
-  area.value =
-    buildPrompt();
-
-}
-
-/* =========================
-   コピー
-========================= */
-
-async function copyPrompt() {
-
-  const prompt =
-    buildPrompt();
-
-  try {
-
-    await navigator.clipboard.writeText(
-      prompt
-    );
-
-    alert(
-      "プロンプトをコピーしました。"
-    );
-
-  } catch (error) {
-
-    const area =
-      document.getElementById("promptPreview");
-
-    area.style.display = "block";
-
-    area.value =
-      prompt;
-
-    area.select();
-
-    alert(
-      "自動コピーに失敗しました。\n" +
-      "表示された文章をコピーしてください。"
-    );
-
-  }
-
-}
-
-/* =========================
-   ChatGPTを開く
-========================= */
-
-function openChatGPT() {
-
-  const prompt =
-    buildPrompt();
-
-  navigator.clipboard.writeText(
-    prompt
-  ).catch(error => {
-
-    console.log(
-      "コピーできませんでした。"
-    );
-
-  });
-
-  const url =
-    "https://chatgpt.com/?q=" +
-    encodeURIComponent(prompt);
-
-  window.open(
-    url,
-    "_blank"
-  );
-
-}
-
-/* =========================
-   印の頭数チェック
-========================= */
-
-function checkMarkCounts() {
-
-  const answer =
-    document.getElementById("aiAnswer").value.trim();
-
-  const result =
-    document.getElementById("checkResult");
-
-  if (!answer) {
-
-    alert(
-      "ChatGPTの回答を貼り付けてください。"
-    );
-
-    return;
-
-  }
-
-  /*
-    印ごとの許容範囲
-  */
-
-  const rules = [
-
-    {
-      mark: "◎",
-      name: "本命",
-      min: 1,
-      max: 1
-    },
-
-    {
-      mark: "○",
-      name: "対抗",
-      min: 1,
-      max: 2
-    },
-
-    {
-      mark: "▲",
-      name: "単穴",
-      min: 1,
-      max: 2
-    },
-
-    {
-      mark: "△",
-      name: "連下",
-      min: 2,
-      max: 4
-    },
-
-    {
-      mark: "☆",
-      name: "穴馬",
-      min: 1,
-      max: 2
-    },
-
-    {
-      mark: "注",
-      name: "注意馬",
-      min: 1,
-      max: 3
     }
 
-  ];
-
-  const lines =
-    answer
-      .split(/\r?\n/)
-      .map(line => line.trim())
-      .filter(Boolean);
-
-  let allCorrect = true;
-
-  let output = "";
-
-  rules.forEach(rule => {
-
-    const mark = rule.mark;
-    const name = rule.name;
-
-    let count = 0;
-
     /*
-      形式1：
-      ◎ 1頭目：馬番1番 馬名
-      ○ 1頭目：馬番2番 馬名
+      プロンプト表示
     */
 
-    const directRegex =
-      new RegExp(
-        "^" +
-        escapeRegExp(mark) +
-        "\\s*\\d+頭目\\s*[：:]"
+    function showPrompt() {
+
+      const prompt = buildPrompt();
+
+      document.getElementById("promptOutput").value = prompt;
+
+      setStatus(
+        "markCheck",
+        "プロンプトを作成しました。内容を確認してください。",
+        "normal"
       );
 
-    count =
-      lines.filter(line =>
-        directRegex.test(line)
-      ).length;
+    }
 
     /*
-      形式2：
-      ◎ 本命
-      1頭目：馬番1番 馬名
+      プロンプトコピー
     */
 
-    if (count === 0) {
+    async function copyPrompt() {
 
-      const index =
-        lines.findIndex(line =>
-          line.startsWith(mark)
+      const output = document.getElementById("promptOutput");
+
+      if (!output.value.trim()) {
+        showPrompt();
+      }
+
+      const text = document.getElementById("promptOutput").value;
+
+      if (!text.trim()) {
+
+        setStatus(
+          "markCheck",
+          "コピーするプロンプトがありません。",
+          "warning"
         );
 
-      if (index >= 0) {
+        return;
+      }
 
-        for (
-          let i = index + 1;
-          i < lines.length;
-          i++
-        ) {
+      try {
 
-          if (
-            /^[◎○▲△☆注]/.test(lines[i])
-          ) {
+        await navigator.clipboard.writeText(text);
 
-            break;
+        setStatus(
+          "markCheck",
+          "プロンプトをコピーしました。",
+          "normal"
+        );
 
-          }
+      } catch (error) {
 
-          if (
-            /頭目.*馬番|馬番.*馬名/.test(lines[i])
-          ) {
+        output.focus();
+        output.select();
 
-            count++;
+        const copied = document.execCommand("copy");
 
-          }
+        if (copied) {
+
+          setStatus(
+            "markCheck",
+            "プロンプトをコピーしました。",
+            "normal"
+          );
+
+        } else {
+
+          setStatus(
+            "markCheck",
+            "自動コピーに失敗しました。選択された文章を手動でコピーしてください。",
+            "warning"
+          );
 
         }
 
@@ -1176,87 +1047,126 @@ function checkMarkCounts() {
     }
 
     /*
-      形式3：
-      ◎：馬番1番 馬名
-      ◎ 馬番1番 馬名
+      ChatGPTを開く
     */
 
-    if (count === 0) {
+    function openChatGPT() {
 
-      const simpleRegex =
-        new RegExp(
-          "^" +
-          escapeRegExp(mark) +
-          "\\s*[：:]?\\s*.*馬番.*馬名"
+      let prompt = document.getElementById("promptOutput").value.trim();
+
+      if (!prompt) {
+
+        prompt = buildPrompt();
+
+        document.getElementById("promptOutput").value = prompt;
+
+      }
+
+      if (!prompt) {
+
+        setStatus(
+          "markCheck",
+          "プロンプトがありません。",
+          "warning"
         );
 
-      count =
-        lines.filter(line =>
-          simpleRegex.test(line)
-        ).length;
+        return;
+      }
+
+      const url =
+        "https://chatgpt.com/?q=" +
+        encodeURIComponent(prompt);
+
+      window.open(url, "_blank");
 
     }
 
-    const correct =
-      count >= rule.min &&
-      count <= rule.max;
+    /*
+      印の頭数チェック
+    */
 
-    if (!correct) {
+    function checkMarkCounts() {
 
-      allCorrect = false;
+      const text = document.getElementById("promptOutput").value;
+
+      if (!text.trim()) {
+
+        setStatus(
+          "markCheck",
+          "先にプロンプトを作成してください。",
+          "warning"
+        );
+
+        return;
+      }
+
+      const result = [];
+
+      const rules = [
+        {
+          mark: "◎",
+          min: 1,
+          max: 1
+        },
+        {
+          mark: "○",
+          min: 1,
+          max: 2
+        },
+        {
+          mark: "▲",
+          min: 1,
+          max: 2
+        },
+        {
+          mark: "△",
+          min: 2,
+          max: 4
+        },
+        {
+          mark: "☆",
+          min: 1,
+          max: 2
+        },
+        {
+          mark: "注",
+          min: 1,
+          max: 3
+        }
+      ];
+
+      rules.forEach(function (rule) {
+
+        const count =
+          (text.match(new RegExp(escapeRegExp(rule.mark), "g")) || []).length;
+
+        const valid =
+          count >= rule.min &&
+          count <= rule.max;
+
+        result.push(
+          `${rule.mark}：${count}個 ` +
+          (valid ? "範囲内" : "要確認")
+        );
+
+      });
+
+      document.getElementById("markCheck").textContent =
+        result.join("\n");
 
     }
 
-    const rangeText =
-      rule.min === rule.max
-        ? rule.min + "頭"
-        : rule.min + "～" + rule.max + "頭";
+    /*
+      正規表現用の文字エスケープ
+    */
 
-    output +=
-      mark +
-      " " +
-      name +
-      "：検出" +
-      count +
-      "頭 / 許容範囲" +
-      rangeText +
-      " " +
-      (correct ? "✓" : "✕") +
-      "\n";
+    function escapeRegExp(text) {
 
-  });
+      return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  result.className =
-    allCorrect
-      ? "check-ok"
-      : "check-ng";
+    }
 
-  result.textContent =
-    (
-      allCorrect
-        ? "すべての印が指定範囲内です。\n\n"
-        : "指定範囲外の印があります。\n\n"
-    ) +
-    output +
-    "\n※簡易判定です。\n" +
-    "馬番・馬名の重複や正確性は目視でも確認してください。";
-
-}
-
-/* =========================
-   正規表現エスケープ
-========================= */
-
-function escapeRegExp(string) {
-
-  return string.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
-  );
-
-}
-
-</script>
+  </script>
 
 </body>
 </html>

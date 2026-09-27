@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>競馬予想アシスタント</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競馬予想チャッピー</title>
 
 <style>
 *{box-sizing:border-box}
@@ -12,9 +12,8 @@ body{
   margin:0;
   background:#f3f4f6;
   color:#111827;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Noto Sans JP","Hiragino Kaku Gothic ProN",
-  Meiryo,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",
+  "Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
 }
 
 header{
@@ -43,7 +42,7 @@ main{
 .card{
   background:white;
   border-radius:14px;
-  padding:15px;
+  padding:14px;
   margin-bottom:12px;
   box-shadow:0 2px 8px rgba(0,0,0,.05);
 }
@@ -53,22 +52,27 @@ h2{
   margin:0 0 12px;
 }
 
+h3{
+  font-size:15px;
+  margin:16px 0 8px;
+}
+
 label{
   display:block;
   font-size:12px;
   color:#64748b;
-  margin-bottom:5px;
+  margin-bottom:4px;
 }
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
 
 select,
-textarea,
-input{
+input,
+textarea{
   width:100%;
   padding:11px;
   border:1px solid #cbd5e1;
@@ -78,9 +82,9 @@ input{
 }
 
 textarea{
-  min-height:300px;
+  min-height:110px;
   resize:vertical;
-  line-height:1.7;
+  font-family:inherit;
 }
 
 button{
@@ -90,10 +94,7 @@ button{
   font-weight:700;
   font-size:14px;
   cursor:pointer;
-}
-
-button:active{
-  transform:scale(.98);
+  -webkit-tap-highlight-color:transparent;
 }
 
 .primary{
@@ -101,14 +102,14 @@ button:active{
   color:white;
 }
 
-.secondary{
-  background:#e2e8f0;
-  color:#111827;
-}
-
 .good{
   background:#166534;
   color:white;
+}
+
+.secondary{
+  background:#e2e8f0;
+  color:#111827;
 }
 
 .actions{
@@ -128,42 +129,64 @@ button:active{
 }
 
 .notice{
-  padding:11px;
-  border-radius:9px;
+  padding:10px;
   background:#fff7ed;
   border:1px solid #fed7aa;
   color:#9a3412;
+  border-radius:9px;
   font-size:12px;
   line-height:1.7;
-  margin-bottom:12px;
 }
 
-.output{
-  min-height:280px;
-  background:#0f172a;
-  color:#e2e8f0;
-  border-radius:10px;
-  padding:13px;
-  white-space:pre-wrap;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+.horse{
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+  padding:10px;
+  margin-bottom:9px;
+  background:#f8fafc;
+}
+
+.horse-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:7px;
+  font-weight:700;
+}
+
+.horse-title span{
+  color:#64748b;
+  font-size:12px;
+}
+
+.remove{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:7px 10px;
+  font-size:12px;
+}
+
+textarea.prompt{
+  min-height:260px;
+  font-family:monospace;
+  font-size:12px;
+}
+
+.big-button{
+  width:100%;
+  padding:15px;
+  font-size:16px;
+}
+
+.small{
+  color:#64748b;
   font-size:12px;
   line-height:1.7;
-  overflow:auto;
 }
 
-@media(max-width:650px){
-  .grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-
-@media(max-width:430px){
+@media(max-width:600px){
   .grid{
     grid-template-columns:1fr;
-  }
-
-  button{
-    width:100%;
   }
 }
 </style>
@@ -172,16 +195,13 @@ button:active{
 <body>
 
 <header>
-<h1>🏇 競馬予想アシスタント</h1>
-<p>JRA・地方対応 / 自由入力出馬表 / ChatGPT予想</p>
+  <h1>🏇 競馬予想チャッピー</h1>
+  <p>JRA・地方対応 / 最大18頭 / 自由入力方式</p>
 </header>
 
 <main>
 
-<!-- =========================================
-     レース条件
-========================================= -->
-
+<!-- レース条件 -->
 <section class="card">
 
 <h2>① レース条件</h2>
@@ -191,69 +211,138 @@ button:active{
 <div>
 <label>開催区分</label>
 <select id="raceType">
-<option value="JRA">JRA</option>
-<option value="地方競馬">地方競馬</option>
+  <option value="中央競馬（JRA）">中央競馬（JRA）</option>
+  <option value="地方競馬">地方競馬</option>
 </select>
 </div>
 
 <div>
 <label>競馬場</label>
-<select id="raceTrack"></select>
-</div>
+<select id="track">
+  <option value="">選択してください</option>
 
-<div>
-<label>R</label>
-<select id="raceNumber"></select>
-</div>
+  <optgroup label="JRA">
+    <option>札幌</option>
+    <option>函館</option>
+    <option>福島</option>
+    <option>新潟</option>
+    <option>東京</option>
+    <option>中山</option>
+    <option>中京</option>
+    <option>京都</option>
+    <option>阪神</option>
+    <option>小倉</option>
+  </optgroup>
 
-<div>
-<label>距離</label>
-<select id="raceDistance"></select>
-</div>
-
-<div>
-<label>コース</label>
-<select id="raceSurface">
-<option>芝</option>
-<option>ダート</option>
-<option>障害</option>
+  <optgroup label="地方">
+    <option>門別</option>
+    <option>盛岡</option>
+    <option>水沢</option>
+    <option>浦和</option>
+    <option>船橋</option>
+    <option>大井</option>
+    <option>川崎</option>
+    <option>金沢</option>
+    <option>笠松</option>
+    <option>名古屋</option>
+    <option>園田</option>
+    <option>姫路</option>
+    <option>高知</option>
+    <option>佐賀</option>
+  </optgroup>
 </select>
 </div>
 
 <div>
-<label>天候</label>
+<label>距離</label>
+<select id="distance">
+  <option value="">選択してください</option>
+
+  <option>850m</option>
+  <option>860m</option>
+  <option>870m</option>
+  <option>880m</option>
+  <option>890m</option>
+  <option>900m</option>
+
+  <option>1000m</option>
+  <option>1100m</option>
+  <option>1150m</option>
+  <option>1200m</option>
+  <option>1230m</option>
+  <option>1250m</option>
+  <option>1300m</option>
+  <option>1400m</option>
+  <option>1500m</option>
+  <option>1600m</option>
+  <option>1700m</option>
+  <option>1800m</option>
+  <option>1900m</option>
+  <option>2000m</option>
+  <option>2100m</option>
+  <option>2200m</option>
+  <option>2300m</option>
+  <option>2400m</option>
+  <option>2500m</option>
+  <option>2600m</option>
+  <option>2700m</option>
+  <option>2800m</option>
+  <option>3000m</option>
+  <option>3200m</option>
+</select>
+</div>
+
+<div>
+<label>コース</label>
+<select id="surface">
+  <option value="">選択してください</option>
+  <option>芝</option>
+  <option>ダート</option>
+  <option>障害</option>
+</select>
+</div>
+
+<div>
+<label>天気</label>
 <select id="weather">
-<option>晴</option>
-<option>曇</option>
-<option>雨</option>
-<option>小雨</option>
-<option>雪</option>
-<option>不明</option>
+  <option value="">選択してください</option>
+  <option>晴</option>
+  <option>曇</option>
+  <option>雨</option>
+  <option>小雨</option>
+  <option>雪</option>
+  <option>不明</option>
 </select>
 </div>
 
 <div>
 <label>馬場状態</label>
 <select id="going">
-<option>良</option>
-<option>稍重</option>
-<option>重</option>
-<option>不良</option>
-<option>不明</option>
+  <option value="">選択してください</option>
+  <option>良</option>
+  <option>稍重</option>
+  <option>重</option>
+  <option>不良</option>
+  <option>不明</option>
 </select>
 </div>
 
 <div>
-<label>頭数</label>
-<select id="horseCount"></select>
-</div>
-
-<div>
-<label>予想タイプ</label>
-<select id="predictionStyle">
-<option value="short">ズバッと簡潔</option>
-<option value="normal">通常</option>
-<option value="deep">詳しく分析</option>
+<label>レース番号</label>
+<select id="raceNumber">
+  <option value="">選択してください</option>
+  <option>1R</option>
+  <option>2R</option>
+  <option>3R</option>
+  <option>4R</option>
+  <option>5R</option>
+  <option>6R</option>
+  <option>7R</option>
+  <option>8R</option>
+  <option>9R</option>
+  <option>10R</option>
+  <option>11R</option>
+  <option>12R</option>
 </select>
 </div>
 
@@ -262,150 +351,104 @@ button:active{
 </section>
 
 
-<!-- =========================================
-     出馬表
-========================================= -->
-
+<!-- 出走馬 -->
 <section class="card">
 
-<h2>② 出馬表・自由メモ</h2>
+<h2>② 出走馬メモ</h2>
 
 <div class="notice">
-
-<strong>ここは自由入力です。</strong>
-
-<br>
-
-馬番・馬名・騎手・オッズ・斤量・近走などを、
-好きな形式でそのまま貼り付けてください。
-
-<br>
-
-出馬表をコピーして貼り付けてもOKです。
-馬ごとの入力欄はありません。
-
+馬番・馬名・騎手などの固定入力欄はありません。<br>
+<strong>1頭につき自由にメモしてください。</strong><br>
+例：「1 サクラ○○　逃げ　前走1着　1200得意　内枠有利」
 </div>
+
+<div id="horses"></div>
+
+<div class="actions">
+<button class="secondary" type="button" id="addHorseButton">
+＋馬を追加
+</button>
+
+<button class="secondary" type="button" id="clearHorsesButton">
+全消去
+</button>
+</div>
+
+<div class="status" id="horseStatus">
+0 / 18頭
+</div>
+
+</section>
+
+
+<!-- 追加情報 -->
+<section class="card">
+
+<h2>③ その他メモ</h2>
 
 <textarea
-id="horseMemo"
+id="extraMemo"
 placeholder="例：
-
-1　○○○○　3.2倍　騎手○○
-2　△△△△　5.8倍　騎手△△
-3　□□□□　12.5倍　騎手□□
-4　☆☆☆☆　18.4倍　騎手☆☆
-
-前走：
-1番 前走1着
-2番 前走3着
-3番 前走5着
-
-メモ：
-逃げ馬が3頭。
-前走1200m。
-このコースは先行有利。
-人気馬に不安あり。
-
-※分かる情報だけでOK
-">
-</textarea>
-
-<div class="actions">
-
-<button
-class="secondary"
-id="sampleButton"
-type="button"
->
-サンプルを入れる
-</button>
-
-<button
-class="secondary"
-id="clearButton"
-type="button"
->
-消去
-</button>
-
-</div>
+展開は逃げ馬が多い
+内枠有利
+前残り傾向
+人気馬に不安あり
+穴馬を1頭入れてほしい
+買い目は3連単中心
+"></textarea>
 
 </section>
 
 
-<!-- =========================================
-     ChatGPT
-========================================= -->
-
+<!-- ChatGPTへ -->
 <section class="card">
 
-<h2>③ ChatGPTに予想してもらう</h2>
+<h2>④ チャッピーに聞く</h2>
 
-<div class="notice">
-
-入力されたレース条件と出馬表から、
-ChatGPTへ渡す予想依頼文を自動作成します。
-
-<br><br>
-
-APIキーはこのHTMLに入れません。
-そのためGitHub Pagesに置いてもAPIキーを公開することはありません。
-
-</div>
-
-<div class="actions">
+<p class="small">
+入力内容からChatGPTにそのまま渡せる予想依頼文を自動作成します。
+「コピーしてChatGPTへ」を押してください。
+</p>
 
 <button
-class="primary"
-id="makePromptButton"
-type="button"
+  class="primary big-button"
+  type="button"
+  id="askButton"
 >
-🎯 予想依頼文を作る
+🤖 チャッピーに聞く
 </button>
-
-<button
-class="good"
-id="chatButton"
-type="button"
->
-💬 ChatGPTを開く
-</button>
-
-</div>
 
 <div
-class="status"
-id="status"
+  class="status"
+  id="copyStatus"
 >
 待機中
 </div>
 
-</section>
+<h3>ChatGPTに送る文章</h3>
 
-
-<!-- =========================================
-     出力
-========================================= -->
-
-<section class="card">
-
-<h2>④ 作成された予想依頼文</h2>
-
-<div
-class="output"
-id="promptOutput"
->
-ここにChatGPTへ送る文章が表示されます。
-</div>
+<textarea
+class="prompt"
+id="promptText"
+readonly
+></textarea>
 
 <div class="actions">
 
 <button
-class="secondary"
-id="copyButton"
+class="good"
 type="button"
+id="copyButton"
 >
-📋 コピー
+📋 コピーしてChatGPTへ
+</button>
+
+<button
+class="secondary"
+type="button"
+id="openChatGPTButton"
+>
+💬 ChatGPTを開く
 </button>
 
 </div>
@@ -420,521 +463,485 @@ type="button"
 "use strict";
 
 
-/* =========================================
-   共通
-========================================= */
+/* =========================================================
+   基本
+========================================================= */
 
-const $ = id =>
-  document.getElementById(id);
+const MAX_HORSES = 18;
 
+let horseCount = 0;
 
-/* =========================================
-   競馬場
-========================================= */
-
-const JRA_TRACKS = [
-
-  "札幌",
-  "函館",
-  "福島",
-  "新潟",
-  "東京",
-  "中山",
-  "中京",
-  "京都",
-  "阪神",
-  "小倉"
-
-];
+const $ = id => document.getElementById(id);
 
 
-const NAR_TRACKS = [
+/* =========================================================
+   馬欄追加
+========================================================= */
 
-  "門別",
-  "盛岡",
-  "水沢",
-  "浦和",
-  "船橋",
-  "大井",
-  "川崎",
-  "金沢",
-  "笠松",
-  "名古屋",
-  "園田",
-  "姫路",
-  "高知",
-  "佐賀"
+function addHorse(){
 
-];
+  if(horseCount >= MAX_HORSES){
 
+    alert("最大18頭までです。");
 
-/* =========================================
-   距離
-========================================= */
+    return;
+  }
 
-const DISTANCES = [
+  horseCount++;
 
-  850,
-  900,
-  1000,
-  1100,
-  1150,
-  1200,
-  1230,
-  1250,
-  1300,
-  1400,
-  1500,
-  1600,
-  1700,
-  1800,
-  1900,
-  2000,
-  2100,
-  2200,
-  2300,
-  2400,
-  2500,
-  2600,
-  2800,
-  3000,
-  3200
+  const box = document.createElement("div");
 
-];
+  box.className = "horse";
 
+  box.dataset.number = horseCount;
 
-/* =========================================
-   選択肢生成
-========================================= */
+  box.innerHTML = `
 
-function fillSelect(
-  element,
-  values,
-  suffix = ""
-){
+    <div class="horse-title">
 
-  element.innerHTML =
-    values
-      .map(
-        value =>
+      <span>
+        出走馬 ${horseCount}
+      </span>
 
-          `<option value="${value}">
-            ${value}${suffix}
-          </option>`
+      <button
+        type="button"
+        class="remove"
+      >
+        この馬を削除
+      </button>
 
-      )
-      .join("");
+    </div>
 
+    <textarea
+      class="horseMemo"
+      placeholder="この馬について自由に入力
+
+例：
+1 サンプルホース
+単勝4.5倍
+逃げ
+前走1着
+1200m得意
+大井ダート良馬場得意
+内枠なら買い
+騎手○○
+穴候補
+"
+    ></textarea>
+  `;
+
+  box
+    .querySelector(".remove")
+    .addEventListener(
+      "click",
+      function(){
+
+        box.remove();
+
+        updateHorseNumbers();
+
+      }
+    );
+
+  $("horses").appendChild(box);
+
+  updateHorseNumbers();
+
+  box
+    .querySelector("textarea")
+    .focus();
 }
 
 
-/* =========================================
-   開催区分変更
-========================================= */
+/* =========================================================
+   頭数更新
+========================================================= */
 
-function updateTracks(){
+function updateHorseNumbers(){
 
-  const type =
-    $("raceType").value;
+  const boxes =
+    document.querySelectorAll(".horse");
 
-  const tracks =
-    type === "JRA"
-      ? JRA_TRACKS
-      : NAR_TRACKS;
+  horseCount = boxes.length;
 
-  fillSelect(
-    $("raceTrack"),
-    tracks
-  );
+  boxes.forEach(
+    (box,index)=>{
 
-}
+      box.dataset.number =
+        index + 1;
 
+      const title =
+        box.querySelector(".horse-title span");
 
-/* =========================================
-   初期設定
-========================================= */
-
-fillSelect(
-  $("raceNumber"),
-  Array.from(
-    {length:12},
-    (_,i) => i + 1
-  ),
-  "R"
-);
-
-
-fillSelect(
-  $("raceDistance"),
-  DISTANCES,
-  "m"
-);
-
-
-fillSelect(
-  $("horseCount"),
-  Array.from(
-    {length:18},
-    (_,i) => i + 1
-  ),
-  "頭"
-);
-
-
-updateTracks();
-
-
-$("raceType")
-  .addEventListener(
-    "change",
-    updateTracks
-  );
-
-
-/* =========================================
-   サンプル
-========================================= */
-
-$("sampleButton")
-  .addEventListener(
-    "click",
-    function(){
-
-      $("horseMemo").value =
-
-`1　サンプルホース　3.2倍　騎手A
-2　サンプルホース2　5.8倍　騎手B
-3　サンプルホース3　8.4倍　騎手C
-4　サンプルホース4　12.6倍　騎手D
-5　サンプルホース5　18.2倍　騎手E
-6　サンプルホース6　25.0倍　騎手F
-
-近走：
-1番　前走1着
-2番　前走2着
-3番　前走4着
-4番　前走3着
-
-その他メモ：
-先行馬が多い。
-逃げ馬が3頭。
-前走1200m。
-このコースは先行有利か確認してほしい。`;
-
-      $("status")
-        .textContent =
-        "サンプルを入力しました。";
+      title.textContent =
+        "出走馬 " +
+        (index + 1);
 
     }
   );
 
+  $("horseStatus").textContent =
+    horseCount +
+    " / " +
+    MAX_HORSES +
+    "頭";
 
-/* =========================================
-   消去
-========================================= */
-
-$("clearButton")
-  .addEventListener(
-    "click",
-    function(){
-
-      $("horseMemo").value = "";
-
-      $("promptOutput")
-        .textContent =
-        "ここにChatGPTへ送る文章が表示されます。";
-
-      $("status")
-        .textContent =
-        "消去しました。";
-
-    }
-  );
+}
 
 
-/* =========================================
+/* =========================================================
+   全消去
+========================================================= */
+
+function clearHorses(){
+
+  if(
+    !confirm("入力した出走馬メモを全部消しますか？")
+  ){
+
+    return;
+  }
+
+  $("horses").innerHTML = "";
+
+  horseCount = 0;
+
+  updateHorseNumbers();
+
+}
+
+
+/* =========================================================
+   レース情報取得
+========================================================= */
+
+function getRaceInfo(){
+
+  return {
+
+    type:
+      $("raceType").value,
+
+    track:
+      $("track").value ||
+      "未指定",
+
+    distance:
+      $("distance").value ||
+      "未指定",
+
+    surface:
+      $("surface").value ||
+      "未指定",
+
+    weather:
+      $("weather").value ||
+      "未指定",
+
+    going:
+      $("going").value ||
+      "未指定",
+
+    raceNumber:
+      $("raceNumber").value ||
+      "未指定"
+
+  };
+
+}
+
+
+/* =========================================================
+   馬情報取得
+========================================================= */
+
+function getHorseMemos(){
+
+  return Array
+    .from(
+      document.querySelectorAll(".horseMemo")
+    )
+    .map(
+      (textarea,index)=>{
+
+        const text =
+          textarea.value.trim();
+
+        if(!text){
+
+          return (
+            "出走馬 " +
+            (index + 1) +
+            "：情報なし"
+          );
+
+        }
+
+        return (
+          "【出走馬 " +
+          (index + 1) +
+          "】\n" +
+          text
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
    プロンプト作成
-========================================= */
+========================================================= */
 
 function createPrompt(){
 
-  const type =
-    $("raceType").value;
-
-  const track =
-    $("raceTrack").value;
-
   const race =
-    $("raceNumber").value;
+    getRaceInfo();
 
-  const distance =
-    $("raceDistance").value;
+  const horses =
+    getHorseMemos();
 
-  const surface =
-    $("raceSurface").value;
-
-  const weather =
-    $("weather").value;
-
-  const going =
-    $("going").value;
-
-  const horseCount =
-    $("horseCount").value;
-
-  const style =
-    $("predictionStyle").value;
-
-  const memo =
-    $("horseMemo")
+  const extra =
+    $("extraMemo")
       .value
       .trim();
 
 
-  if(!memo){
+  let prompt = `
 
-    throw new Error(
-      "出馬表・自由メモを入力してください。"
-    );
+あなたは中央競馬・地方競馬に対応した
+競馬予想分析アシスタントです。
 
-  }
-
-
-  let analysisStyle;
-
-
-  if(style === "short"){
-
-    analysisStyle =
-      "結論を最優先して、ズバッと簡潔に。";
-
-  }
-  else if(style === "deep"){
-
-    analysisStyle =
-      "過去レース、距離適性、コース適性、馬場適性、展開、脚質、上がり、騎手、オッズなどを可能な範囲で総合分析してください。";
-
-  }
-  else{
-
-    analysisStyle =
-      "重要な根拠を簡潔に添えて分析してください。";
-
-  }
-
-
-  return `あなたは中央競馬・地方競馬に対応した競馬予想分析アシスタントです。
+以下のレース情報と出走馬メモを分析して、
+できるだけ実戦的に予想してください。
 
 ━━━━━━━━━━━━━━━━━━
 【レース情報】
 ━━━━━━━━━━━━━━━━━━
 
-開催区分：${type}
-競馬場：${track}
-レース：${race}R
-距離：${distance}m
-コース：${surface}
-天候：${weather}
-馬場状態：${going}
-頭数：${horseCount}頭
+開催区分：${race.type}
+競馬場：${race.track}
+レース番号：${race.raceNumber}
+距離：${race.distance}
+コース：${race.surface}
+天気：${race.weather}
+馬場状態：${race.going}
 
 ━━━━━━━━━━━━━━━━━━
-【出馬表・ユーザーメモ】
+【出走馬】
 ━━━━━━━━━━━━━━━━━━
 
-${memo}
+${horses.length
+  ? horses.join("\n\n")
+  : "出走馬情報なし"
+}
 
 ━━━━━━━━━━━━━━━━━━
-【分析指示】
+【追加メモ】
 ━━━━━━━━━━━━━━━━━━
 
-${analysisStyle}
+${extra || "なし"}
 
-可能なら過去のレース成績や、
-競馬場・距離・コース・馬場の傾向も確認してください。
+━━━━━━━━━━━━━━━━━━
+【予想してほしい内容】
+━━━━━━━━━━━━━━━━━━
 
-入力された馬番・馬名・オッズなどは勝手に変更しないでください。
+1. 各馬を分析
+2. 過去走・近走内容を重視
+3. 距離適性
+4. コース適性
+5. 馬場適性
+6. 展開・脚質
+7. 騎手
+8. 人気とオッズが入力されていれば人気との比較
+9. 穴馬候補
+10. 最終的な印
+
+印は以下の形式で出してください。
+
+◎
+○
+▲
+△
+△
+☆
+
+同じ印の馬が複数いる場合はまとめてください。
+
+例：
+
+◎ 5
+○ 3
+▲ 8
+△ 1・6
+☆ 11
+
+最後に、
+
+・本命
+・対抗
+・穴馬
+・危険な人気馬
+・ワイド
+・馬連
+・3連複
+・3連単
+
+を簡潔に出してください。
+
+馬番がメモ内に書かれている場合は、
+その馬番を正確に使用してください。
 
 情報が不足している場合は、
-不足している情報を明示したうえで、
-分かる範囲で予想してください。
+不足していることを明記したうえで、
+入力された情報だけでも可能な範囲で予想してください。
 
-━━━━━━━━━━━━━━━━━━
-【最終回答】
-━━━━━━━━━━━━━━━━━━
+`;
 
-以下の形式で出してください。
-
-◎：
-○：
-▲：
-△：
-☆：
-
-1着候補：
-3着内候補：
-穴馬：
-危険な人気馬：
-
-【買い目】
-
-ワイド：
-馬連：
-3連複：
-3連単：
-
-【結論】
-
-本命は○番。
-理由は○○。
-
-できるだけ馬番を明確にしてください。`;
+  return prompt.trim();
 
 }
 
 
-/* =========================================
-   予想依頼文作成
-========================================= */
+/* =========================================================
+   チャッピーに聞く
+========================================================= */
 
-$("makePromptButton")
+function generatePrompt(){
+
+  const prompt =
+    createPrompt();
+
+  $("promptText").value =
+    prompt;
+
+  $("copyStatus").textContent =
+    "予想依頼文を作成しました。";
+
+  $("promptText").focus();
+
+  $("promptText").select();
+
+}
+
+
+/* =========================================================
+   コピー
+========================================================= */
+
+async function copyPrompt(){
+
+  const prompt =
+    $("promptText").value.trim();
+
+  if(!prompt){
+
+    generatePrompt();
+
+  }
+
+  const text =
+    $("promptText").value;
+
+  try{
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+    $("copyStatus").textContent =
+      "✅ コピーしました。ChatGPTを開いて貼り付けてください。";
+
+    /*
+     * ChatGPTアプリ / Webを開く
+     */
+
+    setTimeout(
+      function(){
+
+        window.location.href =
+          "https://chatgpt.com/";
+
+      },
+      300
+    );
+
+  }catch(error){
+
+    /*
+     * iPhoneなどでClipboard APIが使えない場合
+     */
+
+    $("promptText").focus();
+
+    $("promptText").select();
+
+    $("copyStatus").textContent =
+      "文章を選択しました。コピーしてChatGPTに貼り付けてください。";
+
+  }
+
+}
+
+
+/* =========================================================
+   ChatGPTを開く
+========================================================= */
+
+function openChatGPT(){
+
+  window.location.href =
+    "https://chatgpt.com/";
+
+}
+
+
+/* =========================================================
+   ボタン
+========================================================= */
+
+$("addHorseButton")
   .addEventListener(
     "click",
-    function(){
-
-      try{
-
-        const prompt =
-          createPrompt();
-
-        $("promptOutput")
-          .textContent =
-          prompt;
-
-        $("status")
-          .textContent =
-          "予想依頼文を作成しました。";
-
-      }
-      catch(error){
-
-        $("status")
-          .textContent =
-          error.message;
-
-      }
-
-    }
+    addHorse
   );
 
 
-/* =========================================
-   コピー
-========================================= */
+$("clearHorsesButton")
+  .addEventListener(
+    "click",
+    clearHorses
+  );
+
+
+$("askButton")
+  .addEventListener(
+    "click",
+    generatePrompt
+  );
+
 
 $("copyButton")
   .addEventListener(
     "click",
-    async function(){
-
-      const text =
-        $("promptOutput")
-          .textContent;
-
-
-      if(
-        !text ||
-        text.startsWith(
-          "ここにChatGPT"
-        )
-      ){
-
-        $("status")
-          .textContent =
-          "先に「予想依頼文を作る」を押してください。";
-
-        return;
-
-      }
-
-
-      try{
-
-        await navigator.clipboard
-          .writeText(text);
-
-        $("status")
-          .textContent =
-          "コピーしました。";
-
-      }
-      catch(error){
-
-        $("status")
-          .textContent =
-          "自動コピーできませんでした。文章を長押ししてコピーしてください。";
-
-      }
-
-    }
+    copyPrompt
   );
 
 
-/* =========================================
-   ChatGPTを開く
-========================================= */
-
-$("chatButton")
+$("openChatGPTButton")
   .addEventListener(
     "click",
-    async function(){
-
-      try{
-
-        const prompt =
-          createPrompt();
-
-
-        $("promptOutput")
-          .textContent =
-          prompt;
-
-
-        try{
-
-          await navigator.clipboard
-            .writeText(prompt);
-
-        }
-        catch(error){
-
-          /* コピーできなくても
-             ChatGPTは開く */
-
-        }
-
-
-        $("status")
-          .textContent =
-          "依頼文を作成しました。ChatGPTを開きます。コピーできない場合は下の文章をコピーしてください。";
-
-
-        window.open(
-          "https://chatgpt.com/",
-          "_blank"
-        );
-
-      }
-      catch(error){
-
-        $("status")
-          .textContent =
-          error.message;
-
-      }
-
-    }
+    openChatGPT
   );
+
+
+/* =========================================================
+   最初から18頭の枠を作らない
+   必要な分だけ「＋馬を追加」
+========================================================= */
+
+updateHorseNumbers();
 
 </script>
 

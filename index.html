@@ -13,7 +13,7 @@ body{
   color:#111827;
 }
 .container{
-  max-width:1100px;
+  max-width:1150px;
   margin:auto;
   padding:20px;
 }
@@ -76,7 +76,7 @@ button{
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:900px;
+  min-width:1050px;
 }
 th,td{
   border-bottom:1px solid #e5e7eb;
@@ -86,16 +86,6 @@ th,td{
 }
 th{
   background:#f9fafb;
-}
-td:first-child,th:first-child{
-  position:sticky;
-  left:0;
-  background:white;
-}
-.result-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:10px;
 }
 .stat{
   background:#f9fafb;
@@ -107,17 +97,18 @@ td:first-child,th:first-child{
   font-size:24px;
   margin-top:5px;
 }
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+}
 .mark{
   font-size:20px;
   font-weight:bold;
 }
-◎{color:#dc2626}
-○{color:#2563eb}
-▲{color:#d97706}
-△{color:#16a34a}
 .good{
-  font-weight:bold;
   color:#dc2626;
+  font-weight:bold;
 }
 .bad{
   color:#6b7280;
@@ -129,8 +120,20 @@ td:first-child,th:first-child{
   font-size:12px;
   color:#6b7280;
 }
+.highlight{
+  background:#fef3c7;
+  border-radius:10px;
+  padding:12px;
+  margin-top:12px;
+}
+.ticket{
+  padding:14px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  margin-bottom:10px;
+}
 #status{
-  margin-top:10px;
+  margin-top:12px;
   font-weight:bold;
 }
 @media(max-width:600px){
@@ -141,599 +144,1138 @@ td:first-child,th:first-child{
 </head>
 <body>
 <div class="container">
-  <div class="card">
-    <h1>🏇 競馬予想シミュレーター</h1>
-    <div class="small">
-      過去走などから作成した能力値を入力し、レースを大量シミュレーションします。
-    </div>
-  </div>
-  <!-- レース条件 -->
-  <div class="card">
-    <h2>① レース条件</h2>
-    <div class="grid">
-      <label>
-        距離
-        <select id="distance">
-          <option value="1200">1200m</option>
-          <option value="1400">1400m</option>
-          <option value="1600" selected>1600m</option>
-          <option value="1800">1800m</option>
-          <option value="2000">2000m</option>
-          <option value="2200">2200m</option>
-          <option value="2400">2400m</option>
-          <option value="2500">2500m</option>
-          <option value="3000">3000m</option>
-        </select>
-      </label>
-      <label>
-        馬場
-        <select id="track">
-          <option value="good">良</option>
-          <option value="yield">稍重</option>
-          <option value="heavy">重</option>
-          <option value="bad">不良</option>
-        </select>
-      </label>
-      <label>
-        ペース
-        <select id="pace">
-          <option value="slow">スローペース</option>
-          <option value="normal" selected>平均ペース</option>
-          <option value="fast">ハイペース</option>
-        </select>
-      </label>
-      <label>
-        シミュレーション回数
-        <select id="simCount">
-          <option value="1000">1,000回</option>
-          <option value="5000">5,000回</option>
-          <option value="10000" selected>10,000回</option>
-          <option value="30000">30,000回</option>
-        </select>
-      </label>
-    </div>
-  </div>
-  <!-- 馬データ -->
-  <div class="card">
-    <h2>② 出走馬データ</h2>
-    <div class="small">
-      能力値は0〜100。近走・距離適性・コース適性・馬場適性・瞬発力・スタミナなどを入力。
-    </div>
-    <div class="table-wrap">
-      <table id="horseTable">
-        <thead>
-          <tr>
-            <th>馬番</th>
-            <th>馬名</th>
-            <th>脚質</th>
-            <th>近走</th>
-            <th>距離</th>
-            <th>コース</th>
-            <th>馬場</th>
-            <th>瞬発</th>
-            <th>スタミナ</th>
-            <th>騎手</th>
-            <th>オッズ</th>
-            <th>削除</th>
-          </tr>
-        </thead>
-        <tbody id="horseBody"></tbody>
-      </table>
-    </div>
-    <div class="actions">
-      <button
-        type="button"
-        class="secondary"
-        id="addHorse">
-        ＋ 馬を追加
-      </button>
-      <button
-        type="button"
-        class="danger"
-        id="clearHorses">
-        全削除
-      </button>
-    </div>
-  </div>
-  <!-- シミュレーション -->
-  <div class="card">
-    <h2>③ シミュレーション</h2>
-    <button
-      type="button"
-      class="primary"
-      id="runSimulation">
-      🚀 10,000回シミュレーション
-    </button>
-    <div id="status"></div>
-  </div>
-  <!-- 結果 -->
-  <div class="card" id="resultCard" style="display:none">
-    <h2>④ シミュレーション結果</h2>
-    <div class="result-grid">
-      <div class="stat">
-        ◎ 本命
-        <strong id="honmei">-</strong>
-      </div>
-      <div class="stat">
-        ○ 対抗
-        <strong id="taikou">-</strong>
-      </div>
-      <div class="stat">
-        ▲ 単穴
-        <strong id="tanana">-</strong>
-      </div>
-      <div class="stat">
-        △ 穴
-        <strong id="ana">-</strong>
-      </div>
-    </div>
-    <br>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>印</th>
-            <th>馬番</th>
-            <th>馬名</th>
-            <th>1着率</th>
-            <th>2着率</th>
-            <th>3着内率</th>
-            <th>平均着順</th>
-            <th>オッズ</th>
-            <th>市場確率</th>
-            <th>期待値判定</th>
-          </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-      </table>
-    </div>
-  </div>
-  <!-- 馬券 -->
-  <div class="card" id="ticketCard" style="display:none">
-    <h2>⑤ シミュレーションから見る買い目</h2>
-    <div id="tickets"></div>
-  </div>
+<!-- =========================
+     タイトル
+========================= -->
+<div class="card">
+<h1>🏇 競馬予想シミュレーター</h1>
+<div class="small">
+過去走・適性・展開・騎手・オッズを使って
+レースを大量シミュレーションします。
+</div>
+</div>
+<!-- =========================
+     レース条件
+========================= -->
+<div class="card">
+<h2>① レース条件</h2>
+<div class="grid">
+<label>
+距離
+<select id="distance">
+<option value="1200">1200m</option>
+<option value="1400">1400m</option>
+<option value="1600" selected>1600m</option>
+<option value="1800">1800m</option>
+<option value="2000">2000m</option>
+<option value="2200">2200m</option>
+<option value="2400">2400m</option>
+<option value="2500">2500m</option>
+<option value="3000">3000m</option>
+</select>
+</label>
+<label>
+馬場
+<select id="track">
+<option value="good">良</option>
+<option value="yield">稍重</option>
+<option value="heavy">重</option>
+<option value="bad">不良</option>
+</select>
+</label>
+<label>
+ペース
+<select id="pace">
+<option value="slow">スローペース</option>
+<option value="normal" selected>平均ペース</option>
+<option value="fast">ハイペース</option>
+</select>
+</label>
+<label>
+シミュレーション回数
+<select id="simCount">
+<option value="1000">1,000回</option>
+<option value="5000">5,000回</option>
+<option value="10000" selected>10,000回</option>
+<option value="30000">30,000回</option>
+</select>
+</label>
+</div>
+</div>
+<!-- =========================
+     過去走自動評価
+========================= -->
+<div class="card">
+<h2>② 過去走から能力を自動計算</h2>
+<div class="small">
+直近5走の着順などを入力すると、
+シミュレーション用の能力値を自動作成します。
+</div>
+<div class="grid">
+<label>
+対象馬
+<select id="historyHorse"></select>
+</label>
+<label>
+直近5走
+<input
+id="historyResults"
+type="text"
+placeholder="1,3,5,2,8">
+</label>
+<label>
+上がり性能
+<input
+id="historyAgari"
+type="number"
+min="0"
+max="100"
+value="75">
+</label>
+<label>
+同コース適性
+<input
+id="historyCourse"
+type="number"
+min="0"
+max="100"
+value="75">
+</label>
+<label>
+距離適性
+<input
+id="historyDistance"
+type="number"
+min="0"
+max="100"
+value="75">
+</label>
+<label>
+馬場適性
+<input
+id="historyGround"
+type="number"
+min="0"
+max="100"
+value="75">
+</label>
+<label>
+騎手評価
+<input
+id="historyJockey"
+type="number"
+min="0"
+max="100"
+value="75">
+</label>
+</div>
+<div class="actions">
+<button
+type="button"
+class="primary"
+id="calculateHistory">
+過去走から能力値を計算
+</button>
+</div>
+<div
+id="historyResult"
+class="small"
+style="margin-top:12px">
+</div>
+</div>
+<!-- =========================
+     馬データ
+========================= -->
+<div class="card">
+<h2>③ 出走馬データ</h2>
+<div class="small">
+能力値は0〜100。
+過去走計算を使えば自動入力できます。
+</div>
+<div class="table-wrap">
+<table id="horseTable">
+<thead>
+<tr>
+<th>馬番</th>
+<th>馬名</th>
+<th>脚質</th>
+<th>近走</th>
+<th>距離</th>
+<th>コース</th>
+<th>馬場</th>
+<th>瞬発</th>
+<th>スタミナ</th>
+<th>騎手</th>
+<th>オッズ</th>
+<th>削除</th>
+</tr>
+</thead>
+<tbody id="horseBody"></tbody>
+</table>
+</div>
+<div class="actions">
+<button
+type="button"
+class="secondary"
+id="addHorse">
+＋ 馬を追加
+</button>
+<button
+type="button"
+class="danger"
+id="clearHorses">
+全削除
+</button>
+</div>
+</div>
+<!-- =========================
+     シミュレーション
+========================= -->
+<div class="card">
+<h2>④ レースシミュレーション</h2>
+<button
+type="button"
+class="primary"
+id="runSimulation">
+🚀 シミュレーション開始
+</button>
+<div id="status"></div>
+</div>
+<!-- =========================
+     結果
+========================= -->
+<div
+class="card"
+id="resultCard"
+style="display:none">
+<h2>⑤ 予想結果</h2>
+<div class="result-grid">
+<div class="stat">
+◎ 本命
+<strong id="honmei">-</strong>
+</div>
+<div class="stat">
+○ 対抗
+<strong id="taikou">-</strong>
+</div>
+<div class="stat">
+▲ 単穴
+<strong id="tanana">-</strong>
+</div>
+<div class="stat">
+△ 穴
+<strong id="ana">-</strong>
+</div>
+</div>
+<div
+class="highlight"
+id="summary">
+</div>
+<br>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>印</th>
+<th>馬番</th>
+<th>馬名</th>
+<th>1着率</th>
+<th>2着率</th>
+<th>3着率</th>
+<th>3着内率</th>
+<th>平均着順</th>
+<th>オッズ</th>
+<th>市場確率</th>
+<th>期待値</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody id="resultBody"></tbody>
+</table>
+</div>
+</div>
+<!-- =========================
+     馬券
+========================= -->
+<div
+class="card"
+id="ticketCard"
+style="display:none">
+<h2>⑥ シミュレーション買い目</h2>
+<div id="tickets"></div>
+<div class="small">
+※シミュレーション結果から作成した参考買い目です。
+実際の購入時は直前オッズ・馬場・馬体重・返し馬なども確認してください。
+</div>
+</div>
 </div>
 <script>
-const horseBody = document.getElementById("horseBody");
-const addHorse = document.getElementById("addHorse");
-const clearHorses = document.getElementById("clearHorses");
-const runSimulation = document.getElementById("runSimulation");
-let horseNumber = 0;
-/* =========================
+/* =====================================================
+   基本
+===================================================== */
+const horseBody =
+document.getElementById("horseBody");
+const addHorse =
+document.getElementById("addHorse");
+const clearHorses =
+document.getElementById("clearHorses");
+const runSimulation =
+document.getElementById("runSimulation");
+let horseNumber=0;
+/* =====================================================
    馬追加
-========================= */
+===================================================== */
 function addHorseRow(
-  name="",
-  style="差し",
-  recent=75,
-  distance=75,
-  course=75,
-  ground=75,
-  speed=75,
-  stamina=75,
-  jockey=75,
-  odds=10
+name="",
+style="差し",
+recent=75,
+distance=75,
+course=75,
+ground=75,
+speed=75,
+stamina=75,
+jockey=75,
+odds=10
 ){
-  horseNumber++;
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>
-      <input
-        class="num"
-        type="number"
-        value="${horseNumber}"
-        min="1"
-        max="18">
-    </td>
-    <td>
-      <input
-        class="name"
-        value="${name}"
-        placeholder="馬名">
-    </td>
-    <td>
-      <select class="style">
-        <option ${style==="逃げ"?"selected":""}>逃げ</option>
-        <option ${style==="先行"?"selected":""}>先行</option>
-        <option ${style==="差し"?"selected":""}>差し</option>
-        <option ${style==="追込"?"selected":""}>追込</option>
-      </select>
-    </td>
-    <td><input class="recent" type="number" value="${recent}" min="0" max="100"></td>
-    <td><input class="distanceFit" type="number" value="${distance}" min="0" max="100"></td>
-    <td><input class="courseFit" type="number" value="${course}" min="0" max="100"></td>
-    <td><input class="groundFit" type="number" value="${ground}" min="0" max="100"></td>
-    <td><input class="speed" type="number" value="${speed}" min="0" max="100"></td>
-    <td><input class="stamina" type="number" value="${stamina}" min="0" max="100"></td>
-    <td><input class="jockey" type="number" value="${jockey}" min="0" max="100"></td>
-    <td><input class="odds" type="number" value="${odds}" min="1.01" step="0.1"></td>
-    <td>
-      <button
-        type="button"
-        class="danger deleteHorse">
-        ×
-      </button>
-    </td>
-  `;
-  horseBody.appendChild(tr);
+horseNumber++;
+const tr =
+document.createElement("tr");
+tr.innerHTML=`
+<td>
+<input
+class="num"
+type="number"
+value="${horseNumber}"
+min="1"
+max="18">
+</td>
+<td>
+<input
+class="name"
+value="${name}"
+placeholder="馬名">
+</td>
+<td>
+<select class="style">
+<option ${style==="逃げ"?"selected":""}>
+逃げ
+</option>
+<option ${style==="先行"?"selected":""}>
+先行
+</option>
+<option ${style==="差し"?"selected":""}>
+差し
+</option>
+<option ${style==="追込"?"selected":""}>
+追込
+</option>
+</select>
+</td>
+<td>
+<input
+class="recent"
+type="number"
+value="${recent}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="distanceFit"
+type="number"
+value="${distance}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="courseFit"
+type="number"
+value="${course}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="groundFit"
+type="number"
+value="${ground}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="speed"
+type="number"
+value="${speed}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="stamina"
+type="number"
+value="${stamina}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="jockey"
+type="number"
+value="${jockey}"
+min="0"
+max="100">
+</td>
+<td>
+<input
+class="odds"
+type="number"
+value="${odds}"
+min="1.01"
+step="0.1">
+</td>
+<td>
+<button
+type="button"
+class="danger deleteHorse">
+×
+</button>
+</td>
+`;
+horseBody.appendChild(tr);
+updateHistoryHorseList();
 }
-/* =========================
+/* =====================================================
    初期馬
-========================= */
+===================================================== */
 for(let i=0;i<8;i++){
-  addHorseRow(
-    "馬"+(i+1),
-    i===0 ? "逃げ" :
-    i===1 ? "先行" :
-    i===2 ? "差し" :
-    "追込",
-    75 + Math.floor(Math.random()*15),
-    70 + Math.floor(Math.random()*25),
-    70 + Math.floor(Math.random()*25),
-    70 + Math.floor(Math.random()*25),
-    70 + Math.floor(Math.random()*25),
-    70 + Math.floor(Math.random()*25),
-    70 + Math.floor(Math.random()*25),
-    4 + Math.random()*16
-  );
+addHorseRow(
+"馬"+(i+1),
+i===0
+?"逃げ"
+:
+i===1
+?"先行"
+:
+i===2
+?"差し"
+:
+"追込",
+75+Math.floor(Math.random()*15),
+70+Math.floor(Math.random()*25),
+70+Math.floor(Math.random()*25),
+70+Math.floor(Math.random()*25),
+70+Math.floor(Math.random()*25),
+70+Math.floor(Math.random()*25),
+70+Math.floor(Math.random()*25),
+4+Math.random()*16
+);
 }
-/* =========================
-   馬追加
-========================= */
+/* =====================================================
+   馬追加ボタン
+===================================================== */
 addHorse.addEventListener("click",()=>{
-  if(horseBody.children.length >= 18){
-    alert("最大18頭です。");
-    return;
-  }
-  addHorseRow("新馬");
+if(horseBody.children.length>=18){
+alert("最大18頭です。");
+return;
+}
+addHorseRow("新馬");
 });
-/* =========================
-   削除
-========================= */
+/* =====================================================
+   馬削除
+===================================================== */
 horseBody.addEventListener("click",(e)=>{
-  if(!e.target.classList.contains("deleteHorse")) return;
-  e.target.closest("tr").remove();
+if(
+!e.target.classList.contains("deleteHorse")
+)return;
+e.target.closest("tr").remove();
+updateHistoryHorseList();
 });
-/* =========================
+/* =====================================================
    全削除
-========================= */
+===================================================== */
 clearHorses.addEventListener("click",()=>{
-  if(!confirm("すべて削除しますか？")) return;
-  horseBody.innerHTML="";
-  horseNumber=0;
+if(!confirm("すべて削除しますか？"))
+return;
+horseBody.innerHTML="";
+horseNumber=0;
+updateHistoryHorseList();
 });
-/* =========================
-   数値
-========================= */
+/* =====================================================
+   数値処理
+===================================================== */
 function num(value,min=0,max=100){
-  let n=parseFloat(value);
-  if(!Number.isFinite(n)) n=min;
-  return Math.max(min,Math.min(max,n));
+let n=parseFloat(value);
+if(!Number.isFinite(n))
+n=min;
+return Math.max(
+min,
+Math.min(max,n)
+);
 }
-/* =========================
-   能力指数
-========================= */
+/* =====================================================
+   基本能力
+===================================================== */
 function getPower(h){
-  const recent=num(h.querySelector(".recent").value);
-  const distance=num(h.querySelector(".distanceFit").value);
-  const course=num(h.querySelector(".courseFit").value);
-  const ground=num(h.querySelector(".groundFit").value);
-  const speed=num(h.querySelector(".speed").value);
-  const stamina=num(h.querySelector(".stamina").value);
-  const jockey=num(h.querySelector(".jockey").value);
-  /*
-    基本能力
-    近走       25%
-    距離適性   15%
-    コース適性 10%
-    馬場適性   10%
-    瞬発力     15%
-    スタミナ   10%
-    騎手       15%
-  */
-  return (
-    recent * .25 +
-    distance * .15 +
-    course * .10 +
-    ground * .10 +
-    speed * .15 +
-    stamina * .10 +
-    jockey * .15
-  );
+const recent=
+num(h.querySelector(".recent").value);
+const distance=
+num(h.querySelector(".distanceFit").value);
+const course=
+num(h.querySelector(".courseFit").value);
+const ground=
+num(h.querySelector(".groundFit").value);
+const speed=
+num(h.querySelector(".speed").value);
+const stamina=
+num(h.querySelector(".stamina").value);
+const jockey=
+num(h.querySelector(".jockey").value);
+/*
+近走       25%
+距離適性   15%
+コース適性 10%
+馬場適性   10%
+瞬発力     15%
+スタミナ   10%
+騎手       15%
+*/
+return(
+recent*.25+
+distance*.15+
+course*.10+
+ground*.10+
+speed*.15+
+stamina*.10+
+jockey*.15
+);
 }
-/* =========================
+/* =====================================================
    展開補正
-========================= */
+===================================================== */
 function paceBonus(style,pace){
-  if(pace==="fast"){
-    if(style==="逃げ") return -5;
-    if(style==="先行") return -2;
-    if(style==="差し") return 4;
-    if(style==="追込") return 6;
-  }
-  if(pace==="slow"){
-    if(style==="逃げ") return 6;
-    if(style==="先行") return 4;
-    if(style==="差し") return -2;
-    if(style==="追込") return -5;
-  }
-  return 0;
+if(pace==="fast"){
+if(style==="逃げ")
+return -5;
+if(style==="先行")
+return -2;
+if(style==="差し")
+return 4;
+if(style==="追込")
+return 6;
 }
-/* =========================
+if(pace==="slow"){
+if(style==="逃げ")
+return 6;
+if(style==="先行")
+return 4;
+if(style==="差し")
+return -2;
+if(style==="追込")
+return -5;
+}
+return 0;
+}
+/* =====================================================
    距離補正
-========================= */
+===================================================== */
 function distanceBonus(style,distance){
-  if(distance<=1400){
-    if(style==="逃げ") return 2;
-    if(style==="先行") return 1;
-  }
-  if(distance>=2200){
-    if(style==="差し") return 1;
-    if(style==="追込") return 1;
-  }
-  return 0;
+if(distance<=1400){
+if(style==="逃げ")
+return 2;
+if(style==="先行")
+return 1;
 }
-/* =========================
-   ランダム値
-========================= */
+if(distance>=2200){
+if(style==="差し")
+return 1;
+if(style==="追込")
+return 1;
+}
+return 0;
+}
+/* =====================================================
+   正規分布乱数
+===================================================== */
 function gaussianRandom(){
-  let u=0;
-  let v=0;
-  while(u===0) u=Math.random();
-  while(v===0) v=Math.random();
-  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+let u=0;
+let v=0;
+while(u===0)
+u=Math.random();
+while(v===0)
+v=Math.random();
+return Math.sqrt(
+-2*Math.log(u)
+)*
+Math.cos(
+2*Math.PI*v
+);
 }
-/* =========================
-   シミュレーション
-========================= */
-function simulate(){
-  const rows=[...horseBody.querySelectorAll("tr")];
-  if(rows.length<2){
-    alert("2頭以上必要です。");
-    return null;
-  }
-  const pace=document.getElementById("pace").value;
-  const distance=parseInt(
-    document.getElementById("distance").value
-  );
-  const count=parseInt(
-    document.getElementById("simCount").value
-  );
-  const horses=rows.map(row=>{
-    const style=row.querySelector(".style").value;
-    return{
-      row,
-      num:row.querySelector(".num").value,
-      name:
-        row.querySelector(".name").value ||
-        "馬"+row.querySelector(".num").value,
-      style,
-      odds:num(
-        row.querySelector(".odds").value,
-        1.01,
-        999
-      ),
-      power:getPower(row),
-      win:0,
-      top3:0,
-      second:0,
-      third:0,
-      positionTotal:0
-    };
-  });
-  for(let i=0;i<count;i++){
-    const race=horses.map(h=>{
-      let score=h.power;
-      score += paceBonus(h.style,pace);
-      score += distanceBonus(h.style,distance);
-      /*
-        ランダム要素
-        能力が高い馬ほど安定
-        能力が低い馬ほどブレやすい
-      */
-      const variation =
-        gaussianRandom() *
-        (3 + (100-h.power)*0.055);
-      score += variation;
-      return{
-        horse:h,
-        score
-      };
-    });
-    race.sort((a,b)=>b.score-a.score);
-    race.forEach((r,index)=>{
-      const h=r.horse;
-      h.positionTotal += index+1;
-      if(index===0) h.win++;
-      if(index===1) h.second++;
-      if(index===2) h.third++;
-      if(index<3) h.top3++;
-    });
-  }
-  horses.forEach(h=>{
-    h.winRate=h.win/count;
-    h.secondRate=h.second/count;
-    h.thirdRate=h.third/count;
-    h.top3Rate=h.top3/count;
-    h.averagePosition=
-      h.positionTotal/count;
-    /*
-      オッズから市場確率
-      1 / オッズ
-    */
-    h.marketProbability=
-      1/h.odds;
-    /*
-      簡易期待値
-      勝率 × オッズ
-    */
-    h.expectedValue=
-      h.winRate*h.odds;
-  });
-  horses.sort((a,b)=>{
-    /*
-      シミュレーション結果を中心に
-      期待値も少し考慮
-    */
-    const aScore=
-      a.winRate*.65+
-      a.top3Rate*.35;
-    const bScore=
-      b.winRate*.65+
-      b.top3Rate*.35;
-    return bScore-aScore;
-  });
-  return horses;
-}
-/* =========================
-   印
-========================= */
-function getMark(index){
-  if(index===0) return "◎";
-  if(index===1) return "○";
-  if(index===2) return "▲";
-  if(index<5) return "△";
-  return "";
-}
-/* =========================
-   結果表示
-========================= */
-function showResults(horses){
-  const resultCard=
-    document.getElementById("resultCard");
-  const ticketCard=
-    document.getElementById("ticketCard");
-  resultCard.style.display="block";
-  ticketCard.style.display="block";
-  document.getElementById("honmei").textContent=
-    horses[0].num+"番";
-  document.getElementById("taikou").textContent=
-    horses[1]?.num+"番" || "-";
-  document.getElementById("tanana").textContent=
-    horses[2]?.num+"番" || "-";
-  document.getElementById("ana").textContent=
-    horses[3]?.num+"番" || "-";
-  const body=document.getElementById("resultBody");
-  body.innerHTML="";
-  horses.forEach((h,index)=>{
-    const tr=document.createElement("tr");
-    if(index===0){
-      tr.className="rank1";
-    }
-    const mark=getMark(index);
-    const market=
-      h.marketProbability*100;
-    const win=
-      h.winRate*100;
-    let valueText="";
-    let valueClass="";
-    if(h.expectedValue>=1){
-      valueText="買い候補";
-      valueClass="good";
-    }else{
-      valueText="妙味薄";
-      valueClass="bad";
-    }
-    tr.innerHTML=`
-      <td class="mark">${mark}</td>
-      <td>${h.num}</td>
-      <td>${h.name}</td>
-      <td>${win.toFixed(1)}%</td>
-      <td>${(h.secondRate*100).toFixed(1)}%</td>
-      <td>${(h.top3Rate*100).toFixed(1)}%</td>
-      <td>${h.averagePosition.toFixed(2)}</td>
-      <td>${h.odds.toFixed(1)}</td>
-      <td>${market.toFixed(1)}%</td>
-      <td class="${valueClass}">
-        ${valueText}
-        <br>
-        <span class="small">
-          EV ${h.expectedValue.toFixed(2)}
-        </span>
-      </td>
-    `;
-    body.appendChild(tr);
-  });
-  createTickets(horses);
-}
-/* =========================
-   馬券候補
-========================= */
-function createTickets(horses){
-  const box=document.getElementById("tickets");
-  const a=horses[0];
-  const b=horses[1];
-  const c=horses[2];
-  const d=horses[3];
-  box.innerHTML=`
-    <div class="stat">
-      <strong>馬連</strong>
-      <div>
-        ${a.num}-${b.num}
-        <br>
-        ${a.num}-${c.num}
-        <br>
-        ${a.num}-${d.num}
-      </div>
-    </div>
-    <br>
-    <div class="stat">
-      <strong>ワイド</strong>
-      <div>
-        ${a.num}-${b.num}
-        <br>
-        ${a.num}-${c.num}
-        <br>
-        ${a.num}-${d.num}
-      </div>
-    </div>
-    <br>
-    <div class="stat">
-      <strong>3連複</strong>
-      <div>
-        ${a.num}-${b.num}-${c.num}
-        <br>
-        ${a.num}-${b.num}-${d.num}
-        <br>
-        ${a.num}-${c.num}-${d.num}
-      </div>
-    </div>
-    <br>
-    <div class="small">
-      ※買い目はシミュレーション順位だけから生成した参考候補です。
-      実際のオッズ・馬場・直前気配などを確認して最終判断してください。
-    </div>
-  `;
-}
-/* =========================
-   実行
-========================= */
-runSimulation.addEventListener("click",()=>{
-  const status=
-    document.getElementById("status");
-  status.textContent=
-    "シミュレーション中...";
-  /*
-    UIを一度更新してから実行
-  */
-  setTimeout(()=>{
-    const result=simulate();
-    if(!result){
-      status.textContent="エラー";
-      return;
-    }
-    showResults(result);
-    status.textContent=
-      document.getElementById("simCount").value+
-      "回のシミュレーション完了。";
-    document
-      .getElementById("resultCard")
-      .scrollIntoView({
-        behavior:"smooth"
-      });
-  },50);
+/* =====================================================
+   過去5走 → 近走指数
+===================================================== */
+function calculateRecentScore(results){
+if(!results.length)
+return 50;
+const scores=
+results.map(position=>{
+position=parseInt(position);
+if(!Number.isFinite(position))
+return 50;
+if(position===1)return 100;
+if(position===2)return 95;
+if(position===3)return 90;
+if(position===4)return 84;
+if(position===5)return 78;
+if(position===6)return 72;
+if(position===7)return 66;
+if(position===8)return 60;
+if(position===9)return 54;
+if(position===10)return 48;
+if(position===11)return 42;
+if(position===12)return 36;
+return 30;
 });
+/*
+最近のレースほど重要
+最新 30%
+2走前 25%
+3走前 20%
+4走前 15%
+5走前 10%
+*/
+const weights=[
+.30,.25,.20,.15,.10
+];
+let total=0;
+let weightTotal=0;
+scores.forEach((score,index)=>{
+const weight=
+weights[index]||.05;
+total+=score*weight;
+weightTotal+=weight;
+});
+return total/weightTotal;
+}
+/* =====================================================
+   過去走入力
+===================================================== */
+const historyHorse=
+document.getElementById("historyHorse");
+const historyResults=
+document.getElementById("historyResults");
+const historyAgari=
+document.getElementById("historyAgari");
+const historyCourse=
+document.getElementById("historyCourse");
+const historyDistance=
+document.getElementById("historyDistance");
+const historyGround=
+document.getElementById("historyGround");
+const historyJockey=
+document.getElementById("historyJockey");
+const calculateHistory=
+document.getElementById("calculateHistory");
+const historyResult=
+document.getElementById("historyResult");
+/* =====================================================
+   馬リスト更新
+===================================================== */
+function updateHistoryHorseList(){
+if(!historyHorse)
+return;
+const current=
+historyHorse.value;
+historyHorse.innerHTML="";
+const rows=
+[
+...horseBody.querySelectorAll("tr")
+];
+rows.forEach(row=>{
+const number=
+row.querySelector(".num").value;
+const name=
+row.querySelector(".name").value||
+"馬"+number;
+const option=
+document.createElement("option");
+option.value=number;
+option.textContent=
+number+"番 "+name;
+historyHorse.appendChild(option);
+});
+if(
+[...historyHorse.options]
+.some(o=>o.value===current)
+){
+historyHorse.value=current;
+}
+}
+/* =====================================================
+   選択馬読み込み
+===================================================== */
+function loadHistoryHorse(){
+const selected=
+historyHorse.value;
+const rows=
+[
+...horseBody.querySelectorAll("tr")
+];
+const row=
+rows.find(
+r=>
+r.querySelector(".num").value===
+selected
+);
+if(!row)
+return;
+historyAgari.value=
+row.querySelector(".speed").value;
+historyCourse.value=
+row.querySelector(".courseFit").value;
+historyDistance.value=
+row.querySelector(".distanceFit").value;
+historyGround.value=
+row.querySelector(".groundFit").value;
+historyJockey.value=
+row.querySelector(".jockey").value;
+}
+historyHorse.addEventListener(
+"change",
+loadHistoryHorse
+);
+/* =====================================================
+   過去走 → 能力値
+===================================================== */
+calculateHistory.addEventListener(
+"click",
+()=>{
+const selected=
+historyHorse.value;
+if(!selected){
+alert("馬を選択してください。");
+return;
+}
+const rows=
+[
+...horseBody.querySelectorAll("tr")
+];
+const row=
+rows.find(
+r=>
+r.querySelector(".num").value===
+selected
+);
+if(!row){
+alert("対象馬が見つかりません。");
+return;
+}
+const results=
+historyResults.value
+.split(",")
+.map(x=>x.trim())
+.filter(x=>x!=="");
+const recent=
+calculateRecentScore(results);
+const agari=
+num(historyAgari.value);
+const course=
+num(historyCourse.value);
+const distance=
+num(historyDistance.value);
+const ground=
+num(historyGround.value);
+const jockey=
+num(historyJockey.value);
+/* 自動入力 */
+row.querySelector(".recent").value=
+Math.round(recent);
+row.querySelector(".speed").value=
+Math.round(agari);
+row.querySelector(".courseFit").value=
+Math.round(course);
+row.querySelector(".distanceFit").value=
+Math.round(distance);
+row.querySelector(".groundFit").value=
+Math.round(ground);
+row.querySelector(".jockey").value=
+Math.round(jockey);
+/* スタミナ */
+const stamina=
+Math.round(
+distance*.55+
+recent*.25+
+ground*.10+
+jockey*.10
+);
+row.querySelector(".stamina").value=
+Math.max(
+0,
+Math.min(100,stamina)
+);
+/* 結果 */
+historyResult.innerHTML=
+`
+<strong>${selected}番を更新しました。</strong><br>
+近走指数：${Math.round(recent)}<br>
+上がり性能：${Math.round(agari)}<br>
+距離適性：${Math.round(distance)}<br>
+コース適性：${Math.round(course)}<br>
+馬場適性：${Math.round(ground)}<br>
+騎手評価：${Math.round(jockey)}<br>
+スタミナ：${stamina}
+`;
+});
+/* =====================================================
+   シミュレーション
+===================================================== */
+function simulate(){
+const rows=
+[
+...horseBody.querySelectorAll("tr")
+];
+if(rows.length<2){
+alert("2頭以上必要です。");
+return null;
+}
+const pace=
+document.getElementById("pace").value;
+const distance=
+parseInt(
+document.getElementById("distance").value
+);
+const count=
+parseInt(
+document.getElementById("simCount").value
+);
+const horses=
+rows.map(row=>{
+const style=
+row.querySelector(".style").value;
+return{
+row,
+num:
+row.querySelector(".num").value,
+name:
+row.querySelector(".name").value||
+"馬"+row.querySelector(".num").value,
+style,
+odds:num(
+row.querySelector(".odds").value,
+1.01,
+999
+),
+power:getPower(row),
+win:0,
+second:0,
+third:0,
+top3:0,
+positionTotal:0
+};
+});
+/* ==================================
+   レースを大量実行
+================================== */
+for(let i=0;i<count;i++){
+const race=
+horses.map(h=>{
+let score=h.power;
+/* 展開 */
+score+=
+paceBonus(
+h.style,
+pace
+);
+/* 距離 */
+score+=
+distanceBonus(
+h.style,
+distance
+);
+/* ランダム */
+const variation=
+gaussianRandom()*
+(
+3+
+(100-h.power)*.055
+);
+score+=variation;
+return{
+horse:h,
+score
+};
+});
+race.sort(
+(a,b)=>b.score-a.score
+);
+race.forEach(
+(r,index)=>{
+const h=r.horse;
+h.positionTotal+=
+index+1;
+if(index===0)
+h.win++;
+if(index===1)
+h.second++;
+if(index===2)
+h.third++;
+if(index<3)
+h.top3++;
+}
+);
+}
+/* ==================================
+   集計
+================================== */
+horses.forEach(h=>{
+h.winRate=
+h.win/count;
+h.secondRate=
+h.second/count;
+h.thirdRate=
+h.third/count;
+h.top3Rate=
+h.top3/count;
+h.averagePosition=
+h.positionTotal/count;
+/* 市場確率 */
+h.marketProbability=
+1/h.odds;
+/* 単勝期待値 */
+h.expectedValue=
+h.winRate*h.odds;
+});
+/* ==================================
+   シミュレーション順位
+================================== */
+horses.sort(
+(a,b)=>{
+const aScore=
+a.winRate*.65+
+a.top3Rate*.35;
+const bScore=
+b.winRate*.65+
+b.top3Rate*.35;
+return bScore-aScore;
+});
+return horses;
+}
+/* =====================================================
+   印
+===================================================== */
+function getMark(index){
+if(index===0)
+return "◎";
+if(index===1)
+return "○";
+if(index===2)
+return "▲";
+if(index<5)
+return "△";
+return "";
+}
+/* =====================================================
+   結果表示
+===================================================== */
+function showResults(horses){
+document.getElementById(
+"resultCard"
+).style.display="block";
+document.getElementById(
+"ticketCard"
+).style.display="block";
+document.getElementById(
+"honmei"
+).textContent=
+horses[0].num+"番";
+document.getElementById(
+"taikou"
+).textContent=
+horses[1]?.num+"番"||"-";
+document.getElementById(
+"tanana"
+).textContent=
+horses[2]?.num+"番"||"-";
+document.getElementById(
+"ana"
+).textContent=
+horses[3]?.num+"番"||"-";
+/* summary */
+const valueHorses=
+horses
+.filter(h=>h.expectedValue>=1);
+document.getElementById(
+"summary"
+).innerHTML=
+`
+<strong>シミュレーション総合判断</strong><br>
+◎ ${horses[0].num}番
+　1着率 ${(horses[0].winRate*100).toFixed(1)}%<br>
+○ ${horses[1]?.num||"-"}番
+　1着率 ${horses[1]?(horses[1].winRate*100).toFixed(1):"-"}%<br>
+▲ ${horses[2]?.num||"-"}番
+　1着率 ${horses[2]?(horses[2].winRate*100).toFixed(1):"-"}%<br>
+<br>
+期待値1.00以上：
+${valueHorses.length}頭
+`;
+const body=
+document.getElementById(
+"resultBody"
+);
+body.innerHTML="";
+horses.forEach(
+(h,index)=>{
+const tr=
+document.createElement("tr");
+if(index===0)
+tr.className="rank1";
+const mark=
+getMark(index);
+const market=
+h.marketProbability*100;
+const ev=
+h.expectedValue;
+const valueText=
+ev>=1
+?"買い候補"
+:"妙味薄";
+const valueClass=
+ev>=1
+?"good"
+:"bad";
+tr.innerHTML=
+`
+<td class="mark">
+${mark}
+</td>
+<td>
+${h.num}
+</td>
+<td>
+${h.name}
+</td>
+<td>
+${(h.winRate*100).toFixed(1)}%
+</td>
+<td>
+${(h.secondRate*100).toFixed(1)}%
+</td>
+<td>
+${(h.thirdRate*100).toFixed(1)}%
+</td>
+<td>
+${(h.top3Rate*100).toFixed(1)}%
+</td>
+<td>
+${h.averagePosition.toFixed(2)}
+</td>
+<td>
+${h.odds.toFixed(1)}
+</td>
+<td>
+${market.toFixed(1)}%
+</td>
+<td>
+${ev.toFixed(2)}
+</td>
+<td class="${valueClass}">
+${valueText}
+</td>
+`;
+body.appendChild(tr);
+});
+createTickets(horses);
+}
+/* =====================================================
+   買い目作成
+===================================================== */
+function createTickets(horses){
+const box=
+document.getElementById(
+"tickets"
+);
+const a=horses[0];
+const b=horses[1];
+const c=horses[2];
+const d=horses[3];
+if(!a||!b||!c){
+box.innerHTML=
+"馬が不足しています。";
+return;
+}
+box.innerHTML=
+`
+<div class="ticket">
+<strong>◎○ 馬連</strong>
+<br><br>
+${a.num}-${b.num}
+<br>
+${a.num}-${c.num}
+<br>
+${a.num}-${d?.num||""}
+</div>
+<div class="ticket">
+<strong>◎○ ワイド</strong>
+<br><br>
+${a.num}-${b.num}
+<br>
+${a.num}-${c.num}
+<br>
+${a.num}-${d?.num||""}
+</div>
+<div class="ticket">
+<strong>3連複 本線</strong>
+<br><br>
+${a.num}-${b.num}-${c.num}
+</div>
+<div class="ticket">
+<strong>3連複 押さえ</strong>
+<br><br>
+${a.num}-${b.num}-${d?.num||""}
+<br>
+${a.num}-${c.num}-${d?.num||""}
+</div>
+`;
+}
+/* =====================================================
+   シミュレーション実行
+===================================================== */
+runSimulation.addEventListener(
+"click",
+()=>{
+const status=
+document.getElementById(
+"status"
+);
+status.textContent=
+"シミュレーション中...";
+setTimeout(()=>{
+const result=
+simulate();
+if(!result){
+status.textContent=
+"エラー";
+return;
+}
+showResults(result);
+status.textContent=
+document.getElementById(
+"simCount"
+).value+
+"回のシミュレーション完了。";
+document.getElementById(
+"resultCard"
+).scrollIntoView({
+behavior:"smooth"
+});
+},50);
+});
+/* =====================================================
+   初期化
+===================================================== */
+updateHistoryHorseList();
 </script>
 </body>
 </html>

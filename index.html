@@ -1,1164 +1,442 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>
-    競馬予想シミュレーター
-  </title>
-
-  <!-- ZIP読み込み用 -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js">
-  </script>
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background: #f3f4f6;
-      color: #111827;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Noto Sans JP",
-        "Hiragino Kaku Gothic ProN",
-        Meiryo,
-        sans-serif;
-    }
-
-    header {
-      background: #111827;
-      color: white;
-      padding: 18px 14px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 21px;
-    }
-
-    header p {
-      margin: 6px 0 0;
-      color: #cbd5e1;
-      font-size: 12px;
-    }
-
-    main {
-      max-width: 1250px;
-      margin: auto;
-      padding: 10px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    h2 {
-      font-size: 18px;
-      margin: 0 0 12px;
-    }
-
-    h3 {
-      font-size: 15px;
-      margin: 16px 0 8px;
-    }
-
-    .small {
-      font-size: 12px;
-      color: #64748b;
-      line-height: 1.7;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns:
-        repeat(4, 1fr);
-      gap: 9px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      color: #64748b;
-      margin-bottom: 4px;
-    }
-
-    input,
-    select,
-    textarea {
-
-      width: 100%;
-
-      padding: 9px;
-
-      border:
-        1px solid #cbd5e1;
-
-      border-radius: 8px;
-
-      background: white;
-
-      font-size: 14px;
-
-    }
-
-    textarea {
-
-      min-height: 140px;
-
-      font-family: monospace;
-
-      font-size: 12px;
-
-    }
-
-    button {
-
-      border: 0;
-
-      border-radius: 9px;
-
-      padding: 10px 14px;
-
-      font-weight: 700;
-
-      cursor: pointer;
-
-    }
-
-    .primary {
-
-      background: #111827;
-
-      color: white;
-
-    }
-
-    .secondary {
-
-      background: #e2e8f0;
-
-      color: #111827;
-
-    }
-
-    .good {
-
-      background: #166534;
-
-      color: white;
-
-    }
-
-    .danger {
-
-      background: #b91c1c;
-
-      color: white;
-
-    }
-
-    .actions {
-
-      display: flex;
-
-      flex-wrap: wrap;
-
-      gap: 7px;
-
-      margin-top: 9px;
-
-    }
-
-    .status {
-
-      margin-top: 9px;
-
-      padding: 10px;
-
-      border-radius: 9px;
-
-      background: #f1f5f9;
-
-      font-size: 13px;
-
-      line-height: 1.6;
-
-    }
-
-    .notice {
-
-      background: #fff7ed;
-
-      border:
-        1px solid #fed7aa;
-
-      color: #9a3412;
-
-      padding: 10px;
-
-      border-radius: 9px;
-
-      font-size: 12px;
-
-      line-height: 1.7;
-
-    }
-
-    .success {
-
-      background: #f0fdf4;
-
-      border:
-        1px solid #bbf7d0;
-
-      color: #166534;
-
-      padding: 10px;
-
-      border-radius: 9px;
-
-      font-size: 12px;
-
-    }
-
-    .table-wrap {
-
-      overflow-x: auto;
-
-    }
-
-    table {
-
-      border-collapse: collapse;
-
-      width: 100%;
-
-      min-width: 1150px;
-
-    }
-
-    th,
-    td {
-
-      border-bottom:
-        1px solid #e5e7eb;
-
-      padding: 6px;
-
-      text-align: center;
-
-      white-space: nowrap;
-
-    }
-
-    th {
-
-      background: #f1f5f9;
-
-      font-size: 12px;
-
-    }
-
-    td input,
-    td select {
-
-      min-width: 62px;
-
-      padding: 7px;
-
-    }
-
-    .cards {
-
-      display: grid;
-
-      grid-template-columns:
-        repeat(3, 1fr);
-
-      gap: 9px;
-
-    }
-
-    .result-card {
-
-      background: #f8fafc;
-
-      border-radius: 11px;
-
-      padding: 12px;
-
-    }
-
-    .big {
-
-      font-size: 29px;
-
-      font-weight: 900;
-
-    }
-
-    .row {
-
-      display: flex;
-
-      gap: 8px;
-
-      align-items: end;
-
-    }
-
-    .row > * {
-
-      flex: 1;
-
-    }
-
-    .mark-row {
-
-      padding: 9px 0;
-
-      border-bottom:
-        1px solid #e5e7eb;
-
-    }
-
-    .bet {
-
-      padding: 11px;
-
-      background: #f8fafc;
-
-      border-radius: 9px;
-
-      margin: 7px 0;
-
-      line-height: 1.8;
-
-    }
-
-    .pill {
-
-      display: inline-block;
-
-      padding: 3px 7px;
-
-      border-radius: 999px;
-
-      background: #e2e8f0;
-
-      font-size: 11px;
-
-      margin: 2px;
-
-    }
-
-    .hidden {
-
-      display: none;
-
-    }
-
-    @media(max-width:800px) {
-
-      .grid {
-
-        grid-template-columns:
-          repeat(2, 1fr);
-
-      }
-
-      .cards {
-
-        grid-template-columns: 1fr;
-
-      }
-
-    }
-
-    @media(max-width:500px) {
-
-      .grid {
-
-        grid-template-columns: 1fr;
-
-      }
-
-      .row {
-
-        display: block;
-
-      }
-
-      .row > * {
-
-        margin-bottom: 7px;
-
-      }
-
-    }
-
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競馬予想シミュレーター</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#f3f4f6;color:#111827;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",
+  "Hiragino Kaku Gothic ProN",Meiryo,sans-serif
+}
+header{background:#111827;color:white;padding:18px 14px}
+header h1{margin:0;font-size:21px}
+header p{margin:6px 0 0;color:#cbd5e1;font-size:12px}
+main{max-width:1250px;margin:auto;padding:10px}
+.card{
+  background:white;border-radius:14px;padding:14px;margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05)
+}
+h2{font-size:18px;margin:0 0 12px}
+h3{font-size:15px;margin:16px 0 8px}
+.small{font-size:12px;color:#64748b;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+label{display:block;font-size:12px;color:#64748b;margin-bottom:4px}
+input,select,textarea{
+  width:100%;padding:9px;border:1px solid #cbd5e1;
+  border-radius:8px;background:white;font-size:14px
+}
+textarea{min-height:140px;font-family:monospace;font-size:12px}
+button{
+  border:0;border-radius:9px;padding:10px 14px;
+  font-weight:700;cursor:pointer
+}
+.primary{background:#111827;color:white}
+.secondary{background:#e2e8f0;color:#111827}
+.good{background:#166534;color:white}
+.danger{background:#b91c1c;color:white}
+.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.status{
+  margin-top:9px;padding:10px;border-radius:9px;
+  background:#f1f5f9;font-size:13px;line-height:1.6
+}
+.notice{
+  background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;
+  padding:10px;border-radius:9px;font-size:12px;line-height:1.7
+}
+.success{
+  background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;
+  padding:10px;border-radius:9px;font-size:12px
+}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1150px}
+th,td{
+  border-bottom:1px solid #e5e7eb;padding:6px;
+  text-align:center;white-space:nowrap
+}
+th{background:#f1f5f9;font-size:12px}
+td input,td select{min-width:62px;padding:7px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.result-card{background:#f8fafc;border-radius:11px;padding:12px}
+.big{font-size:29px;font-weight:900}
+.row{display:flex;gap:8px;align-items:end}
+.row>*{flex:1}
+.mark-row{padding:9px 0;border-bottom:1px solid #e5e7eb}
+.bet{padding:11px;background:#f8fafc;border-radius:9px;margin:7px 0;line-height:1.8}
+.pill{
+  display:inline-block;padding:3px 7px;border-radius:999px;
+  background:#e2e8f0;font-size:11px;margin:2px
+}
+.hidden{display:none}
+
+@media(max-width:800px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .cards{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+  .grid{grid-template-columns:1fr}
+  .row{display:block}
+  .row>*{margin-bottom:7px}
+}
+</style>
 </head>
-
 
 <body>
 
-
 <header>
-
-  <h1>
-    🏇 競馬予想シミュレーター
-  </h1>
-
-  <p>
-    JRA・地方対応 / 最大18頭 / CSV・JSON・ZIP対応
-  </p>
-
+<h1>🏇 競馬予想シミュレーター</h1>
+<p>JRA・地方対応 / 最大18頭 / CSV・JSON・ZIP対応</p>
 </header>
-
 
 <main>
 
-
-<!-- =========================================
-     レース情報
-========================================= -->
-
+<!-- レース情報 -->
 <section class="card">
-
-  <h2>
-    ① レース情報
-  </h2>
-
-
-  <div class="grid">
-
-
-    <div>
-
-      <label>
-        開催日
-      </label>
-
-      <input
-        id="raceDate"
-        type="date"
-      >
-
-    </div>
-
-
-    <div>
-
-      <label>
-        開催区分
-      </label>
-
-      <select id="raceType">
-
-        <option>
-          JRA
-        </option>
-
-        <option>
-          地方
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div>
-
-      <label>
-        競馬場
-      </label>
-
-      <input
-        id="raceTrack"
-        placeholder="中山 / 大井 / 笠松"
-      >
-
-    </div>
-
-
-    <div>
-
-      <label>
-        R
-      </label>
-
-      <input
-        id="raceNumber"
-        type="number"
-        min="1"
-        max="12"
-        placeholder="8"
-      >
-
-    </div>
-
-
-    <div>
-
-      <label>
-        距離(m)
-      </label>
-
-      <input
-        id="raceDistance"
-        type="number"
-        placeholder="1200"
-      >
-
-    </div>
-
-
-    <div>
-
-      <label>
-        コース
-      </label>
-
-      <select id="raceSurface">
-
-        <option>
-          芝
-        </option>
-
-        <option>
-          ダート
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div>
-
-      <label>
-        馬場
-      </label>
-
-      <select id="raceGoing">
-
-        <option>
-          良
-        </option>
-
-        <option>
-          稍重
-        </option>
-
-        <option>
-          重
-        </option>
-
-        <option>
-          不良
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div>
-
-      <label>
-        シミュレーション回数
-      </label>
-
-      <select id="simulationCount">
-
-        <option value="10000">
-          10,000
-        </option>
-
-        <option
-          value="30000"
-          selected
-        >
-          30,000
-        </option>
-
-        <option value="50000">
-          50,000
-        </option>
-
-        <option value="100000">
-          100,000
-        </option>
-
-      </select>
-
-    </div>
-
-
-  </div>
-
-
-  <div class="actions">
-
-    <button
-      class="primary"
-      onclick="loadDemo()"
-    >
-      サンプル16頭
-    </button>
-
-
-    <button
-      class="secondary"
-      onclick="clearAll()"
-    >
-      全消去
-    </button>
-
-  </div>
-
-
-  <div
-    class="status"
-    id="raceStatus"
-  >
-    レース条件を入力してください。
-  </div>
-
-
+<h2>① レース情報</h2>
+
+<div class="grid">
+
+<div>
+<label>開催日</label>
+<input id="raceDate" type="date">
+</div>
+
+<div>
+<label>開催区分</label>
+<select id="raceType">
+<option value="JRA">JRA</option>
+<option value="地方">地方</option>
+</select>
+</div>
+
+<div>
+<label>競馬場</label>
+<input id="raceTrack" placeholder="中山 / 大井 / 笠松">
+</div>
+
+<div>
+<label>R</label>
+<input id="raceNumber" type="number" min="1" max="12" placeholder="8">
+</div>
+
+<div>
+<label>距離(m)</label>
+<input id="raceDistance" type="number" placeholder="1200">
+</div>
+
+<div>
+<label>コース</label>
+<select id="raceSurface">
+<option>芝</option>
+<option>ダート</option>
+</select>
+</div>
+
+<div>
+<label>馬場</label>
+<select id="raceGoing">
+<option>良</option>
+<option>稍重</option>
+<option>重</option>
+<option>不良</option>
+</select>
+</div>
+
+<div>
+<label>シミュレーション回数</label>
+<select id="simulationCount">
+<option value="10000">10,000</option>
+<option value="30000" selected>30,000</option>
+<option value="50000">50,000</option>
+<option value="100000">100,000</option>
+</select>
+</div>
+
+</div>
+
+<div class="actions">
+<button class="primary" onclick="loadDemo()">サンプル16頭</button>
+<button class="secondary" onclick="clearAll()">全消去</button>
+</div>
+
+<div class="status" id="raceStatus">
+レース条件を入力してください。
+</div>
 </section>
 
 
-
-<!-- =========================================
-     データ読み込み
-========================================= -->
-
+<!-- データ読み込み -->
 <section class="card">
 
+<h2>② 実データを読み込む</h2>
 
-  <h2>
-    ② 実データを読み込む
-  </h2>
-
-
-  <div class="notice">
-
-    <strong>
-      OCRは使用しません。
-    </strong>
-
-    <br>
-
-    画像から馬名やオッズを読み取る方式ではなく、
-    CSV / JSONなどの構造化データを優先します。
-
-    <br><br>
-
-    地方競馬の公式CSVを取得した場合は、
-    CSVまたはZIPを選択してください。
-
-    <br>
-
-    ZIPの場合は中にあるCSVを自動検索します。
-
-  </div>
+<div class="notice">
+<strong>JRA：</strong>
+これまで通りCSV / JSON / ZIPを読み込めます。
+<br><br>
+<strong>地方：</strong>
+地方競馬情報サイト等から利用可能なCSV/ZIPを取得した場合、
+ZIP内のCSVを自動検索して読み込みます。
+<br><br>
+※利用するデータは、提供元の利用規約・利用条件に従ってください。
+</div>
 
 
-  <h3>
-    CSV / JSON / ZIP
-  </h3>
+<!-- 地方専用 -->
+<div id="narDataBox" class="hidden">
+
+<h3>🏇 地方競馬データ</h3>
+
+<div class="notice">
+地方競馬用のCSV/ZIPを選択してください。
+ZIPの場合は中のCSVを自動検索します。
+</div>
+
+<input id="narZipFile" type="file" accept=".zip,.csv,.txt,.json">
+
+<div class="actions">
+<button class="good" onclick="loadNARFile()">
+🏇 地方競馬データを読み込む
+</button>
+</div>
+
+<div class="status" id="narStatus">
+未読込
+</div>
+
+</div>
 
 
-  <input
-    id="dataFile"
-    type="file"
-    accept=".csv,.txt,.json,.zip"
-  >
+<h3>通常 CSV / JSON / ZIP</h3>
+
+<input
+id="dataFile"
+type="file"
+accept=".csv,.txt,.json,.zip"
+>
+
+<div class="actions">
+<button class="primary" onclick="loadSelectedFile()">
+📁 データを読み込む
+</button>
+</div>
 
 
-  <div class="actions">
+<h3>直接貼り付け</h3>
 
-    <button
-      class="primary"
-      onclick="loadSelectedFile()"
-    >
-      📁 データを読み込む
-    </button>
-
-  </div>
-
-
-  <h3>
-    直接貼り付け
-  </h3>
-
-
-  <textarea
-    id="dataText"
-    placeholder="CSV例：
+<textarea id="dataText" placeholder="CSV例：
 
 number,name,odds,jockey,recent,distance,course,going,pace,final3f,style
 1,サンプルホース,4.5,騎手名,78,80,75,70,72,80,差し
 2,サンプルホース2,8.2,騎手名2,70,72,80,75,68,74,先行
-"
-  ></textarea>
+"></textarea>
 
+<div class="actions">
+<button class="primary" onclick="importText()">
+データを登録
+</button>
+</div>
 
-  <div class="actions">
-
-    <button
-      class="primary"
-      onclick="importText()"
-    >
-      データを登録
-    </button>
-
-  </div>
-
-
-  <div
-    class="status"
-    id="importStatus"
-  >
-    未読込
-  </div>
-
+<div class="status" id="importStatus">
+未読込
+</div>
 
 </section>
 
 
-
-<!-- =========================================
-     出走馬
-========================================= -->
-
+<!-- 出走馬 -->
 <section class="card">
 
+<h2>③ 出走馬</h2>
 
-  <h2>
-    ③ 出走馬
-  </h2>
+<div class="actions">
+<button class="secondary" onclick="addHorse()">＋馬を追加</button>
+<button class="secondary" onclick="sortHorses()">馬番順</button>
+</div>
 
+<div class="table-wrap">
 
-  <div class="actions">
+<table>
+<thead>
+<tr>
+<th>馬番</th>
+<th>馬名</th>
+<th>単勝</th>
+<th>騎手</th>
+<th>斤量</th>
+<th>近走</th>
+<th>距離</th>
+<th>コース</th>
+<th>馬場</th>
+<th>展開</th>
+<th>上がり</th>
+<th>脚質</th>
+<th>削除</th>
+</tr>
+</thead>
 
-    <button
-      class="secondary"
-      onclick="addHorse()"
-    >
-      ＋馬を追加
-    </button>
+<tbody id="horseTable"></tbody>
 
-
-    <button
-      class="secondary"
-      onclick="sortHorses()"
-    >
-      馬番順
-    </button>
-
-  </div>
-
-
-  <div class="table-wrap">
-
-    <table>
-
-
-      <thead>
-
-        <tr>
-
-          <th>
-            馬番
-          </th>
-
-          <th>
-            馬名
-          </th>
-
-          <th>
-            単勝
-          </th>
-
-          <th>
-            騎手
-          </th>
-
-          <th>
-            斤量
-          </th>
-
-          <th>
-            近走
-          </th>
-
-          <th>
-            距離
-          </th>
-
-          <th>
-            コース
-          </th>
-
-          <th>
-            馬場
-          </th>
-
-          <th>
-            展開
-          </th>
-
-          <th>
-            上がり
-          </th>
-
-          <th>
-            脚質
-          </th>
-
-          <th>
-            削除
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="horseTable"
-      ></tbody>
-
-
-    </table>
-
-  </div>
-
-
+</table>
+</div>
 </section>
 
 
-
-<!-- =========================================
-     シミュレーション
-========================================= -->
-
+<!-- シミュレーション -->
 <section class="card">
 
+<h2>④ 予想シミュレーション</h2>
 
-  <h2>
-    ④ 予想シミュレーション
-  </h2>
+<p class="small">
+近走・距離適性・コース適性・馬場適性・展開・
+上がり・オッズなどを数値化して仮想レースを実行します。
+<br>
+※シミュレーションは予想を補助するもので、的中を保証するものではありません。
+</p>
 
+<button class="primary" onclick="runSimulation()">
+🎯 予想を計算
+</button>
 
-  <p class="small">
-
-    近走・距離適性・コース適性・馬場適性・展開・
-    上がり・オッズなどを数値化して、
-    指定回数の仮想レースを実行します。
-
-    <br>
-
-    ※シミュレーションは予想を補助するもので、
-    的中を保証するものではありません。
-
-  </p>
-
-
-  <button
-    class="primary"
-    onclick="runSimulation()"
-  >
-    🎯 予想を計算
-  </button>
-
-
-  <div
-    class="status"
-    id="simStatus"
-  >
-    待機中
-  </div>
-
+<div class="status" id="simStatus">
+待機中
+</div>
 
 </section>
 
 
+<!-- 結果 -->
+<section class="card hidden" id="resultSection">
 
-<!-- =========================================
-     結果
-========================================= -->
+<h2>⑤ 最終予想</h2>
 
-<section
-  class="card hidden"
-  id="resultSection"
->
+<div class="cards" id="topResults"></div>
 
+<h3>印</h3>
+<div id="marks"></div>
 
-  <h2>
-    ⑤ 最終予想
-  </h2>
+<h3>全馬ランキング</h3>
 
+<div class="table-wrap">
 
-  <div
-    class="cards"
-    id="topResults"
-  ></div>
+<table>
+<thead>
+<tr>
+<th>順位</th>
+<th>馬番</th>
+<th>馬名</th>
+<th>単勝</th>
+<th>1着率</th>
+<th>3着内率</th>
+<th>平均着順</th>
+<th>印</th>
+</tr>
+</thead>
 
+<tbody id="ranking"></tbody>
 
-  <h3>
-    印
-  </h3>
+</table>
+</div>
 
-
-  <div
-    id="marks"
-  ></div>
-
-
-  <h3>
-    全馬ランキング
-  </h3>
-
-
-  <div class="table-wrap">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>
-            順位
-          </th>
-
-          <th>
-            馬番
-          </th>
-
-          <th>
-            馬名
-          </th>
-
-          <th>
-            単勝
-          </th>
-
-          <th>
-            1着率
-          </th>
-
-          <th>
-            3着内率
-          </th>
-
-          <th>
-            平均着順
-          </th>
-
-          <th>
-            印
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="ranking"
-      ></tbody>
-
-
-    </table>
-
-  </div>
-
-
-  <h3>
-    買い目候補
-  </h3>
-
-
-  <div
-    id="bets"
-  ></div>
-
+<h3>買い目候補</h3>
+<div id="bets"></div>
 
 </section>
-
 
 </main>
 
 
-
 <script>
 
-
 /* =========================================================
-   グローバル
+   基本
 ========================================================= */
-
 
 let horses = [];
 
+const $ = id => document.getElementById(id);
 
-const $ = id =>
-  document.getElementById(id);
+function num(value, defaultValue = 0) {
 
-
-function num(
-  value,
-  defaultValue = 0
-) {
-
-  const n =
-    Number(value);
+  const n = Number(value);
 
   return Number.isFinite(n)
     ? n
     : defaultValue;
-
 }
 
-
-function clamp(
-  value
-) {
+function clamp(value) {
 
   return Math.max(
     1,
     Math.min(
       100,
-      num(
-        value,
-        60
-      )
+      num(value, 60)
     )
   );
-
 }
 
+function escapeHTML(value) {
 
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ?? ""
-  )
+  return String(value ?? "")
     .replace(
       /[&<>"']/g,
-      function(match) {
-
-        const map = {
-
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
-
-        };
-
-        return map[match];
-
-      }
+      match => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[match])
     );
-
 }
-
 
 
 /* =========================================================
-   オッズ → 初期指数
+   オッズ
 ========================================================= */
 
+function oddsBase(odds) {
 
-function oddsBase(
-  odds
-) {
+  odds = num(odds, 0);
 
-  odds =
-    num(
-      odds,
-      0
-    );
-
-
-  if (
-    odds <= 0
-  ) {
-
-    return 60;
-
-  }
-
+  if (odds <= 0) return 60;
 
   return Math.max(
     35,
     Math.min(
       95,
-      88 -
-      Math.log(odds) *
-      12
+      88 - Math.log(odds) * 12
     )
   );
-
 }
-
 
 
 /* =========================================================
    馬データ統一
 ========================================================= */
 
+function normalizeHorse(data, index) {
 
-function normalizeHorse(
-  data,
-  index
-) {
-
-  const base =
-    oddsBase(
-      data.odds ||
-      data.単勝 ||
-      data.単勝オッズ
-    );
-
+  const base = oddsBase(
+    data.odds ||
+    data.単勝 ||
+    data.単勝オッズ
+  );
 
   return {
 
-    number:
-      num(
-        data.number ||
-        data.馬番,
-        index + 1
-      ),
-
+    number:num(
+      data.number ||
+      data.馬番 ||
+      data.馬番号,
+      index + 1
+    ),
 
     name:
       data.name ||
@@ -1166,15 +444,12 @@ function normalizeHorse(
       data.馬名略称 ||
       "",
 
-
-    odds:
-      num(
-        data.odds ||
-        data.単勝 ||
-        data.単勝オッズ,
-        0
-      ),
-
+    odds:num(
+      data.odds ||
+      data.単勝 ||
+      data.単勝オッズ,
+      0
+    ),
 
     jockey:
       data.jockey ||
@@ -1182,97 +457,70 @@ function normalizeHorse(
       data.騎手名 ||
       "",
 
+    weight:num(
+      data.weight ||
+      data.斤量 ||
+      data.負担重量,
+      0
+    ),
 
-    weight:
-      num(
-        data.weight ||
-        data.斤量 ||
-        data.負担重量,
-        0
-      ),
+    recent:clamp(
+      data.recent ??
+      data.近走 ??
+      base
+    ),
 
+    distance:clamp(
+      data.distance ??
+      data.距離適性 ??
+      base
+    ),
 
-    recent:
-      clamp(
-        data.recent ??
-        data.近走 ??
-        base
-      ),
+    course:clamp(
+      data.course ??
+      data.コース適性 ??
+      base
+    ),
 
+    going:clamp(
+      data.going ??
+      data.馬場適性 ??
+      base
+    ),
 
-    distance:
-      clamp(
-        data.distance ??
-        data.距離適性 ??
-        base
-      ),
+    pace:clamp(
+      data.pace ??
+      data.展開 ??
+      base
+    ),
 
-
-    course:
-      clamp(
-        data.course ??
-        data.コース適性 ??
-        base
-      ),
-
-
-    going:
-      clamp(
-        data.going ??
-        data.馬場適性 ??
-        base
-      ),
-
-
-    pace:
-      clamp(
-        data.pace ??
-        data.展開 ??
-        base
-      ),
-
-
-    final3f:
-      clamp(
-        data.final3f ??
-        data.上がり ??
-        data.上がり3F ??
-        base
-      ),
-
+    final3f:clamp(
+      data.final3f ??
+      data.上がり ??
+      data.上がり3F ??
+      base
+    ),
 
     style:
       data.style ||
       data.脚質 ||
       "差し"
-
   };
-
 }
-
 
 
 /* =========================================================
    馬追加
 ========================================================= */
 
+function addHorse(data = {}) {
 
-function addHorse(
-  data = {}
-) {
+  if (horses.length >= 18) {
 
-  if (
-    horses.length >= 18
-  ) {
-
-    alert(
-      "最大18頭まで対応しています。"
-    );
-
+    alert("最大18頭まで対応しています。");
     return;
 
   }
-
 
   horses.push(
     normalizeHorse(
@@ -1281,2357 +529,211 @@ function addHorse(
     )
   );
 
-
   renderHorseTable();
-
 }
-
 
 
 /* =========================================================
    表示
 ========================================================= */
 
-
 function renderHorseTable() {
 
   horses.sort(
-    (a, b) =>
-      a.number -
-      b.number
+    (a,b) => a.number - b.number
   );
 
-
-  const table =
-    $("horseTable");
-
-
-  table.innerHTML =
-    horses
-      .map(
-        (
-          horse,
-          index
-        ) => `
+  $("horseTable").innerHTML =
+    horses.map(
+      (horse,index) => `
 
 <tr>
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="number"
-  type="number"
-  value="${horse.number}"
+data-index="${index}"
+data-key="number"
+type="number"
+value="${horse.number}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="name"
-  value="${escapeHTML(horse.name)}"
+data-index="${index}"
+data-key="name"
+value="${escapeHTML(horse.name)}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="odds"
-  type="number"
-  step="0.1"
-  value="${horse.odds || ""}"
+data-index="${index}"
+data-key="odds"
+type="number"
+step="0.1"
+value="${horse.odds || ""}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="jockey"
-  value="${escapeHTML(horse.jockey)}"
+data-index="${index}"
+data-key="jockey"
+value="${escapeHTML(horse.jockey)}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="weight"
-  type="number"
-  step="0.5"
-  value="${horse.weight || ""}"
+data-index="${index}"
+data-key="weight"
+type="number"
+step="0.5"
+value="${horse.weight || ""}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="recent"
-  type="number"
-  min="1"
-  max="100"
-  value="${horse.recent}"
+data-index="${index}"
+data-key="recent"
+type="number"
+min="1"
+max="100"
+value="${horse.recent}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="distance"
-  type="number"
-  min="1"
-  max="100"
-  value="${horse.distance}"
+data-index="${index}"
+data-key="distance"
+type="number"
+min="1"
+max="100"
+value="${horse.distance}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="course"
-  type="number"
-  min="1"
-  max="100"
-  value="${horse.course}"
+data-index="${index}"
+data-key="course"
+type="number"
+min="1"
+max="100"
+value="${horse.course}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="going"
-  type="number"
-  min="1"
-  max="100"
-  value="${horse.going}"
+data-index="${index}"
+data-key="going"
+type="number"
+min="1"
+max="100"
+value="${horse.going}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="pace"
-  type="number"
-  min="1"
-  max="100"
-  value="${horse.pace}"
+data-index="${index}"
+data-key="pace"
+type="number"
+min="1"
+max="100"
+value="${horse.pace}"
 >
-
 </td>
-
 
 <td>
-
 <input
-  data-index="${index}"
-  data-key="final3f"
-  type="number"
-  min="1"
-  max="100"
-  value="${horse.final3f}"
+data-index="${index}"
+data-key="final3f"
+type="number"
+min="1"
+max="100"
+value="${horse.final3f}"
 >
-
 </td>
-
 
 <td>
 
 <select
-  data-index="${index}"
-  data-key="style"
+data-index="${index}"
+data-key="style"
 >
 
-${
-
-[
-  "逃げ",
-  "先行",
-  "差し",
-  "追込"
-]
-
+${["逃げ","先行","差し","追込"]
 .map(
-  style => `
-
-<option
-  ${
-    horse.style === style
-      ? "selected"
-      : ""
-  }
->
-  ${style}
+style => `
+<option ${horse.style === style ? "selected" : ""}>
+${style}
 </option>
-
 `
-)
-.join("")
-
-}
+).join("")}
 
 </select>
 
 </td>
 
-
 <td>
-
 <button
-  class="secondary"
-  onclick="deleteHorse(${index})"
+class="secondary"
+onclick="deleteHorse(${index})"
 >
-
 削除
-
 </button>
-
 </td>
 
 </tr>
 
 `
-      )
-      .join("");
-
+    ).join("");
 }
 
 
-
 /* =========================================================
-   表 → horsesへ同期
+   表 → データ
 ========================================================= */
-
 
 function syncHorses() {
 
   document
-    .querySelectorAll(
-      "[data-index][data-key]"
-    )
-    .forEach(
-      element => {
+    .querySelectorAll("[data-index][data-key]")
+    .forEach(element => {
 
-        const index =
-          Number(
-            element.dataset.index
-          );
+      const index =
+        Number(element.dataset.index);
 
+      const key =
+        element.dataset.key;
 
-        const key =
-          element.dataset.key;
+      if (element.type === "number") {
 
+        horses[index][key] =
+          num(element.value,0);
 
-        if (
-          element.type === "number"
-        ) {
+      } else {
 
-          horses[index][key] =
-            num(
-              element.value,
-              0
-            );
-
-        } else {
-
-          horses[index][key] =
-            element.value;
-
-        }
+        horses[index][key] =
+          element.value;
 
       }
-    );
 
+    });
 }
-
 
 
 /* =========================================================
    削除
 ========================================================= */
 
-
-function deleteHorse(
-  index
-) {
+function deleteHorse(index) {
 
   syncHorses();
 
-  horses.splice(
-    index,
-    1
-  );
-
-  renderHorseTable();
-
-}
-
-
-
-/* =========================================================
-   馬番順
-========================================================= */
-
-
-function sortHorses() {
-
-  syncHorses();
-
-  horses.sort(
-    (a, b) =>
-      a.number -
-      b.number
-  );
-
-  renderHorseTable();
-
-}
-
-
-
-/* =========================================================
-   全消去
-========================================================= */
-
-
-function clearAll() {
-
-  horses = [];
-
-  renderHorseTable();
-
-  $("resultSection")
-    .classList
-    .add("hidden");
-
-
-  $("importStatus")
-    .textContent =
-    "未読込";
-
-
-  $("simStatus")
-    .textContent =
-    "待機中";
-
-}
-
-
-
-/* =========================================================
-   CSV 1行解析
-========================================================= */
-
-
-function splitCSVLine(
-  line,
-  delimiter
-) {
-
-  const result = [];
-
-  let current = "";
-
-  let insideQuote =
-    false;
-
-
-  for (
-    let i = 0;
-    i < line.length;
-    i++
-  ) {
-
-    const char =
-      line[i];
-
-
-    if (
-      char === '"'
-    ) {
-
-      if (
-        insideQuote &&
-        line[i + 1] === '"'
-      ) {
-
-        current += '"';
-
-        i++;
-
-      } else {
-
-        insideQuote =
-          !insideQuote;
-
-      }
-
-      continue;
-
-    }
-
-
-    if (
-      char === delimiter &&
-      !insideQuote
-    ) {
-
-      result.push(
-        current.trim()
-      );
-
-      current = "";
-
-      continue;
-
-    }
-
-
-    current += char;
-
-  }
-
-
-  result.push(
-    current.trim()
-  );
-
-
-  return result;
-
-}
-
-
-
-/* =========================================================
-   CSV解析
-========================================================= */
-
-
-function parseCSV(
-  text
-) {
-
-  text =
-    text
-      .replace(
-        /^\uFEFF/,
-        ""
-      )
-      .replace(
-        /\r/g,
-        ""
-      );
-
-
-  const lines =
-    text
-      .split("\n")
-      .filter(
-        line =>
-          line.trim()
-      );
-
-
-  if (
-    !lines.length
-  ) {
-
-    return [];
-
-  }
-
-
-  let delimiter = ",";
-
-
-  if (
-    lines[0].includes("\t")
-  ) {
-
-    delimiter = "\t";
-
-  }
-
-
-  const headers =
-    splitCSVLine(
-      lines[0],
-      delimiter
-    )
-      .map(
-        header =>
-          header
-            .trim()
-            .toLowerCase()
-      );
-
-
-  const aliases = {
-
-    number: [
-
-      "number",
-      "馬番",
-      "馬番号",
-      "馬　番"
-
-    ],
-
-
-    name: [
-
-      "name",
-      "馬名",
-      "馬名略称",
-      "馬名（略称）"
-
-    ],
-
-
-    odds: [
-
-      "odds",
-      "単勝",
-      "単勝オッズ",
-      "単勝オッズ(人気)"
-
-    ],
-
-
-    jockey: [
-
-      "jockey",
-      "騎手",
-      "騎手名"
-
-    ],
-
-
-    weight: [
-
-      "weight",
-      "斤量",
-      "負担重量"
-
-    ],
-
-
-    recent: [
-
-      "recent",
-      "近走",
-      "近走指数"
-
-    ],
-
-
-    distance: [
-
-      "distance",
-      "距離",
-      "距離適性"
-
-    ],
-
-
-    course: [
-
-      "course",
-      "コース",
-      "コース適性"
-
-    ],
-
-
-    going: [
-
-      "going",
-      "馬場",
-      "馬場適性"
-
-    ],
-
-
-    pace: [
-
-      "pace",
-      "展開",
-      "展開適性"
-
-    ],
-
-
-    final3f: [
-
-      "final3f",
-      "上がり",
-      "上がり3f",
-      "上がり3F"
-
-    ],
-
-
-    style: [
-
-      "style",
-      "脚質"
-
-    ]
-
-  };
-
-
-  function findColumn(
-    key
-  ) {
-
-    const candidates =
-      aliases[key];
-
-
-    for (
-      let i = 0;
-      i < headers.length;
-      i++
-    ) {
-
-      for (
-        const candidate
-        of candidates
-      ) {
-
-        if (
-          headers[i] ===
-          candidate.toLowerCase()
-        ) {
-
-          return i;
-
-        }
-
-      }
-
-    }
-
-
-    for (
-      let i = 0;
-      i < headers.length;
-      i++
-    ) {
-
-      for (
-        const candidate
-        of candidates
-      ) {
-
-        if (
-          headers[i].includes(
-            candidate.toLowerCase()
-          )
-        ) {
-
-          return i;
-
-        }
-
-      }
-
-    }
-
-
-    return -1;
-
-  }
-
-
-  const indexes = {};
-
-
-  Object
-    .keys(aliases)
-    .forEach(
-      key => {
-
-        indexes[key] =
-          findColumn(
-            key
-          );
-
-      }
-    );
-
-
-  const result = [];
-
-
-  for (
-    let row = 1;
-    row < lines.length;
-    row++
-  ) {
-
-    const values =
-      splitCSVLine(
-        lines[row],
-        delimiter
-      );
-
-
-    const data = {};
-
-
-    Object
-      .keys(indexes)
-      .forEach(
-        key => {
-
-          const index =
-            indexes[key];
-
-
-          if (
-            index >= 0
-          ) {
-
-            data[key] =
-              values[index] ??
-              "";
-
-          }
-
-        }
-      );
-
-
-    if (
-      data.name ||
-      data.number
-    ) {
-
-      result.push(
-        data
-      );
-
-    }
-
-  }
-
-
-  return result;
-
-}
-
-
-
-/* =========================================================
-   JSON解析
-========================================================= */
-
-
-function parseJSON(
-  text
-) {
-
-  const data =
-    JSON.parse(
-      text
-    );
-
-
-  if (
-    Array.isArray(data)
-  ) {
-
-    return data;
-
-  }
-
-
-  if (
-    Array.isArray(
-      data.horses
-    )
-  ) {
-
-    return data.horses;
-
-  }
-
-
-  if (
-    Array.isArray(
-      data.entries
-    )
-  ) {
-
-    return data.entries;
-
-  }
-
-
-  if (
-    Array.isArray(
-      data.data
-    )
-  ) {
-
-    return data.data;
-
-  }
-
-
-  return [];
-
-}
-
-
-
-/* =========================================================
-   テキスト読み込み
-========================================================= */
-
-
-function importText(
-  text
-) {
-
-  try {
-
-    if (
-      !text ||
-      !text.trim()
-    ) {
-
-      throw new Error(
-        "データが空です。"
-      );
-
-    }
-
-
-    let data;
-
-
-    const trimmed =
-      text.trim();
-
-
-    if (
-      trimmed.startsWith("[") ||
-      trimmed.startsWith("{")
-    ) {
-
-      data =
-        parseJSON(
-          trimmed
-        );
-
-    } else {
-
-      data =
-        parseCSV(
-          trimmed
-        );
-
-    }
-
-
-    if (
-      !data.length
-    ) {
-
-      throw new Error(
-        "馬データを検出できませんでした。"
-      );
-
-    }
-
-
-    horses =
-      data
-        .slice(
-          0,
-          18
-        )
-        .map(
-          (
-            data,
-            index
-          ) =>
-            normalizeHorse(
-              data,
-              index
-            )
-        );
-
-
-    renderHorseTable();
-
-
-    $("importStatus")
-      .innerHTML =
-
-      '<span class="pill">' +
-      '成功' +
-      '</span>' +
-
-      horses.length +
-
-      '頭を登録しました。';
-
-
-  } catch (
-    error
-  ) {
-
-    $("importStatus")
-      .textContent =
-
-      "読み込み失敗：" +
-      error.message;
-
-  }
-
-}
-
-
-
-/* =========================================================
-   ファイル読み込み
-========================================================= */
-
-
-async function loadSelectedFile() {
-
-  const file =
-    $("dataFile")
-      .files[0];
-
-
-  if (!file) {
-
-    alert(
-      "CSV / JSON / ZIPを選択してください。"
-    );
-
-    return;
-
-  }
-
-
-  try {
-
-
-    /* =============================
-       ZIP
-    ============================= */
-
-    if (
-      file.name
-        .toLowerCase()
-        .endsWith(".zip")
-    ) {
-
-
-      if (
-        typeof JSZip ===
-        "undefined"
-      ) {
-
-        throw new Error(
-          "ZIPライブラリを読み込めませんでした。"
-        );
-
-      }
-
-
-      const zip =
-        await JSZip.loadAsync(
-          file
-        );
-
-
-      const files =
-        Object
-          .values(
-            zip.files
-          )
-          .filter(
-            file =>
-              !file.dir &&
-              /\.(csv|txt|json)$/i
-                .test(
-                  file.name
-                )
-          );
-
-
-      if (
-        !files.length
-      ) {
-
-        throw new Error(
-          "ZIPの中にCSV / JSONがありません。"
-        );
-
-      }
-
-
-      let allData = [];
-
-
-      for (
-        const zipFile
-        of files
-      ) {
-
-        const text =
-          await zipFile
-            .async("text");
-
-
-        try {
-
-          let data;
-
-
-          if (
-            /\.json$/i
-              .test(
-                zipFile.name
-              )
-          ) {
-
-            data =
-              parseJSON(
-                text
-              );
-
-          } else {
-
-            data =
-              parseCSV(
-                text
-              );
-
-          }
-
-
-          if (
-            data.length
-          ) {
-
-            allData =
-              allData.concat(
-                data
-              );
-
-          }
-
-        } catch (
-          error
-        ) {
-
-          console.warn(
-            "読み込み失敗:",
-            zipFile.name,
-            error
-          );
-
-        }
-
-      }
-
-
-      if (
-        !allData.length
-      ) {
-
-        throw new Error(
-          "ZIP内のCSVから馬データを検出できませんでした。"
-        );
-
-      }
-
-
-      horses =
-        allData
-          .slice(
-            0,
-            18
-          )
-          .map(
-            (
-              data,
-              index
-            ) =>
-              normalizeHorse(
-                data,
-                index
-              )
-          );
-
-
-      renderHorseTable();
-
-
-      $("importStatus")
-        .innerHTML =
-
-        '<span class="pill">' +
-        'ZIP成功' +
-        '</span>' +
-
-        horses.length +
-
-        '頭を登録しました。';
-
-
-      return;
-
-    }
-
-
-
-    /* =============================
-       通常CSV / JSON
-    ============================= */
-
-
-    const text =
-      await file.text();
-
-
-    importText(
-      text
-    );
-
-
-  } catch (
-    error
-  ) {
-
-    $("importStatus")
-      .textContent =
-
-      "ファイル読み込み失敗：" +
-      error.message;
-
-  }
-
-}
-
-
-
-/* =========================================================
-   サンプル
-========================================================= */
-
-
-function loadDemo() {
-
-  horses = [];
-
-
-  const demo = [
-
-    [
-      1,
-      "レッドモンレーヴ",
-      52.3
-    ],
-
-    [
-      2,
-      "アイサンサン",
-      56.1
-    ],
-
-    [
-      3,
-      "ママコチャ",
-      16.1
-    ],
-
-    [
-      4,
-      "ジューンブレア",
-      28.3
-    ],
-
-    [
-      5,
-      "サウンドモリアーナ",
-      27.0
-    ],
-
-    [
-      6,
-      "ワールズエンド",
-      10.7
-    ],
-
-    [
-      7,
-      "ペアポルックス",
-      36.7
-    ],
-
-    [
-      8,
-      "エーティーマクフィ",
-      21.9
-    ],
-
-    [
-      9,
-      "スターアニス",
-      3.7
-    ],
-
-    [
-      10,
-      "レイピア",
-      25.2
-    ],
-
-    [
-      11,
-      "ルガル",
-      9.6
-    ],
-
-    [
-      12,
-      "ブラックチャリス",
-      113.6
-    ],
-
-    [
-      13,
-      "パンジャタワー",
-      3.9
-    ],
-
-    [
-      14,
-      "ウインカーネリアン",
-      13.9
-    ],
-
-    [
-      15,
-      "フリッカージャブ",
-      7.7
-    ],
-
-    [
-      16,
-      "ピューロマジック",
-      24.5
-    ]
-
-  ];
-
-
-  demo.forEach(
-    data => {
-
-      addHorse({
-
-        number:
-          data[0],
-
-        name:
-          data[1],
-
-        odds:
-          data[2]
-
-      });
-
-    }
-  );
-
-
-  $("importStatus")
-    .innerHTML =
-
-    '<span class="pill">' +
-    'サンプル' +
-    '</span>' +
-
-    '16頭を登録しました。';
-
-}
-
-
-
-/* =========================================================
-   シミュレーション用指数
-========================================================= */
-
-
-function calculateScore(
-  horse
-) {
-
-  let score = 0;
-
-
-  /*
-   * 近走
-   */
-
-  score +=
-    horse.recent *
-    0.24;
-
-
-  /*
-   * 距離
-   */
-
-  score +=
-    horse.distance *
-    0.14;
-
-
-  /*
-   * コース
-   */
-
-  score +=
-    horse.course *
-    0.11;
-
-
-  /*
-   * 馬場
-   */
-
-  score +=
-    horse.going *
-    0.10;
-
-
-  /*
-   * 展開
-   */
-
-  score +=
-    horse.pace *
-    0.15;
-
-
-  /*
-   * 上がり
-   */
-
-  score +=
-    horse.final3f *
-    0.10;
-
-
-  /*
-   * オッズ補正
-   */
-
-  const odds =
-    Math.max(
-      1,
-      num(
-        horse.odds,
-        20
-      )
-    );
-
-
-  score +=
-    Math.min(
-      8,
-      10 /
-      Math.sqrt(
-        odds
-      ) -
-      1
-    );
-
-
-  /*
-   * 脚質補正
-   */
-
-  if (
-    horse.style ===
-    "逃げ"
-  ) {
-
-    score += 2;
-
-  }
-
-
-  if (
-    horse.style ===
-    "先行"
-  ) {
-
-    score += 1.5;
-
-  }
-
-
-  if (
-    horse.style ===
-    "差し"
-  ) {
-
-    score += 1;
-
-  }
-
-
-  return Math.max(
-    1,
-    score
-  );
-
-}
-
-
-
-/* =========================================================
-   重み付き抽選
-========================================================= */
-
-
-function weightedPick(
-  weights
-) {
-
-  const total =
-    weights.reduce(
-      (
-        sum,
-        value
-      ) =>
-        sum + value,
-      0
-    );
-
-
-  let random =
-    Math.random() *
-    total;
-
-
-  for (
-    let i = 0;
-    i < weights.length;
-    i++
-  ) {
-
-    random -=
-      weights[i];
-
-
-    if (
-      random <= 0
-    ) {
-
-      return i;
-
-    }
-
-  }
-
-
-  return (
-    weights.length -
-    1
-  );
-
-}
-
-
-
-/* =========================================================
-   シミュレーション
-========================================================= */
-
-
-async function runSimulation() {
-
-  syncHorses();
-
-
-  if (
-    horses.length < 2
-  ) {
-
-    alert(
-      "2頭以上必要です。"
-    );
-
-    return;
-
-  }
-
-
-  if (
-    horses.some(
-      horse =>
-        !horse.name
-    )
-  ) {
-
-    alert(
-      "馬名が空欄の馬があります。"
-    );
-
-    return;
-
-  }
-
-
-  const count =
-    num(
-      $("simulationCount")
-        .value,
-      30000
-    );
-
-
-  const weights =
-    horses.map(
-      horse =>
-        calculateScore(
-          horse
-        )
-    );
-
-
-  const win =
-    Array(
-      horses.length
-    ).fill(0);
-
-
-  const top3 =
-    Array(
-      horses.length
-    ).fill(0);
-
-
-  const positionSum =
-    Array(
-      horses.length
-    ).fill(0);
-
-
-  $("simStatus")
-    .textContent =
-
-    count.toLocaleString() +
-    "回シミュレーション中…";
-
-
-  for (
-    let simulation = 0;
-    simulation < count;
-    simulation++
-  ) {
-
-
-    /*
-     * 残っている馬
-     */
-
-    const remaining =
-      horses.map(
-        (
-          horse,
-          index
-        ) =>
-          index
-      );
-
-
-    const order = [];
-
-
-    /*
-     * 1着から順番に抽選
-     */
-
-    while (
-      remaining.length
-    ) {
-
-
-      const currentWeights =
-        remaining.map(
-          index =>
-            Math.pow(
-              weights[index],
-              2.2
-            )
-        );
-
-
-      const selectedPosition =
-        weightedPick(
-          currentWeights
-        );
-
-
-      const selectedHorse =
-        remaining[
-          selectedPosition
-        ];
-
-
-      order.push(
-        selectedHorse
-      );
-
-
-      remaining.splice(
-        selectedPosition,
-        1
-      );
-
-    }
-
-
-    /*
-     * 結果記録
-     */
-
-    order.forEach(
-      (
-        horseIndex,
-        position
-      ) => {
-
-        positionSum[
-          horseIndex
-        ] +=
-          position + 1;
-
-
-        if (
-          position === 0
-        ) {
-
-          win[
-            horseIndex
-          ]++;
-
-        }
-
-
-        if (
-          position < 3
-        ) {
-
-          top3[
-            horseIndex
-          ]++;
-
-        }
-
-      }
-    );
-
-
-    /*
-     * ブラウザを固めない
-     */
-
-    if (
-      simulation % 3000 ===
-      0
-    ) {
-
-      await new Promise(
-        resolve =>
-          setTimeout(
-            resolve,
-            0
-          )
-      );
-
-    }
-
-  }
-
-
-  /*
-   * 結果作成
-   */
-
-  const results =
-    horses.map(
-      (
-        horse,
-        index
-      ) => ({
-
-        ...horse,
-
-        winRate:
-          win[index] /
-          count *
-          100,
-
-        top3Rate:
-          top3[index] /
-          count *
-          100,
-
-        averagePosition:
-          positionSum[index] /
-          count
-
-      })
-    );
-
-
-  /*
-   * 1着率順
-   */
-
-  results.sort(
-    (
-      a,
-      b
-    ) =>
-      b.winRate -
-      a.winRate
-  );
-
-
-  /*
-   * 印
-   */
-
-  const marks = [
-
-    "◎",
-    "○",
-    "▲",
-    "△",
-    "△",
-    "△",
-    "☆"
-
-  ];
-
-
-  results.forEach(
-    (
-      horse,
-      index
-    ) => {
-
-      horse.mark =
-        marks[index] ||
-        "";
-
-    }
-  );
-
-
-  displayResults(
-    results
-  );
-
-
-  $("simStatus")
-    .textContent =
-
-    count.toLocaleString() +
-    "回の計算が完了しました。";
-
-}
-
-
-
-/* =========================================================
-   結果表示
-========================================================= */
-
-
-function displayResults(
-  results
-) {
-
-  $("resultSection")
-    .classList
-    .remove(
-      "hidden"
-    );
-
-
-  /*
-   * TOP3
-   */
-
-  $("topResults")
-    .innerHTML =
-
-    results
-      .slice(
-        0,
-        3
-      )
-      .map(
-        (
-          horse,
-          index
-        ) => `
-
-<div class="result-card">
-
-  <div class="big">
-
-    ${
-      [
-        "◎",
-        "○",
-        "▲"
-      ][index]
-    }
-
-  </div>
-
-
-  <b>
-
-    ${escapeHTML(
-      horse.number
-    )}
-
-    番
-
-    ${escapeHTML(
-      horse.name
-    )}
-
-  </b>
-
-
-  <div>
-
-    単勝
-
-    ${
-      horse.odds
-        ? horse.odds.toFixed(1)
-        : "—"
-    }
-
-    倍
-
-  </div>
-
-
-  <div>
-
-    1着率
-
-    ${
-      horse.winRate.toFixed(2)
-    }%
-
-  </div>
-
-
-  <div>
-
-    3着内率
-
-    ${
-      horse.top3Rate.toFixed(2)
-    }%
-
-  </div>
-
-</div>
-
-`
-      )
-      .join("");
-
-
-
-  /*
-   * 印まとめ
-   */
-
-  const groups = {};
-
-
-  results.forEach(
-    horse => {
-
-      if (
-        !horse.mark
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        !groups[
-          horse.mark
-        ]
-      ) {
-
-        groups[
-          horse.mark
-        ] = [];
-
-      }
-
-
-      groups[
-        horse.mark
-      ].push(
-        horse.number
-      );
-
-    }
-  );
-
-
-  $("marks")
-    .innerHTML =
-
-    [
-      "◎",
-      "○",
-      "▲",
-      "△",
-      "☆"
-    ]
-      .filter(
-        mark =>
-          groups[mark]
-      )
-      .map(
-        mark => `
-
-<div class="mark-row">
-
-  <b>
-    ${mark}
-  </b>
-
- 　
-
-  ${
-    groups[mark]
-      .join("・")
-  }
-
-  番
-
-</div>
-
-`
-      )
-      .join("");
-
-
-
-  /*
-   * 全馬ランキング
-   */
-
-  $("ranking")
-    .innerHTML =
-
-    results
-      .map(
-        (
-          horse,
-          index
-        ) => `
-
-<tr>
-
-<td>
-  ${index + 1}
-</td>
-
-<td>
-  ${horse.number}
-</td>
-
-<td>
-  ${escapeHTML(
-    horse.name
-  )}
-</td>
-
-<td>
-
-  ${
-    horse.odds
-      ? horse.odds.toFixed(1)
-      : "—"
-  }
-
-</td>
-
-<td>
-
-  ${
-    horse.winRate.toFixed(2)
-  }%
-
-</td>
-
-<td>
-
-  ${
-    horse.top3Rate.toFixed(2)
-  }%
-
-</td>
-
-<td>
-
-  ${
-    horse.averagePosition.toFixed(2)
-  }
-
-</td>
-
-<td>
-
-  <b>
-    ${horse.mark}
-  </b>
-
-</td>
-
-</tr>
-
-`
-      )
-      .join("");
-
-
-  /*
-   * 買い目
-   */
-
-  createBetSuggestions(
-    results
-  );
-
-}
-
-
-
-/* =========================================================
-   買い目作成
-========================================================= */
-
-
-function createBetSuggestions(
-  results
-) {
-
-  const top =
-    results.slice(
-      0,
-      5
-    );
-
-
-  const numbers =
-    top.map(
-      horse =>
-        horse.number
-    );
-
-
-  /*
-   * ワイド
-   */
-
-  const wide =
-    numbers
-      .slice(
-        0,
-        4
-      )
-      .join("・");
-
-
-  /*
-   * 馬連
-   */
-
-  const quinella = [];
-
-
-  for (
-    let i = 0;
-    i < top.length;
-    i++
-  ) {
-
-    for (
-      let j = i + 1;
-      j < top.length;
-      j++
-    ) {
-
-      quinella.push(
-
-        numbers[i] +
-        "-" +
-        numbers[j]
-
-      );
-
-    }
-
-  }
-
-
-  /*
-   * 3連複
-   */
-
-  const trifectaBox = [];
-
-
-  for (
-    let i = 0;
-    i < top.length;
-    i++
-  ) {
-
-    for (
-      let j = i + 1;
-      j < top.length;
-      j++
-    ) {
-
-      for (
-        let k = j + 1;
-        k < top.length;
-        k++
-      ) {
-
-        trifectaBox.push(
-
-          numbers[i] +
-          "-" +
-          numbers[j] +
-          "-" +
-          numbers[k]
-
-        );
-
-      }
-
-    }
-
-  }
-
-
-  /*
-   * 3連単
-   */
-
-  const exacta = [];
-
-
-  for (
-    let i = 0;
-    i < Math.min(
-      3,
-      top.length
-    );
-    i++
-  ) {
-
-    for (
-      let j = 0;
-      j < Math.min(
-        4,
-        top.length
-      );
-      j++
-    ) {
-
-      for (
-        let k = 0;
-        k < Math.min(
-          5,
-          top.length
-        );
-        k++
-      ) {
-
-
-        if (
-          i === j ||
-          i === k ||
-          j === k
-        ) {
-
-          continue;
-
-        }
-
-
-        exacta.push(
-
-          numbers[i] +
-          "→" +
-          numbers[j] +
-          "→" +
-          numbers[k]
-
-        );
-
-      }
-
-    }
-
-  }
-
-
-  $("bets")
-    .innerHTML = `
-
-<div class="bet">
-
-  <b>
-    ワイド候補
-  </b>
-
-  <br>
-
-  ${wide}
-
-</div>
-
-
-<div class="bet">
-
-  <b>
-    馬連候補
-  </b>
-
-  <br>
-
-  ${
-    quinella
-      .slice(
-        0,
-        10
-      )
-      .join(" / ")
-  }
-
-</div>
-
-
-<div class="bet">
-
-  <b>
-    3連複候補
-  </b>
-
-  <br>
-
-  ${
-    trifectaBox
-      .slice(
-        0,
-        10
-      )
-      .join(" / ")
-  }
-
-</div>
-
-
-<div class="bet">
-
-  <b>
-    3連単候補
-  </b>
-
-  <br>
-
-  ${
-    exacta
-      .slice(
-        0,
-        12
-      )
-      .join(" / ")
-  }
-
-</div>
-
-`;
-
-}
-
-
-
-/* =========================================================
-   初期表示
-========================================================= */
-
-
-renderHorseTable();
-
-
-</script>
-
-
-</body>
-
-</html>
+  horses.splice(index,1

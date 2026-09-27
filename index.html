@@ -1,4422 +1,2768 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-  <title>競馬予想シミュレーター</title>
+<title>競馬予想シミュレーター</title>
 
-  <!-- OCR -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+*{box-sizing:border-box}
 
-    body {
-      margin: 0;
-      background: #f3f4f6;
-      color: #111827;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Noto Sans JP",
-        "Yu Gothic",
-        sans-serif;
-    }
+body{
+  margin:0;
+  background:#f3f4f6;
+  color:#111827;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;
+}
 
-    header {
-      background: #111827;
-      color: white;
-      padding: 18px 15px;
-    }
+header{
+  background:#111827;
+  color:#fff;
+  padding:18px 14px;
+}
 
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
+header h1{
+  margin:0;
+  font-size:21px;
+}
 
-    header p {
-      margin: 6px 0 0;
-      color: #d1d5db;
-      font-size: 13px;
-    }
+header p{
+  margin:6px 0 0;
+  font-size:12px;
+  color:#d1d5db;
+}
 
-    main {
-      width: min(1200px, 100%);
-      margin: auto;
-      padding: 14px;
-    }
+main{
+  width:min(1200px,100%);
+  margin:auto;
+  padding:12px;
+}
 
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:15px;
+  margin-bottom:13px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
 
-    h2 {
-      margin: 0 0 12px;
-      font-size: 18px;
-    }
+h2{
+  font-size:18px;
+  margin:0 0 12px;
+}
 
-    h3 {
-      margin: 18px 0 10px;
-      font-size: 15px;
-    }
+h3{
+  font-size:15px;
+  margin:18px 0 9px;
+}
 
-    .small {
-      color: #6b7280;
-      font-size: 12px;
-      line-height: 1.7;
-    }
+.small{
+  font-size:12px;
+  color:#6b7280;
+  line-height:1.7;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
 
-    .field label {
-      display: block;
-      margin-bottom: 4px;
-      color: #6b7280;
-      font-size: 12px;
-    }
+label{
+  display:block;
+  font-size:12px;
+  color:#6b7280;
+  margin-bottom:4px;
+}
 
-    input,
-    select {
-      width: 100%;
-      padding: 9px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      background: white;
-      font-size: 14px;
-    }
+input,select{
+  width:100%;
+  padding:9px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  font-size:14px;
+  background:#fff;
+}
 
-    button {
-      border: 0;
-      border-radius: 9px;
-      padding: 10px 15px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-    }
+button{
+  border:0;
+  border-radius:9px;
+  padding:10px 14px;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    button.primary {
-      background: #111827;
-      color: white;
-    }
+button.primary{
+  background:#111827;
+  color:#fff;
+}
 
-    button.secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
+button.secondary{
+  background:#e5e7eb;
+  color:#111827;
+}
 
-    button.danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+button.danger{
+  background:#fee2e2;
+  color:#991b1b;
+}
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+button:disabled{
+  opacity:.5;
+}
 
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
 
-    .table-wrap {
-      overflow-x: auto;
-      margin-top: 12px;
-    }
+.progress{
+  margin-top:10px;
+  padding:10px;
+  border-radius:8px;
+  background:#f3f4f6;
+  font-size:13px;
+  line-height:1.6;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 900px;
-    }
+.notice{
+  padding:11px;
+  border-radius:9px;
+  margin-top:10px;
+  font-size:13px;
+  line-height:1.6;
+}
 
-    th,
-    td {
-      border-bottom: 1px solid #e5e7eb;
-      padding: 8px;
-      text-align: center;
-      white-space: nowrap;
-    }
+.notice.ok{
+  background:#ecfdf5;
+  color:#166534;
+}
 
-    th {
-      background: #f3f4f6;
-      font-size: 12px;
-    }
+.notice.warn{
+  background:#fff7ed;
+  color:#9a3412;
+}
 
-    td {
-      font-size: 13px;
-    }
+.notice.error{
+  background:#fef2f2;
+  color:#991b1b;
+}
 
-    td input,
-    td select {
-      min-width: 70px;
-    }
+.table-wrap{
+  overflow-x:auto;
+  margin-top:12px;
+}
 
-    .notice {
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 10px;
-      font-size: 13px;
-      line-height: 1.6;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:900px;
+}
 
-    .notice.ok {
-      background: #ecfdf5;
-      color: #166534;
-    }
+th,td{
+  border-bottom:1px solid #e5e7eb;
+  padding:7px;
+  text-align:center;
+  white-space:nowrap;
+}
 
-    .notice.warn {
-      background: #fff7ed;
-      color: #9a3412;
-    }
+th{
+  background:#f3f4f6;
+  font-size:12px;
+}
 
-    .notice.error {
-      background: #fef2f2;
-      color: #991b1b;
-    }
+td{
+  font-size:13px;
+}
 
-    .progress {
-      margin-top: 10px;
-      padding: 10px;
-      background: #f3f4f6;
-      border-radius: 8px;
-      font-size: 13px;
-    }
+td input,td select{
+  min-width:65px;
+}
 
-    .result-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
+.preview-wrap{
+  margin-top:12px;
+  background:#111827;
+  padding:8px;
+  border-radius:10px;
+  overflow:auto;
+}
 
-    .result-box {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 14px;
-    }
+#previewCanvas{
+  display:block;
+  max-width:100%;
+  height:auto;
+  margin:auto;
+}
 
-    .result-box .mark {
-      font-size: 28px;
-      font-weight: 900;
-    }
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
 
-    .result-box strong {
-      font-size: 18px;
-    }
+.result-box{
+  background:#f8fafc;
+  padding:14px;
+  border-radius:12px;
+}
 
-    .mark-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
+.result-mark{
+  font-size:28px;
+  font-weight:900;
+}
 
-    .mark-circle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #f3f4f6;
-      font-weight: 900;
-    }
+.mark-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:9px 0;
+  border-bottom:1px solid #eee;
+}
 
-    .bet-box {
-      padding: 12px;
-      background: #f8fafc;
-      border-radius: 10px;
-      margin-top: 8px;
-      line-height: 1.8;
-    }
+.mark-circle{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:#f3f4f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  font-weight:900;
+}
 
-    .hidden {
-      display: none !important;
-    }
+.bet-box{
+  background:#f8fafc;
+  padding:12px;
+  border-radius:10px;
+  margin-top:8px;
+  line-height:1.8;
+}
 
-    @media (max-width: 750px) {
+.hidden{
+  display:none!important;
+}
 
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+.ocr-good{
+  color:#166534;
+  font-weight:bold;
+}
 
-      .result-grid {
-        grid-template-columns: 1fr;
-      }
+.ocr-bad{
+  color:#991b1b;
+  font-weight:bold;
+}
 
-      header h1 {
-        font-size: 19px;
-      }
-    }
+@media(max-width:750px){
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
 
-    @media (max-width: 480px) {
+  .result-grid{
+    grid-template-columns:1fr;
+  }
+}
 
-      .grid {
-        grid-template-columns: 1fr;
-      }
+@media(max-width:480px){
+  .grid{
+    grid-template-columns:1fr;
+  }
 
-      main {
-        padding: 8px;
-      }
+  main{
+    padding:8px;
+  }
 
-      .card {
-        padding: 12px;
-      }
-    }
-  </style>
+  .card{
+    padding:12px;
+  }
+}
+</style>
 </head>
-
 
 <body>
 
 <header>
-
-  <h1>🏇 競馬予想シミュレーター</h1>
-
-  <p>
-    出馬表OCR・最大18頭対応・オッズ分析・30,000回シミュレーション
-  </p>
-
+<h1>🏇 競馬予想シミュレーター</h1>
+<p>出馬表OCR・18頭対応・オッズ分析・シミュレーション</p>
 </header>
-
 
 <main>
 
-
-<!-- =====================================================
-     ① レース情報
-===================================================== -->
+<!-- レース情報 -->
 
 <section class="card">
 
-  <h2>① レース情報</h2>
+<h2>① レース情報</h2>
 
-  <div class="grid">
+<div class="grid">
 
-    <div class="field">
+<div>
+<label>開催日</label>
+<input id="raceDate" type="date">
+</div>
 
-      <label>開催日</label>
+<div>
+<label>競馬場</label>
+<input id="track" placeholder="中山">
+</div>
 
-      <input
-        id="raceDate"
-        type="date"
-      >
+<div>
+<label>レース番号</label>
+<input id="raceNo" type="number" min="1" max="12">
+</div>
 
-    </div>
+<div>
+<label>距離</label>
+<input id="distance" type="number" placeholder="1200">
+</div>
 
+<div>
+<label>コース</label>
+<select id="surface">
+<option>芝</option>
+<option>ダート</option>
+</select>
+</div>
 
-    <div class="field">
+<div>
+<label>馬場</label>
+<select id="going">
+<option>良</option>
+<option>稍重</option>
+<option>重</option>
+<option>不良</option>
+</select>
+</div>
 
-      <label>競馬場</label>
+<div>
+<label>天気</label>
+<input id="weather" placeholder="晴">
+</div>
 
-      <input
-        id="track"
-        type="text"
-        placeholder="中山"
-      >
+<div>
+<label>シミュレーション回数</label>
+<select id="simCount">
+<option value="10000">10,000回</option>
+<option value="30000" selected>30,000回</option>
+<option value="50000">50,000回</option>
+</select>
+</div>
 
-    </div>
-
-
-    <div class="field">
-
-      <label>レース番号</label>
-
-      <input
-        id="raceNo"
-        type="number"
-        placeholder="11"
-        min="1"
-        max="12"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>距離(m)</label>
-
-      <input
-        id="distance"
-        type="number"
-        placeholder="1200"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>コース</label>
-
-      <select id="surface">
-
-        <option value="芝">
-          芝
-        </option>
-
-        <option value="ダート">
-          ダート
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>馬場</label>
-
-      <select id="going">
-
-        <option value="良">
-          良
-        </option>
-
-        <option value="稍重">
-          稍重
-        </option>
-
-        <option value="重">
-          重
-        </option>
-
-        <option value="不良">
-          不良
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>天気</label>
-
-      <input
-        id="weather"
-        type="text"
-        placeholder="晴"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>シミュレーション回数</label>
-
-      <select id="simCount">
-
-        <option value="10000">
-          10,000回
-        </option>
-
-        <option
-          value="30000"
-          selected
-        >
-          30,000回
-        </option>
-
-        <option value="50000">
-          50,000回
-        </option>
-
-      </select>
-
-    </div>
-
-  </div>
+</div>
 
 </section>
 
 
-
-<!-- =====================================================
-     ② OCR
-===================================================== -->
+<!-- OCR -->
 
 <section class="card">
 
-  <h2>
-    ② 📷 出馬表画像を読み取る
-  </h2>
+<h2>② 📷 出馬表を読み取る</h2>
+
+<p class="small">
+出馬表画像をアップロードすると、
+馬番・馬名・単勝オッズ・複勝オッズを読み取ります。
+<br>
+最大18頭まで対応。
+</p>
+
+<input
+  id="raceImage"
+  type="file"
+  accept="image/*"
+>
+
+<div class="actions">
+
+<button
+  id="ocrButton"
+  class="primary"
+>
+📷 出馬表を読み取る
+</button>
+
+</div>
+
+<div
+  id="ocrProgress"
+  class="progress"
+>
+画像を選択してください。
+</div>
+
+<div
+  id="previewArea"
+  class="hidden"
+>
+
+<h3>画像プレビュー</h3>
+
+<div class="preview-wrap">
+
+<canvas id="previewCanvas"></canvas>
+
+</div>
+
+</div>
 
 
-  <p class="small">
+<div
+  id="ocrCheck"
+  class="hidden"
+>
 
-    出馬表のスクリーンショットを選択してください。
+<h3>🔎 OCR結果確認</h3>
 
-    <br>
+<div id="ocrMessage"></div>
 
-    最大18頭まで対応しています。
+<div class="table-wrap">
 
-    <br>
+<table>
 
-    馬番・馬名・単勝オッズ・複勝オッズを読み取ります。
+<thead>
 
-    <br>
+<tr>
+<th>馬番</th>
+<th>馬名</th>
+<th>単勝</th>
+<th>複勝</th>
+<th>判定</th>
+</tr>
 
-    <strong>
-      ※OCR結果は必ず確認してから登録してください。
-    </strong>
+</thead>
 
-  </p>
+<tbody id="ocrBody"></tbody>
 
+</table>
 
-  <input
-    id="raceImage"
-    type="file"
-    accept="image/*"
-  >
+</div>
 
+<div class="actions">
 
-  <div class="actions">
+<button
+  id="registerOCR"
+  class="primary"
+>
+✓ この内容で登録
+</button>
 
-    <button
-      id="ocrButton"
-      class="primary"
-    >
-      📷 出馬表を読み取る
-    </button>
+<button
+  id="retryOCR"
+  class="secondary"
+>
+🔄 もう一度読む
+</button>
 
-  </div>
+</div>
 
-
-  <div
-    id="ocrProgress"
-    class="progress"
-  >
-    待機中
-  </div>
-
-
-  <!-- OCR確認 -->
-
-  <div
-    id="ocrCheckCard"
-    class="hidden"
-  >
-
-    <h3>
-      🔎 OCR読み取り結果
-    </h3>
-
-
-    <div
-      id="ocrWarning"
-    ></div>
-
-
-    <div class="table-wrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>
-              馬番
-            </th>
-
-            <th>
-              馬名
-            </th>
-
-            <th>
-              単勝
-            </th>
-
-            <th>
-              複勝
-            </th>
-
-            <th>
-              状態
-            </th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody
-          id="ocrBody"
-        ></tbody>
-
-      </table>
-
-    </div>
-
-
-    <div class="actions">
-
-      <button
-        id="applyOCR"
-        class="primary"
-      >
-        ✓ 確認して馬データへ登録
-      </button>
-
-
-      <button
-        id="cancelOCR"
-        class="secondary"
-      >
-        キャンセル
-      </button>
-
-    </div>
-
-  </div>
+</div>
 
 </section>
 
 
-
-<!-- =====================================================
-     ③ 馬データ
-===================================================== -->
+<!-- 馬データ -->
 
 <section class="card">
 
-  <h2>
-    ③ 🐎 馬データ
-  </h2>
+<h2>③ 🐎 馬データ</h2>
 
+<p class="small">
+OCR後に能力値を修正できます。
+</p>
 
-  <p class="small">
+<div class="actions">
 
-    最大18頭まで登録できます。
+<button
+  id="addHorse"
+  class="secondary"
+>
+＋ 馬を追加
+</button>
 
-    <br>
+<button
+  id="clearHorse"
+  class="danger"
+>
+全馬クリア
+</button>
 
-    OCRで読み取ったデータはここで修正できます。
+</div>
 
-  </p>
+<div class="table-wrap">
 
+<table>
 
-  <div class="actions">
+<thead>
 
-    <button
-      id="addHorse"
-      class="secondary"
-    >
-      ＋ 馬を追加
-    </button>
+<tr>
+<th>馬番</th>
+<th>馬名</th>
+<th>単勝</th>
+<th>近走</th>
+<th>距離</th>
+<th>コース</th>
+<th>馬場</th>
+<th>展開</th>
+<th>騎手</th>
+<th>上がり</th>
+<th>枠</th>
+<th>脚質</th>
+<th>削除</th>
+</tr>
 
+</thead>
 
-    <button
-      id="clearHorses"
-      class="danger"
-    >
-      全馬クリア
-    </button>
+<tbody id="horseBody"></tbody>
 
-  </div>
+</table>
 
-
-  <div class="table-wrap">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>
-            馬番
-          </th>
-
-          <th>
-            馬名
-          </th>
-
-          <th>
-            単勝
-          </th>
-
-          <th>
-            近走
-          </th>
-
-          <th>
-            距離
-          </th>
-
-          <th>
-            コース
-          </th>
-
-          <th>
-            馬場
-          </th>
-
-          <th>
-            展開
-          </th>
-
-          <th>
-            騎手
-          </th>
-
-          <th>
-            上がり
-          </th>
-
-          <th>
-            枠
-          </th>
-
-          <th>
-            脚質
-          </th>
-
-          <th>
-            削除
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="horseBody"
-      ></tbody>
-
-    </table>
-
-  </div>
+</div>
 
 </section>
 
 
-
-<!-- =====================================================
-     ④ シミュレーション
-===================================================== -->
+<!-- シミュレーション -->
 
 <section class="card">
 
-  <h2>
-    ④ 🎯 シミュレーション
-  </h2>
+<h2>④ 🎯 シミュレーション</h2>
 
+<p class="small">
+オッズと各能力値から多数回シミュレーションします。
+</p>
 
-  <p class="small">
+<div class="actions">
 
-    入力した能力・適性・オッズを利用して、
+<button
+  id="runSimulation"
+  class="primary"
+>
+🎯 シミュレーション開始
+</button>
 
-    指定回数のレースシミュレーションを行います。
+</div>
 
-    <br>
-
-    ※シミュレーションは予測モデルであり、
-    的中を保証するものではありません。
-
-  </p>
-
-
-  <div class="actions">
-
-    <button
-      id="runSimulation"
-      class="primary"
-    >
-      🎯 シミュレーション開始
-    </button>
-
-  </div>
-
-
-  <div
-    id="simStatus"
-    class="progress"
-  >
-    待機中
-  </div>
+<div
+  id="simStatus"
+  class="progress"
+>
+待機中
+</div>
 
 </section>
 
 
-
-<!-- =====================================================
-     ⑤ 結果
-===================================================== -->
+<!-- 結果 -->
 
 <section
   id="resultCard"
   class="card hidden"
 >
 
-  <h2>
-    ⑤ 📊 予想結果
-  </h2>
+<h2>⑤ 📊 予想結果</h2>
 
+<div
+  id="summary"
+  class="result-grid"
+></div>
 
-  <div
-    id="summary"
-    class="result-grid"
-  ></div>
+<h3>印</h3>
 
+<div id="marks"></div>
 
-  <h3>
-    印
-  </h3>
+<h3>全馬ランキング</h3>
 
+<div class="table-wrap">
 
-  <div
-    id="marks"
-  ></div>
+<table>
 
+<thead>
 
-  <h3>
-    全馬ランキング
-  </h3>
+<tr>
+<th>順位</th>
+<th>馬番</th>
+<th>馬名</th>
+<th>単勝</th>
+<th>1着率</th>
+<th>3着内率</th>
+<th>平均着順</th>
+<th>印</th>
+</tr>
 
+</thead>
 
-  <div class="table-wrap">
+<tbody id="resultBody"></tbody>
 
-    <table>
+</table>
 
-      <thead>
+</div>
 
-        <tr>
+<h3>💰 買い目候補</h3>
 
-          <th>
-            順位
-          </th>
-
-          <th>
-            馬番
-          </th>
-
-          <th>
-            馬名
-          </th>
-
-          <th>
-            単勝
-          </th>
-
-          <th>
-            1着率
-          </th>
-
-          <th>
-            3着内率
-          </th>
-
-          <th>
-            平均着順
-          </th>
-
-          <th>
-            印
-          </th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody
-        id="resultBody"
-      ></tbody>
-
-    </table>
-
-  </div>
-
-
-  <h3>
-    💰 買い目候補
-  </h3>
-
-
-  <div
-    id="bets"
-  ></div>
-
+<div id="bets"></div>
 
 </section>
 
-
 </main>
-
 
 
 <script>
 
 /* =====================================================
-   グローバル
+状態
 ===================================================== */
 
-let horses = [];
-
-let ocrHorses = [];
+let horses=[];
+let ocrResults=[];
 
 
 /* =====================================================
-   DOM
+DOM
 ===================================================== */
 
-const horseBody =
-  document.getElementById(
-    "horseBody"
-  );
+const imageInput=
+document.getElementById("raceImage");
 
+const ocrButton=
+document.getElementById("ocrButton");
 
-const raceImage =
-  document.getElementById(
-    "raceImage"
-  );
+const ocrProgress=
+document.getElementById("ocrProgress");
 
+const previewArea=
+document.getElementById("previewArea");
 
-const ocrButton =
-  document.getElementById(
-    "ocrButton"
-  );
+const previewCanvas=
+document.getElementById("previewCanvas");
 
+const ocrCheck=
+document.getElementById("ocrCheck");
 
-const ocrProgress =
-  document.getElementById(
-    "ocrProgress"
-  );
+const ocrBody=
+document.getElementById("ocrBody");
 
+const ocrMessage=
+document.getElementById("ocrMessage");
 
-const ocrCheckCard =
-  document.getElementById(
-    "ocrCheckCard"
-  );
-
-
-const ocrBody =
-  document.getElementById(
-    "ocrBody"
-  );
-
-
-const ocrWarning =
-  document.getElementById(
-    "ocrWarning"
-  );
+const horseBody=
+document.getElementById("horseBody");
 
 
 /* =====================================================
-   HTMLエスケープ
+HTMLエスケープ
 ===================================================== */
 
-function escapeHTML(
-  value
-){
+function esc(value){
 
-  return String(
-    value ?? ""
-  )
-
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-
-  .replace(
-    /</g,
-    "&lt;"
-  )
-
-  .replace(
-    />/g,
-    "&gt;"
-  )
-
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-
-  .replace(
-    /'/g,
-    "&#039;"
-  );
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 
 }
 
 
 /* =====================================================
-   数値制限
+数値
 ===================================================== */
 
-function clamp(
-  value,
-  min = 1,
-  max = 100
-){
+function num(value,def=0){
 
-  const n =
-    Number(value);
+const n=Number(value);
 
-  if(
-    !Number.isFinite(n)
-  ){
+return Number.isFinite(n)
+?n
+:def;
 
-    return min;
+}
 
-  }
 
-  return Math.max(
-    min,
-    Math.min(
-      max,
-      n
-    )
-  );
+function clamp(value,min=1,max=100){
+
+return Math.max(
+min,
+Math.min(
+max,
+num(value,min)
+)
+);
 
 }
 
 
 /* =====================================================
-   オッズ → 基礎能力
+オッズ → 初期能力
 ===================================================== */
 
-function oddsToBase(
-  odds
-){
+function oddsAbility(odds){
 
-  const o =
-    Number(odds);
+const o=Number(odds);
 
+if(!Number.isFinite(o)||o<=1){
+return 60;
+}
 
-  if(
-    !Number.isFinite(o) ||
-    o <= 1
-  ){
-
-    return 60;
-
-  }
-
-
-  return clamp(
-
-    88 -
-    Math.log(o) * 12,
-
-    35,
-
-    92
-
-  );
+return clamp(
+88-Math.log(o)*12,
+35,
+95
+);
 
 }
 
 
 /* =====================================================
-   次の馬番
+馬追加
 ===================================================== */
 
-function nextHorseNumber(){
+function addHorse(data={}){
 
-  for(
-    let i = 1;
-    i <= 18;
-    i++
-  ){
+if(horses.length>=18){
 
-    if(
-      !horses.some(
-        h =>
-          Number(h.number) === i
-      )
-    ){
+alert("最大18頭です。");
 
-      return i;
+return;
 
-    }
+}
 
-  }
+let number=data.number;
 
+if(!number){
 
-  return 18;
+for(let i=1;i<=18;i++){
+
+if(!horses.some(h=>h.number===i)){
+
+number=i;
+break;
+
+}
+
+}
+
+}
+
+const odds=num(data.odds,0);
+
+const base=oddsAbility(odds);
+
+horses.push({
+
+number:Number(number),
+
+name:data.name||"",
+
+odds:odds,
+
+recent:num(data.recent,base),
+
+distance:num(data.distance,base),
+
+course:num(data.course,base),
+
+going:num(data.going,base),
+
+pace:num(data.pace,base),
+
+jockey:num(data.jockey,base),
+
+final3F:num(data.final3F,base),
+
+gate:num(data.gate,base),
+
+style:data.style||"差し"
+
+});
+
+renderHorses();
 
 }
 
 
 /* =====================================================
-   馬追加
-===================================================== */
-
-function addHorse(
-  data = {}
-){
-
-  if(
-    horses.length >= 18
-  ){
-
-    alert(
-      "最大18頭までです。"
-    );
-
-    return;
-
-  }
-
-
-  const number =
-    data.number ??
-    nextHorseNumber();
-
-
-  const odds =
-    Number(data.odds) || 0;
-
-
-  const base =
-    oddsToBase(
-      odds
-    );
-
-
-  horses.push({
-
-    number,
-
-    name:
-      data.name ??
-      "",
-
-    odds,
-
-    recent:
-      Number(
-        data.recent
-      ) || base,
-
-    distance:
-      Number(
-        data.distance
-      ) || base,
-
-    course:
-      Number(
-        data.course
-      ) || base,
-
-    going:
-      Number(
-        data.going
-      ) || base,
-
-    pace:
-      Number(
-        data.pace
-      ) || base,
-
-    jockey:
-      Number(
-        data.jockey
-      ) || base,
-
-    final3F:
-      Number(
-        data.final3F
-      ) || base,
-
-    gate:
-      Number(
-        data.gate
-      ) || base,
-
-    style:
-      data.style ||
-      "差し"
-
-  });
-
-
-  renderHorses();
-
-}
-
-
-/* =====================================================
-   馬データ表示
+馬表示
 ===================================================== */
 
 function renderHorses(){
 
-  horseBody.innerHTML =
-    "";
+horseBody.innerHTML="";
+
+horses.sort(
+(a,b)=>a.number-b.number
+);
+
+horses.forEach((horse,index)=>{
+
+const tr=document.createElement("tr");
+
+tr.innerHTML=`
+
+<td>
+<input
+class="number"
+type="number"
+min="1"
+max="18"
+value="${horse.number}"
+>
+</td>
+
+<td>
+<input
+class="name"
+value="${esc(horse.name)}"
+placeholder="馬名"
+>
+</td>
+
+<td>
+<input
+class="odds"
+type="number"
+step="0.1"
+value="${horse.odds||""}"
+>
+</td>
+
+<td>
+<input
+class="recent"
+type="number"
+min="1"
+max="100"
+value="${horse.recent}"
+>
+</td>
+
+<td>
+<input
+class="distance"
+type="number"
+min="1"
+max="100"
+value="${horse.distance}"
+>
+</td>
+
+<td>
+<input
+class="course"
+type="number"
+min="1"
+max="100"
+value="${horse.course}"
+>
+</td>
+
+<td>
+<input
+class="going"
+type="number"
+min="1"
+max="100"
+value="${horse.going}"
+>
+</td>
+
+<td>
+<input
+class="pace"
+type="number"
+min="1"
+max="100"
+value="${horse.pace}"
+>
+</td>
+
+<td>
+<input
+class="jockey"
+type="number"
+min="1"
+max="100"
+value="${horse.jockey}"
+>
+</td>
+
+<td>
+<input
+class="final3F"
+type="number"
+min="1"
+max="100"
+value="${horse.final3F}"
+>
+</td>
 
+<td>
+<input
+class="gate"
+type="number"
+min="1"
+max="100"
+value="${horse.gate}"
+>
+</td>
 
-  horses.sort(
-    (
-      a,
-      b
-    ) =>
-      Number(a.number) -
-      Number(b.number)
-  );
+<td>
 
+<select class="style">
 
-  horses.forEach(
-    (
-      horse,
-      index
-    ) => {
+<option ${horse.style==="逃げ"?"selected":""}>逃げ</option>
+<option ${horse.style==="先行"?"selected":""}>先行</option>
+<option ${horse.style==="差し"?"selected":""}>差し</option>
+<option ${horse.style==="追込"?"selected":""}>追込</option>
 
-      const tr =
-        document.createElement(
-          "tr"
-        );
+</select>
 
+</td>
 
-      tr.innerHTML = `
+<td>
 
-        <td>
+<button class="danger delete">
+削除
+</button>
 
-          <input
-            class="h-number"
-            type="number"
-            min="1"
-            max="18"
-            value="${horse.number}"
-          >
+</td>
 
-        </td>
+`;
 
+horseBody.appendChild(tr);
 
-        <td>
+tr.querySelector(".delete").onclick=()=>{
 
-          <input
-            class="h-name"
-            type="text"
-            value="${escapeHTML(
-              horse.name
-            )}"
-            placeholder="馬名"
-          >
+horses.splice(index,1);
 
-        </td>
+renderHorses();
 
+};
 
-        <td>
-
-          <input
-            class="h-odds"
-            type="number"
-            min="1.01"
-            step="0.1"
-            value="${
-              horse.odds || ""
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-recent"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.recent
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-distance"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.distance
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-course"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.course
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-going"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.going
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-pace"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.pace
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-jockey"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.jockey
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-final3F"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.final3F
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="h-gate"
-            type="number"
-            min="1"
-            max="100"
-            value="${
-              horse.gate
-            }"
-          >
-
-        </td>
-
-
-        <td>
-
-          <select
-            class="h-style"
-          >
-
-            <option
-              ${
-                horse.style === "逃げ"
-                ? "selected"
-                : ""
-              }
-            >
-              逃げ
-            </option>
-
-
-            <option
-              ${
-                horse.style === "先行"
-                ? "selected"
-                : ""
-              }
-            >
-              先行
-            </option>
-
-
-            <option
-              ${
-                horse.style === "差し"
-                ? "selected"
-                : ""
-              }
-            >
-              差し
-            </option>
-
-
-            <option
-              ${
-                horse.style === "追込"
-                ? "selected"
-                : ""
-              }
-            >
-              追込
-            </option>
-
-          </select>
-
-        </td>
-
-
-        <td>
-
-          <button
-            class="danger delete-horse"
-          >
-            削除
-          </button>
-
-        </td>
-
-      `;
-
-
-      horseBody.appendChild(
-        tr
-      );
-
-
-      tr
-        .querySelector(
-          ".delete-horse"
-        )
-        .onclick =
-          () => {
-
-            horses.splice(
-              index,
-              1
-            );
-
-            renderHorses();
-
-          };
-
-    }
-  );
+});
 
 }
 
 
 /* =====================================================
-   画面入力 → horses
+入力取得
 ===================================================== */
 
 function readHorseInputs(){
 
-  const rows =
-    [
-      ...horseBody.querySelectorAll(
-        "tr"
-      )
-    ];
+const rows=[
+...horseBody.querySelectorAll("tr")
+];
 
+horses=rows.map(row=>({
 
-  horses =
-    rows.map(
-      row => ({
+number:Number(
+row.querySelector(".number").value
+),
 
-        number:
-          Number(
-            row.querySelector(
-              ".h-number"
-            ).value
-          ),
+name:
+row.querySelector(".name").value.trim(),
 
-        name:
-          row.querySelector(
-            ".h-name"
-          ).value.trim(),
+odds:Number(
+row.querySelector(".odds").value
+),
 
-        odds:
-          Number(
-            row.querySelector(
-              ".h-odds"
-            ).value
-          ),
+recent:clamp(
+row.querySelector(".recent").value
+),
 
-        recent:
-          clamp(
-            row.querySelector(
-              ".h-recent"
-            ).value
-          ),
+distance:clamp(
+row.querySelector(".distance").value
+),
 
-        distance:
-          clamp(
-            row.querySelector(
-              ".h-distance"
-            ).value
-          ),
+course:clamp(
+row.querySelector(".course").value
+),
 
-        course:
-          clamp(
-            row.querySelector(
-              ".h-course"
-            ).value
-          ),
+going:clamp(
+row.querySelector(".going").value
+),
 
-        going:
-          clamp(
-            row.querySelector(
-              ".h-going"
-            ).value
-          ),
+pace:clamp(
+row.querySelector(".pace").value
+),
 
-        pace:
-          clamp(
-            row.querySelector(
-              ".h-pace"
-            ).value
-          ),
+jockey:clamp(
+row.querySelector(".jockey").value
+),
 
-        jockey:
-          clamp(
-            row.querySelector(
-              ".h-jockey"
-            ).value
-          ),
+final3F:clamp(
+row.querySelector(".final3F").value
+),
 
-        final3F:
-          clamp(
-            row.querySelector(
-              ".h-final3F"
-            ).value
-          ),
+gate:clamp(
+row.querySelector(".gate").value
+),
 
-        gate:
-          clamp(
-            row.querySelector(
-              ".h-gate"
-            ).value
-          ),
+style:
+row.querySelector(".style").value
 
-        style:
-          row.querySelector(
-            ".h-style"
-          ).value
+}));
 
-      })
-    );
-
-
-  return horses;
+return horses;
 
 }
 
 
 /* =====================================================
-   馬追加ボタン
+画像読み込み
+===================================================== */
+
+function loadImage(file){
+
+return new Promise((resolve,reject)=>{
+
+const url=
+URL.createObjectURL(file);
+
+const img=new Image();
+
+img.onload=()=>{
+
+URL.revokeObjectURL(url);
+
+resolve(img);
+
+};
+
+img.onerror=reject;
+
+img.src=url;
+
+});
+
+}
+
+
+/* =====================================================
+画像Canvas化
+===================================================== */
+
+function imageToCanvas(img){
+
+const maxWidth=1800;
+
+let width=img.naturalWidth;
+
+let height=img.naturalHeight;
+
+if(width>maxWidth){
+
+const scale=maxWidth/width;
+
+width=Math.round(width*scale);
+
+height=Math.round(height*scale);
+
+}
+
+const canvas=
+document.createElement("canvas");
+
+canvas.width=width;
+canvas.height=height;
+
+const ctx=
+canvas.getContext("2d");
+
+ctx.drawImage(
+img,
+0,
+0,
+width,
+height
+);
+
+return canvas;
+
+}
+
+
+/* =====================================================
+行検出
+===================================================== */
+
+function detectRows(canvas){
+
+/*
+今回の画像のように
+
+ヘッダー
+↓
+馬1
+↓
+馬2
+↓
+馬3
+
+という縦長出馬表を想定。
+
+まずヘッダー約7%を除外。
+その後、16～18頭を自動判定する。
+
+*/
+
+const h=canvas.height;
+
+const top=Math.round(h*0.075);
+
+const bottom=Math.round(h*0.995);
+
+const bodyHeight=bottom-top;
+
+
+/*
+今回の画像は16頭。
+一般的な出馬表なら
+16頭または18頭。
+
+高さから推定する。
+*/
+
+let count=16;
+
+if(bodyHeight/16<65){
+count=18;
+}
+
+if(bodyHeight/16>120){
+count=16;
+}
+
+
+/*
+画像比率による補正
+
+*/
+
+const rows=[];
+
+const rowHeight=bodyHeight/count;
+
+for(let i=0;i<count;i++){
+
+rows.push({
+
+top:Math.round(
+top+i*rowHeight
+),
+
+bottom:Math.round(
+top+(i+1)*rowHeight
+)
+
+});
+
+}
+
+return rows;
+
+}
+
+
+/* =====================================================
+Crop
+===================================================== */
+
+function cropCanvas(
+source,
+x1,
+y1,
+x2,
+y2,
+scale=3
+){
+
+const width=
+Math.max(
+1,
+Math.round((x2-x1)*scale)
+);
+
+const height=
+Math.max(
+1,
+Math.round((y2-y1)*scale)
+);
+
+const canvas=
+document.createElement("canvas");
+
+canvas.width=width;
+canvas.height=height;
+
+const ctx=
+canvas.getContext("2d");
+
+ctx.fillStyle="white";
+
+ctx.fillRect(
+0,
+0,
+width,
+height
+);
+
+ctx.drawImage(
+source,
+x1,
+y1,
+x2-x1,
+y2-y1,
+0,
+0,
+width,
+height
+);
+
+return canvas;
+
+}
+
+
+/* =====================================================
+OCR前処理
+===================================================== */
+
+function prepareOCR(canvas,type){
+
+const out=
+document.createElement("canvas");
+
+out.width=canvas.width;
+out.height=canvas.height;
+
+const ctx=
+out.getContext("2d");
+
+ctx.drawImage(
+canvas,
+0,
+0
+);
+
+const image=
+ctx.getImageData(
+0,
+0,
+out.width,
+out.height
+);
+
+const d=image.data;
+
+for(
+let i=0;
+i<d.length;
+i+=4
+){
+
+let gray=
+0.299*d[i]+
+0.587*d[i+1]+
+0.114*d[i+2];
+
+gray=
+(gray-128)*1.5+128;
+
+gray=Math.max(
+0,
+Math.min(255,gray)
+);
+
+if(type==="number"){
+
+gray=
+gray>165
+?255
+:0;
+
+}
+
+d[i]=gray;
+d[i+1]=gray;
+d[i+2]=gray;
+
+}
+
+ctx.putImageData(
+image,
+0,
+0
+);
+
+return out;
+
+}
+
+
+/* =====================================================
+Blob
+===================================================== */
+
+function canvasBlob(canvas){
+
+return new Promise(resolve=>{
+
+canvas.toBlob(
+blob=>resolve(blob),
+"image/png"
+);
+
+});
+
+}
+
+
+/* =====================================================
+数字OCR
+===================================================== */
+
+async function ocrNumber(canvas){
+
+const prepared=
+prepareOCR(
+canvas,
+"number"
+);
+
+const blob=
+await canvasBlob(prepared);
+
+const result=
+await Tesseract.recognize(
+blob,
+"eng",
+{
+logger:()=>{}
+}
+);
+
+return (result.data.text||"")
+.replace(
+/[^0-9.\-]/g,
+" "
+)
+.replace(
+/\s+/g,
+" "
+)
+.trim();
+
+}
+
+
+/* =====================================================
+馬番
+===================================================== */
+
+async function ocrHorseNumber(canvas){
+
+const text=
+await ocrNumber(canvas);
+
+const nums=
+text.match(
+/1[0-8]|[1-9]/g
+)||[];
+
+for(const x of nums){
+
+const n=Number(x);
+
+if(n>=1&&n<=18){
+
+return n;
+
+}
+
+}
+
+return null;
+
+}
+
+
+/* =====================================================
+単勝
+===================================================== */
+
+async function ocrWinOdds(canvas){
+
+const text=
+await ocrNumber(canvas);
+
+const matches=
+text.match(
+/\d{1,3}\.\d{1,2}/g
+)||[];
+
+for(const x of matches){
+
+const n=Number(x);
+
+if(n>=1&&n<1000){
+
+return n;
+
+}
+
+}
+
+return null;
+
+}
+
+
+/* =====================================================
+複勝
+===================================================== */
+
+async function ocrPlaceOdds(canvas){
+
+const text=
+await ocrNumber(canvas);
+
+const matches=
+text.match(
+/\d{1,3}\.\d{1,2}/g
+)||[];
+
+const values=
+matches
+.map(Number)
+.filter(
+x=>x>=1&&x<1000
+);
+
+if(values.length>=2){
+
+return {
+low:values[0],
+high:values[1],
+text:
+`${values[0].toFixed(1)} - ${values[1].toFixed(1)}`
+};
+
+}
+
+return {
+low:null,
+high:null,
+text:""
+};
+
+}
+
+
+/* =====================================================
+馬名
+===================================================== */
+
+async function ocrHorseName(canvas){
+
+const prepared=
+prepareOCR(
+canvas,
+"name"
+);
+
+const blob=
+await canvasBlob(prepared);
+
+const result=
+await Tesseract.recognize(
+blob,
+"jpn",
+{
+logger:()=>{}
+}
+);
+
+let text=
+result.data.text||"";
+
+text=
+text
+.replace(/[\r\n]/g," ")
+.replace(/\s+/g," ")
+.trim();
+
+return text;
+
+}
+
+
+/* =====================================================
+1頭分
+===================================================== */
+
+async function readOneRow(
+source,
+row,
+index
+){
+
+const w=source.width;
+
+const top=row.top+3;
+const bottom=row.bottom-3;
+
+
+/*
+今回送ってくれた画像の列位置。
+
+馬番  0～8.5%
+印    8.5～15%
+馬名  15～58.5%
+単勝  58.5～75%
+複勝  75～100%
+*/
+
+const numberCanvas=
+cropCanvas(
+source,
+w*0.005,
+top,
+w*0.085,
+bottom,
+4
+);
+
+const nameCanvas=
+cropCanvas(
+source,
+w*0.15,
+top,
+w*0.585,
+bottom,
+3
+);
+
+const winCanvas=
+cropCanvas(
+source,
+w*0.585,
+top,
+w*0.755,
+bottom,
+4
+);
+
+const placeCanvas=
+cropCanvas(
+source,
+w*0.755,
+top,
+w*0.995,
+bottom,
+4
+);
+
+
+ocrProgress.textContent=
+`🐎 ${index+1}頭目を読み取り中…`;
+
+
+const number=
+await ocrHorseNumber(
+numberCanvas
+);
+
+const name=
+await ocrHorseName(
+nameCanvas
+);
+
+const odds=
+await ocrWinOdds(
+winCanvas
+);
+
+const place=
+await ocrPlaceOdds(
+placeCanvas
+);
+
+
+return {
+
+number,
+name,
+odds,
+placeOdds:place.text,
+placeLow:place.low,
+placeHigh:place.high
+
+};
+
+}
+
+
+/* =====================================================
+馬番補正
+===================================================== */
+
+function repairNumbers(list){
+
+const used=new Set();
+
+for(const h of list){
+
+if(
+h.number &&
+h.number>=1 &&
+h.number<=18 &&
+!used.has(h.number)
+){
+
+used.add(h.number);
+
+}else{
+
+h.number=null;
+
+}
+
+}
+
+
+/*
+空いている番号
+*/
+
+const missing=[];
+
+for(let i=1;i<=18;i++){
+
+if(!used.has(i)){
+missing.push(i);
+}
+
+}
+
+
+/*
+読めなかった馬番を補完
+*/
+
+for(const h of list){
+
+if(
+!h.number &&
+missing.length
+){
+
+h.number=
+missing.shift();
+
+}
+
+}
+
+return list;
+
+}
+
+
+/* =====================================================
+OCR結果表示
+===================================================== */
+
+function showOCRResults(list){
+
+ocrBody.innerHTML="";
+
+list.forEach(h=>{
+
+const tr=
+document.createElement("tr");
+
+const valid=
+h.number &&
+h.name &&
+h.odds;
+
+tr.innerHTML=`
+
+<td>
+<input
+class="ocr-number"
+type="number"
+min="1"
+max="18"
+value="${h.number||""}"
+>
+</td>
+
+<td>
+<input
+class="ocr-name"
+value="${esc(h.name)}"
+>
+</td>
+
+<td>
+<input
+class="ocr-odds"
+type="number"
+step="0.1"
+value="${h.odds||""}"
+>
+</td>
+
+<td>
+${esc(h.placeOdds||"—")}
+</td>
+
+<td>
+
+<span
+class="${valid?"ocr-good":"ocr-bad"}"
+>
+${valid?"✓ OK":"⚠ 要確認"}
+</span>
+
+</td>
+
+`;
+
+ocrBody.appendChild(tr);
+
+});
+
+
+ocrCheck.classList.remove("hidden");
+
+
+if(
+list.some(
+h=>!h.name||!h.odds
+)
+){
+
+ocrMessage.className=
+"notice warn";
+
+ocrMessage.innerHTML=
+"⚠ 一部読み取り結果を確認してください。";
+
+}else{
+
+ocrMessage.className=
+"notice ok";
+
+ocrMessage.innerHTML=
+"✓ OCR完了。馬番・馬名・オッズを確認してください。";
+
+}
+
+}
+
+
+/* =====================================================
+OCR開始
+===================================================== */
+
+ocrButton.onclick=
+async()=>{
+
+const file=
+imageInput.files[0];
+
+if(!file){
+
+alert(
+"まず出馬表画像を選択してください。"
+);
+
+return;
+
+}
+
+ocrButton.disabled=true;
+
+try{
+
+ocrProgress.textContent=
+"🖼 画像を読み込んでいます…";
+
+const img=
+await loadImage(file);
+
+const canvas=
+imageToCanvas(img);
+
+
+/*
+プレビュー
+*/
+
+previewCanvas.width=
+canvas.width;
+
+previewCanvas.height=
+canvas.height;
+
+previewCanvas
+.getContext("2d")
+.drawImage(
+canvas,
+0,
+0
+);
+
+previewArea.classList.remove(
+"hidden"
+);
+
+
+/*
+行作成
+*/
+
+const rows=
+detectRows(canvas);
+
+
+/*
+16/18頭
+*/
+
+const useRows=
+rows.slice(0,18);
+
+ocrResults=[];
+
+for(
+let i=0;
+i<useRows.length;
+i++
+){
+
+const result=
+await readOneRow(
+canvas,
+useRows[i],
+i
+);
+
+ocrResults.push(result);
+
+}
+
+
+/*
+馬番補正
+*/
+
+ocrResults=
+repairNumbers(
+ocrResults
+);
+
+
+/*
+馬番順
+*/
+
+ocrResults.sort(
+(a,b)=>
+(a.number||99)-
+(b.number||99)
+);
+
+
+showOCRResults(
+ocrResults
+);
+
+ocrProgress.textContent=
+`✓ ${ocrResults.length}頭の読み取りが完了しました。`;
+
+}catch(error){
+
+console.error(error);
+
+ocrProgress.textContent=
+"❌ OCRエラー";
+
+alert(
+"OCRでエラーが発生しました。"
+);
+
+}finally{
+
+ocrButton.disabled=false;
+
+}
+
+};
+
+
+/* =====================================================
+OCR登録
 ===================================================== */
 
 document
-  .getElementById(
-    "addHorse"
-  )
-  .onclick =
-    () => {
+.getElementById("registerOCR")
+.onclick=
+()=>{
 
-      addHorse();
+const rows=
+[
+...ocrBody.querySelectorAll("tr")
+];
 
-    };
+if(!rows.length){
+
+alert(
+"登録する馬がありません。"
+);
+
+return;
+
+}
+
+
+horses=
+rows.map(row=>{
+
+const number=
+Number(
+row.querySelector(
+".ocr-number"
+).value
+);
+
+const name=
+row.querySelector(
+".ocr-name"
+).value.trim();
+
+const odds=
+Number(
+row.querySelector(
+".ocr-odds"
+).value
+);
+
+const base=
+oddsAbility(odds);
+
+return {
+
+number,
+name,
+odds,
+
+recent:clamp(base+5),
+distance:clamp(base),
+course:clamp(base),
+going:clamp(base),
+pace:clamp(base),
+jockey:clamp(base),
+final3F:clamp(base),
+gate:clamp(base),
+
+style:"差し"
+
+};
+
+});
+
+
+/*
+重複確認
+*/
+
+const nums=
+horses.map(h=>h.number);
+
+const duplicate=
+nums.filter(
+(n,i)=>
+nums.indexOf(n)!==i
+);
+
+if(duplicate.length){
+
+alert(
+"馬番が重複しています。\n"+
+[...new Set(duplicate)].join("・")
+);
+
+return;
+
+}
+
+
+renderHorses();
+
+ocrCheck.classList.add("hidden");
+
+ocrProgress.textContent=
+`${horses.length}頭を登録しました。`;
+
+};
 
 
 /* =====================================================
-   全削除
+再読み取り
 ===================================================== */
 
 document
-  .getElementById(
-    "clearHorses"
-  )
-  .onclick =
-    () => {
+.getElementById("retryOCR")
+.onclick=
+()=>{
 
-      if(
-        confirm(
-          "全馬データを削除しますか？"
-        )
-      ){
+ocrCheck.classList.add("hidden");
 
-        horses = [];
+ocrProgress.textContent=
+"もう一度読み取れます。";
 
-        renderHorses();
-
-      }
-
-    };
-
+};
 
 
 /* =====================================================
-   OCR画像前処理
-===================================================== */
-
-function preprocessImage(
-  file
-){
-
-  return new Promise(
-    (
-      resolve,
-      reject
-    ) => {
-
-      const image =
-        new Image();
-
-
-      const url =
-        URL.createObjectURL(
-          file
-        );
-
-
-      image.onload =
-        () => {
-
-          /*
-            OCR精度向上のため
-            2倍に拡大
-          */
-
-          const scale =
-            2;
-
-
-          const canvas =
-            document.createElement(
-              "canvas"
-            );
-
-
-          canvas.width =
-            image.naturalWidth *
-            scale;
-
-
-          canvas.height =
-            image.naturalHeight *
-            scale;
-
-
-          const ctx =
-            canvas.getContext(
-              "2d"
-            );
-
-
-          ctx.drawImage(
-
-            image,
-
-            0,
-
-            0,
-
-            canvas.width,
-
-            canvas.height
-
-          );
-
-
-          /*
-            グレースケール化
-          */
-
-          const imageData =
-            ctx.getImageData(
-              0,
-              0,
-              canvas.width,
-              canvas.height
-            );
-
-
-          for(
-            let i = 0;
-            i < imageData.data.length;
-            i += 4
-          ){
-
-            const r =
-              imageData.data[i];
-
-            const g =
-              imageData.data[i + 1];
-
-            const b =
-              imageData.data[i + 2];
-
-
-            let gray =
-              0.299 * r +
-              0.587 * g +
-              0.114 * b;
-
-
-            /*
-              コントラスト
-            */
-
-            gray =
-              (
-                gray -
-                128
-              ) *
-              1.25 +
-              128;
-
-
-            gray =
-              Math.max(
-                0,
-                Math.min(
-                  255,
-                  gray
-                )
-              );
-
-
-            imageData.data[i] =
-              gray;
-
-            imageData.data[i + 1] =
-              gray;
-
-            imageData.data[i + 2] =
-              gray;
-
-          }
-
-
-          ctx.putImageData(
-            imageData,
-            0,
-            0
-          );
-
-
-          canvas.toBlob(
-            blob => {
-
-              URL.revokeObjectURL(
-                url
-              );
-
-              resolve(
-                blob
-              );
-
-            },
-            "image/png"
-          );
-
-        };
-
-
-      image.onerror =
-        reject;
-
-
-      image.src =
-        url;
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   OCR行正規化
-===================================================== */
-
-function normalizeOCRLine(
-  line
-){
-
-  return line
-
-    .replace(
-      /[０-９]/g,
-      char =>
-        String.fromCharCode(
-          char.charCodeAt(
-            0
-          ) -
-          0xfee0
-        )
-    )
-
-    .replace(
-      /，/g,
-      ","
-    )
-
-    .replace(
-      /．/g,
-      "."
-    )
-
-    .replace(
-      /[ＯＯ○]/g,
-      "0"
-    )
-
-    .replace(
-      /\s+/g,
-      " "
-    )
-
-    .trim();
-
-}
-
-
-/* =====================================================
-   オッズ抽出
-===================================================== */
-
-function extractOdds(
-  line
-){
-
-  return [
-
-    ...line.matchAll(
-      /\b(\d{1,3}\.\d{1,2})\b/g
-    )
-
-  ].map(
-    m =>
-      Number(
-        m[1]
-      )
-  );
-
-}
-
-
-/* =====================================================
-   馬番抽出
-===================================================== */
-
-function extractHorseNumber(
-  text
-){
-
-  /*
-    1～18を探す
-  */
-
-  const match =
-    text.match(
-      /(?:^|[\s|｜])([1-9]|1[0-8])(?:[\s|｜]|$)/
-    );
-
-
-  if(match){
-
-    return Number(
-      match[1]
-    );
-
-  }
-
-
-  /*
-    行頭
-  */
-
-  const start =
-    text.match(
-      /^([1-9]|1[0-8])(?:\D|$)/
-    );
-
-
-  if(start){
-
-    return Number(
-      start[1]
-    );
-
-  }
-
-
-  return null;
-
-}
-
-
-/* =====================================================
-   馬名クリーニング
-===================================================== */
-
-function cleanHorseName(
-  text
-){
-
-  let name =
-    text
-
-      .replace(
-        /\d{1,3}\.\d{1,2}/g,
-        " "
-      )
-
-      .replace(
-        /\d+/g,
-        " "
-      )
-
-      .replace(
-        /[△▲◎○◯☆注－—―ー\-]/g,
-        " "
-      )
-
-      .replace(
-        /\s+/g,
-        " "
-      )
-
-      .trim();
-
-
-  const ignoreWords = [
-
-    "人気",
-
-    "馬番",
-
-    "馬名",
-
-    "単勝",
-
-    "オッズ",
-
-    "複勝",
-
-    "印",
-
-    "着順",
-
-    "レース"
-
-  ];
-
-
-  if(
-    ignoreWords.some(
-      word =>
-        name === word
-    )
-  ){
-
-    return "";
-
-  }
-
-
-  if(
-    name.length < 2
-  ){
-
-    return "";
-
-  }
-
-
-  return name;
-
-}
-
-
-/* =====================================================
-   複勝オッズ
-===================================================== */
-
-function parsePlaceOdds(
-  line
-){
-
-  const numbers =
-    extractOdds(
-      line
-    );
-
-
-  if(
-    numbers.length >= 3
-  ){
-
-    return (
-
-      numbers[1].toFixed(
-        1
-      ) +
-
-      " - " +
-
-      numbers[2].toFixed(
-        1
-      )
-
-    );
-
-  }
-
-
-  return "";
-
-}
-
-
-/* =====================================================
-   OCRテキスト → 馬
-===================================================== */
-
-function parseRaceTable(
-  text
-){
-
-  const lines =
-
-    text
-
-      .split(
-        /\r?\n/
-      )
-
-      .map(
-        normalizeOCRLine
-      )
-
-      .filter(
-        line =>
-          line.length > 0
-      );
-
-
-  const result = [];
-
-
-  for(
-    let i = 0;
-    i < lines.length;
-    i++
-  ){
-
-    const line =
-      lines[i];
-
-
-    const odds =
-      extractOdds(
-        line
-      );
-
-
-    /*
-      オッズがない行は
-      一旦スキップ
-    */
-
-    if(
-      odds.length === 0
-    ){
-
-      continue;
-
-    }
-
-
-    /*
-      馬番
-    */
-
-    let number =
-      extractHorseNumber(
-        line
-      );
-
-
-    /*
-      前後の行も見る
-    */
-
-    if(!number){
-
-      for(
-        let j =
-          Math.max(
-            0,
-            i - 2
-          );
-
-        j <=
-          Math.min(
-            lines.length - 1,
-            i + 2
-          );
-
-        j++
-      ){
-
-        number =
-          extractHorseNumber(
-            lines[j]
-          );
-
-
-        if(number){
-
-          break;
-
-        }
-
-      }
-
-    }
-
-
-    if(
-      !number ||
-      number < 1 ||
-      number > 18
-    ){
-
-      continue;
-
-    }
-
-
-    /*
-      馬名
-    */
-
-    let name =
-      cleanHorseName(
-        line
-      );
-
-
-    if(!name){
-
-      for(
-        let j =
-          Math.max(
-            0,
-            i - 2
-          );
-
-        j <=
-          Math.min(
-            lines.length - 1,
-            i + 2
-          );
-
-        j++
-      ){
-
-        const candidate =
-          cleanHorseName(
-            lines[j]
-          );
-
-
-        if(candidate){
-
-          name =
-            candidate;
-
-          break;
-
-        }
-
-      }
-
-    }
-
-
-    if(!name){
-
-      continue;
-
-    }
-
-
-    /*
-      単勝
-    */
-
-    const winOdds =
-      Number(
-        odds[0]
-      );
-
-
-    if(
-      !Number.isFinite(
-        winOdds
-      ) ||
-      winOdds <= 1
-    ){
-
-      continue;
-
-    }
-
-
-    /*
-      同じ馬番は重複登録しない
-    */
-
-    if(
-      result.some(
-        h =>
-          h.number === number
-      )
-    ){
-
-      continue;
-
-    }
-
-
-    result.push({
-
-      number,
-
-      name,
-
-      odds: winOdds,
-
-      placeOdds:
-        parsePlaceOdds(
-          line
-        )
-
-    });
-
-  }
-
-
-  /*
-    馬番順
-  */
-
-  result.sort(
-    (
-      a,
-      b
-    ) =>
-      a.number -
-      b.number
-  );
-
-
-  return result;
-
-}
-
-
-/* =====================================================
-   OCR検算
-===================================================== */
-
-function validateOCR(
-  list
-){
-
-  const warnings = [];
-
-
-  if(
-    list.length === 0
-  ){
-
-    warnings.push(
-      "馬を読み取れませんでした。"
-    );
-
-
-    return warnings;
-
-  }
-
-
-  /*
-    18頭を超えていないか
-  */
-
-  if(
-    list.length > 18
-  ){
-
-    warnings.push(
-      "18頭を超えて読み取っています。"
-    );
-
-  }
-
-
-  /*
-    重複
-  */
-
-  const numbers =
-    list.map(
-      h =>
-        h.number
-    );
-
-
-  const duplicate =
-    numbers.filter(
-      (
-        number,
-        index
-      ) =>
-        numbers.indexOf(
-          number
-        ) !== index
-    );
-
-
-  if(
-    duplicate.length
-  ){
-
-    warnings.push(
-
-      "馬番重複：" +
-
-      [
-        ...new Set(
-          duplicate
-        )
-      ].join(
-        "・"
-      )
-
-    );
-
-  }
-
-
-  /*
-    欠番
-  */
-
-  const maxNumber =
-    Math.max(
-      ...numbers
-    );
-
-
-  const missing = [];
-
-
-  for(
-    let i = 1;
-    i <= maxNumber;
-    i++
-  ){
-
-    if(
-      !numbers.includes(
-        i
-      )
-    ){
-
-      missing.push(
-        i
-      );
-
-    }
-
-  }
-
-
-  if(
-    missing.length
-  ){
-
-    warnings.push(
-
-      "欠番候補：" +
-
-      missing.join(
-        "・"
-      )
-
-    );
-
-  }
-
-
-  /*
-    18頭
-  */
-
-  if(
-    list.length === 18 &&
-    missing.length === 0
-  ){
-
-    warnings.push(
-      "✓ 1～18番をすべて読み取りました。"
-    );
-
-  }
-
-
-  /*
-    18頭未満
-  */
-
-  if(
-    list.length < 18
-  ){
-
-    warnings.push(
-
-      `現在 ${list.length}頭です。` +
-
-      "出走取消などがある場合は問題ありません。"
-
-    );
-
-  }
-
-
-  /*
-    オッズ
-  */
-
-  list.forEach(
-    horse => {
-
-      if(
-        !Number.isFinite(
-          horse.odds
-        ) ||
-        horse.odds <= 1
-      ){
-
-        warnings.push(
-
-          `${horse.number}番 ${horse.name} の単勝オッズを確認してください。`
-
-        );
-
-      }
-
-    }
-  );
-
-
-  return warnings;
-
-}
-
-
-/* =====================================================
-   OCR結果表示
-===================================================== */
-
-function showOCRResult(
-  list,
-  warnings
-){
-
-  ocrBody.innerHTML =
-    "";
-
-
-  list.forEach(
-    horse => {
-
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-
-      tr.innerHTML = `
-
-        <td>
-
-          <input
-            class="ocr-number"
-            type="number"
-            min="1"
-            max="18"
-            value="${horse.number}"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="ocr-name"
-            type="text"
-            value="${escapeHTML(
-              horse.name
-            )}"
-          >
-
-        </td>
-
-
-        <td>
-
-          <input
-            class="ocr-win"
-            type="number"
-            min="1.01"
-            step="0.1"
-            value="${horse.odds}"
-          >
-
-        </td>
-
-
-        <td>
-
-          ${
-            escapeHTML(
-              horse.placeOdds ||
-              "—"
-            )
-          }
-
-        </td>
-
-
-        <td>
-          ✓
-        </td>
-
-      `;
-
-
-      ocrBody.appendChild(
-        tr
-      );
-
-    }
-  );
-
-
-  if(
-    warnings.length
-  ){
-
-    ocrWarning.className =
-      "notice warn";
-
-
-    ocrWarning.innerHTML =
-
-      "<strong>⚠ 確認してください</strong>" +
-
-      "<ul>" +
-
-      warnings
-        .map(
-          warning =>
-            `<li>${escapeHTML(
-              warning
-            )}</li>`
-        )
-        .join(
-          ""
-        ) +
-
-      "</ul>";
-
-  }
-
-  else{
-
-    ocrWarning.className =
-      "notice ok";
-
-
-    ocrWarning.innerHTML =
-
-      "<strong>✓ OCR検算OK</strong>" +
-
-      `<br>${list.length}頭を読み取りました。`;
-
-  }
-
-
-}
-
-
-/* =====================================================
-   OCR実行
-===================================================== */
-
-ocrButton.onclick =
-  async () => {
-
-    const file =
-      raceImage.files[0];
-
-
-    if(!file){
-
-      alert(
-        "出馬表画像を選択してください。"
-      );
-
-      return;
-
-    }
-
-
-    ocrButton.disabled =
-      true;
-
-
-    ocrProgress.textContent =
-      "📷 画像を前処理しています…";
-
-
-    try{
-
-      /*
-        画像前処理
-      */
-
-      const image =
-        await preprocessImage(
-          file
-        );
-
-
-      /*
-        OCR
-      */
-
-      const result =
-        await Tesseract.recognize(
-
-          image,
-
-          "jpn+eng",
-
-          {
-
-            logger:
-              message => {
-
-                if(
-                  message.status ===
-                  "recognizing text"
-                ){
-
-                  const percent =
-                    Math.round(
-
-                      (
-                        message.progress ||
-                        0
-
-                      ) * 100
-
-                    );
-
-
-                  ocrProgress.textContent =
-
-                    `📖 OCR解析中 ${percent}%`;
-
-                }
-
-              }
-
-          }
-
-        );
-
-
-      console.log(
-        "OCR RAW TEXT:",
-        result.data.text
-      );
-
-
-      /*
-        解析
-      */
-
-      ocrHorses =
-        parseRaceTable(
-          result.data.text
-        );
-
-
-      /*
-        表示
-      */
-
-      showOCRResult(
-
-        ocrHorses,
-
-        validateOCR(
-          ocrHorses
-        )
-
-      );
-
-
-      ocrCheckCard
-        .classList
-        .remove(
-          "hidden"
-        );
-
-
-      ocrProgress.textContent =
-
-        `✓ OCR完了：${ocrHorses.length}頭`;
-
-    }
-
-    catch(error){
-
-      console.error(
-        error
-      );
-
-
-      ocrProgress.textContent =
-        "❌ OCRに失敗しました。";
-
-
-      alert(
-
-        "OCRに失敗しました。\n" +
-
-        "画像をもう一度選択してください。"
-
-      );
-
-    }
-
-    finally{
-
-      ocrButton.disabled =
-        false;
-
-    }
-
-  };
-
-
-/* =====================================================
-   OCR → 馬データ登録
+馬追加
 ===================================================== */
 
 document
-  .getElementById(
-    "applyOCR"
-  )
-  .onclick =
-    () => {
+.getElementById("addHorse")
+.onclick=
+()=>{
 
-      const rows =
+addHorse();
 
-        [
-          ...ocrBody.querySelectorAll(
-            "tr"
-          )
-        ];
-
-
-      if(
-        rows.length === 0
-      ){
-
-        alert(
-          "登録する馬がありません。"
-        );
-
-        return;
-
-      }
-
-
-      if(
-        rows.length > 18
-      ){
-
-        alert(
-          "18頭を超えています。"
-        );
-
-        return;
-
-      }
-
-
-      const newHorses = [];
-
-
-      rows.forEach(
-        row => {
-
-          const number =
-            Number(
-              row.querySelector(
-                ".ocr-number"
-              ).value
-            );
-
-
-          const name =
-            row.querySelector(
-              ".ocr-name"
-            ).value.trim();
-
-
-          const odds =
-            Number(
-              row.querySelector(
-                ".ocr-win"
-              ).value
-            );
-
-
-          const base =
-            oddsToBase(
-              odds
-            );
-
-
-          newHorses.push({
-
-            number,
-
-            name,
-
-            odds,
-
-            /*
-              OCR後の初期能力
-
-              後から手動修正可能
-            */
-
-            recent:
-              clamp(
-                base + 5
-              ),
-
-            distance:
-              clamp(
-                base
-              ),
-
-            course:
-              clamp(
-                base
-              ),
-
-            going:
-              clamp(
-                base
-              ),
-
-            pace:
-              clamp(
-                base
-              ),
-
-            jockey:
-              clamp(
-                base
-              ),
-
-            final3F:
-              clamp(
-                base
-              ),
-
-            gate:
-              clamp(
-                base
-              ),
-
-            style:
-              "差し"
-
-          });
-
-        }
-      );
-
-
-      /*
-        馬番重複確認
-      */
-
-      const numbers =
-        newHorses.map(
-          horse =>
-            horse.number
-        );
-
-
-      const duplicate =
-        numbers.filter(
-          (
-            number,
-            index
-          ) =>
-            numbers.indexOf(
-              number
-            ) !== index
-        );
-
-
-      if(
-        duplicate.length
-      ){
-
-        alert(
-
-          "馬番が重複しています。\n" +
-
-          [
-            ...new Set(
-              duplicate
-            )
-          ].join(
-            "・"
-          ) +
-
-          "番"
-
-        );
-
-        return;
-
-      }
-
-
-      /*
-        馬番範囲
-      */
-
-      if(
-        newHorses.some(
-          horse =>
-            horse.number < 1 ||
-            horse.number > 18
-        )
-      ){
-
-        alert(
-          "馬番は1～18で入力してください。"
-        );
-
-        return;
-
-      }
-
-
-      horses =
-        newHorses;
-
-
-      renderHorses();
-
-
-      ocrCheckCard
-        .classList
-        .add(
-          "hidden"
-        );
-
-
-      ocrProgress.textContent =
-
-        `✓ ${horses.length}頭を登録しました。`;
-
-    };
+};
 
 
 /* =====================================================
-   OCRキャンセル
+全削除
 ===================================================== */
 
 document
-  .getElementById(
-    "cancelOCR"
-  )
-  .onclick =
-    () => {
+.getElementById("clearHorse")
+.onclick=
+()=>{
 
-      ocrCheckCard
-        .classList
-        .add(
-          "hidden"
-        );
+if(
+confirm("全馬を削除しますか？")
+){
 
-    };
+horses=[];
 
+renderHorses();
+
+}
+
+};
 
 
 /* =====================================================
-   シミュレーション能力計算
+能力スコア
 ===================================================== */
 
-function calculateScore(
-  horse
-){
+function calculateScore(h){
 
-  /*
-    基本ウェイト
+let score=
 
-    近走     25%
-    距離     15%
-    コース   10%
-    馬場     10%
-    展開     15%
-    騎手     10%
-    上がり   10%
-    枠        5%
-  */
+h.recent*0.25+
+h.distance*0.15+
+h.course*0.10+
+h.going*0.10+
+h.pace*0.15+
+h.jockey*0.10+
+h.final3F*0.10+
+h.gate*0.05;
 
 
-  let score =
+/*
+脚質補正
+*/
 
-    horse.recent *
-      0.25 +
+if(h.style==="逃げ")
+score+=2;
 
-    horse.distance *
-      0.15 +
+if(h.style==="先行")
+score+=1.5;
 
-    horse.course *
-      0.10 +
+if(h.style==="差し")
+score+=1;
 
-    horse.going *
-      0.10 +
-
-    horse.pace *
-      0.15 +
-
-    horse.jockey *
-      0.10 +
-
-    horse.final3F *
-      0.10 +
-
-    horse.gate *
-      0.05;
+if(h.style==="追込")
+score+=0.5;
 
 
-  /*
-    脚質補正
-  */
+/*
+オッズ補正
+*/
 
-  if(
-    horse.style === "逃げ"
-  ){
+if(h.odds>1){
 
-    score += 1.5;
+score+=Math.max(
+-5,
+Math.min(
+8,
+10/Math.sqrt(h.odds)-1
+)
+);
 
-  }
+}
 
-
-  if(
-    horse.style === "先行"
-  ){
-
-    score += 1;
-
-  }
-
-
-  if(
-    horse.style === "差し"
-  ){
-
-    score += 0.5;
-
-  }
-
-
-  /*
-    馬場補正
-  */
-
-  const going =
-    document
-      .getElementById(
-        "going"
-      )
-      .value;
-
-
-  if(
-    going === "重" ||
-    going === "不良"
-  ){
-
-    score +=
-      (
-        horse.going -
-        70
-      ) * 0.08;
-
-  }
-
-
-  /*
-    オッズ補正
-
-    人気をそのまま
-    信用しすぎない
-  */
-
-  if(
-    horse.odds > 1
-  ){
-
-    const oddsBoost =
-
-      Math.max(
-
-        -5,
-
-        Math.min(
-
-          8,
-
-          (
-            1 /
-            Math.sqrt(
-              horse.odds
-            )
-          ) *
-          10 -
-          1
-
-        )
-
-      );
-
-
-    score +=
-      oddsBoost;
-
-  }
-
-
-  return Math.max(
-    1,
-    score
-  );
+return Math.max(
+1,
+score
+);
 
 }
 
 
 /* =====================================================
-   重み付き抽選
+重み抽選
 ===================================================== */
 
-function weightedRandomIndex(
-  weights
+function weightedRandom(weights){
+
+const total=
+weights.reduce(
+(a,b)=>a+b,
+0
+);
+
+let r=
+Math.random()*total;
+
+for(
+let i=0;
+i<weights.length;
+i++
 ){
 
-  const total =
-    weights.reduce(
-      (
-        sum,
-        value
-      ) =>
-        sum + value,
-      0
-    );
+r-=weights[i];
 
+if(r<=0){
 
-  let random =
-    Math.random() *
-    total;
+return i;
 
+}
 
-  for(
-    let i = 0;
-    i < weights.length;
-    i++
-  ){
+}
 
-    random -=
-      weights[i];
-
-
-    if(
-      random <= 0
-    ){
-
-      return i;
-
-    }
-
-  }
-
-
-  return weights.length - 1;
+return weights.length-1;
 
 }
 
 
 /* =====================================================
-   シミュレーション
+シミュレーション
 ===================================================== */
 
 async function runSimulation(){
 
-  /*
-    現在の入力を取得
-  */
+readHorseInputs();
 
-  readHorseInputs();
+if(horses.length<2){
 
+alert(
+"2頭以上登録してください。"
+);
 
-  /*
-    基本チェック
-  */
-
-  if(
-    horses.length < 2
-  ){
-
-    alert(
-      "2頭以上登録してください。"
-    );
-
-    return;
-
-  }
-
-
-  if(
-    horses.length > 18
-  ){
-
-    alert(
-      "最大18頭です。"
-    );
-
-    return;
-
-  }
-
-
-  if(
-    horses.some(
-      horse =>
-        !horse.name
-    )
-  ){
-
-    alert(
-      "馬名が空欄の馬があります。"
-    );
-
-    return;
-
-  }
-
-
-  /*
-    馬番重複
-  */
-
-  const numbers =
-    horses.map(
-      horse =>
-        horse.number
-    );
-
-
-  const duplicate =
-    numbers.filter(
-      (
-        number,
-        index
-      ) =>
-        numbers.indexOf(
-          number
-        ) !== index
-    );
-
-
-  if(
-    duplicate.length
-  ){
-
-    alert(
-      "馬番が重複しています。"
-    );
-
-    return;
-
-  }
-
-
-  const count =
-    Number(
-      document
-        .getElementById(
-          "simCount"
-        )
-        .value
-    );
-
-
-  const status =
-    document
-      .getElementById(
-        "simStatus"
-      );
-
-
-  status.textContent =
-
-    `🎯 ${count.toLocaleString()}回計算しています…`;
-
-
-  /*
-    ブラウザに表示を更新させる
-  */
-
-  await new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        50
-      )
-  );
-
-
-  /*
-    各馬の能力
-  */
-
-  const scores =
-    horses.map(
-      horse =>
-        calculateScore(
-          horse
-        )
-    );
-
-
-  /*
-    集計
-  */
-
-  const wins =
-    new Array(
-      horses.length
-    ).fill(0);
-
-
-  const top3 =
-    new Array(
-      horses.length
-    ).fill(0);
-
-
-  const positionSum =
-    new Array(
-      horses.length
-    ).fill(0);
-
-
-  /*
-    シミュレーション
-  */
-
-  for(
-    let simulation = 0;
-    simulation < count;
-    simulation++
-  ){
-
-    /*
-      残りの馬
-    */
-
-    const remaining =
-      horses.map(
-        (
-          horse,
-          index
-        ) =>
-          index
-      );
-
-
-    const order = [];
-
-
-    /*
-      1着から順番に決める
-    */
-
-    while(
-      remaining.length
-    ){
-
-      const weights =
-
-        remaining.map(
-          index =>
-
-            Math.pow(
-              scores[index],
-              2.2
-            )
-        );
-
-
-      const selectedPosition =
-        weightedRandomIndex(
-          weights
-        );
-
-
-      const selectedIndex =
-        remaining[
-          selectedPosition
-        ];
-
-
-      order.push(
-        selectedIndex
-      );
-
-
-      remaining.splice(
-        selectedPosition,
-        1
-      );
-
-    }
-
-
-    /*
-      集計
-    */
-
-    order.forEach(
-      (
-        index,
-        position
-      ) => {
-
-        const place =
-          position + 1;
-
-
-        positionSum[index] +=
-          place;
-
-
-        if(
-          position === 0
-        ){
-
-          wins[index]++;
-
-        }
-
-
-        if(
-          position < 3
-        ){
-
-          top3[index]++;
-
-        }
-
-      }
-    );
-
-  }
-
-
-  /*
-    結果作成
-  */
-
-  const results =
-
-    horses.map(
-      (
-        horse,
-        index
-      ) => ({
-
-        ...horse,
-
-        score:
-          scores[index],
-
-        winRate:
-          (
-            wins[index] /
-            count
-          ) *
-          100,
-
-        top3Rate:
-          (
-            top3[index] /
-            count
-          ) *
-          100,
-
-        avgPosition:
-          positionSum[index] /
-          count
-
-      })
-    );
-
-
-  /*
-    1着率順
-  */
-
-  results.sort(
-    (
-      a,
-      b
-    ) =>
-      b.winRate -
-      a.winRate
-  );
-
-
-  /*
-    印
-  */
-
-  assignMarks(
-    results
-  );
-
-
-  /*
-    結果表示
-  */
-
-  renderResults(
-    results,
-    count
-  );
-
-
-  status.textContent =
-
-    `✓ ${count.toLocaleString()}回の計算が完了しました。`;
+return;
 
 }
 
-
-/* =====================================================
-   印
-===================================================== */
-
-function assignMarks(
-  results
+if(
+horses.some(h=>!h.name)
 ){
 
-  results.forEach(
-    horse => {
+alert(
+"馬名が空欄です。"
+);
 
-      horse.mark =
-        "";
-
-    }
-  );
-
-
-  if(
-    results[0]
-  ){
-
-    results[0].mark =
-      "◎";
-
-  }
-
-
-  if(
-    results[1]
-  ){
-
-    results[1].mark =
-      "○";
-
-  }
-
-
-  if(
-    results[2]
-  ){
-
-    results[2].mark =
-      "▲";
-
-  }
-
-
-  if(
-    results[3]
-  ){
-
-    results[3].mark =
-      "△";
-
-  }
-
-
-  if(
-    results[4]
-  ){
-
-    results[4].mark =
-      "△";
-
-  }
-
-
-  if(
-    results[5]
-  ){
-
-    results[5].mark =
-      "△";
-
-  }
-
-
-  if(
-    results[6]
-  ){
-
-    results[6].mark =
-      "☆";
-
-  }
+return;
 
 }
 
 
-/* =====================================================
-   結果表示
-===================================================== */
+const count=
+Number(
+document.getElementById(
+"simCount"
+).value
+);
 
-function renderResults(
-  results,
-  count
+const status=
+document.getElementById(
+"simStatus"
+);
+
+status.textContent=
+`${count.toLocaleString()}回シミュレーション中…`;
+
+await new Promise(
+r=>setTimeout(r,50)
+);
+
+
+const scores=
+horses.map(
+h=>calculateScore(h)
+);
+
+const wins=
+new Array(horses.length).fill(0);
+
+const top3=
+new Array(horses.length).fill(0);
+
+const positionSum=
+new Array(horses.length).fill(0);
+
+
+for(
+let s=0;
+s<count;
+s++
 ){
 
-  const resultCard =
-    document
-      .getElementById(
-        "resultCard"
-      );
-
-
-  resultCard
-    .classList
-    .remove(
-      "hidden"
-    );
-
-
-  const top =
-    results[0];
-
-
-  const second =
-    results[1];
-
-
-  const third =
-    results[2];
-
-
-  /*
-    本命・対抗・単穴
-  */
-
-  document
-    .getElementById(
-      "summary"
-    )
-    .innerHTML = `
-
-      <div class="result-box">
-
-        <div class="mark">
-          ◎
-        </div>
-
-        <strong>
-          ${
-            escapeHTML(
-              top.name
-            )
-          }
-        </strong>
-
-        <div>
-          ${
-            top.number
-          }番
-        </div>
-
-        <div>
-          1着率
-          ${
-            top.winRate.toFixed(
-              2
-            )
-          }%
-        </div>
-
-        <div>
-          3着内率
-          ${
-            top.top3Rate.toFixed(
-              2
-            )
-          }%
-        </div>
-
-      </div>
-
-
-      <div class="result-box">
-
-        <div class="mark">
-          ○
-        </div>
-
-        <strong>
-          ${
-            second
-              ? escapeHTML(
-                  second.name
-                )
-              : "—"
-          }
-        </strong>
-
-        <div>
-          ${
-            second
-              ? second.number +
-                "番"
-              : "—"
-          }
-        </div>
+const remaining=
+horses.map(
+(_,i)=>i
+);
 
-        <div>
-          ${
-            second
-              ? "1着率 " +
-                second.winRate.toFixed(
-                  2
-                ) +
-                "%"
-              : ""
-          }
-        </div>
+const order=[];
 
-      </div>
+while(remaining.length){
 
+const weights=
+remaining.map(
+i=>
+Math.pow(
+scores[i],
+2.2
+)
+);
 
-      <div class="result-box">
+const selected=
+weightedRandom(weights);
 
-        <div class="mark">
-          ▲
-        </div>
+const index=
+remaining[selected];
 
-        <strong>
-          ${
-            third
-              ? escapeHTML(
-                  third.name
-                )
-              : "—"
-          }
-        </strong>
-
-        <div>
-          ${
-            third
-              ? third.number +
-                "番"
-              : "—"
-          }
-        </div>
-
-        <div>
-          ${
-            third
-              ? "1着率 " +
-                third.winRate.toFixed(
-                  2
-                ) +
-                "%"
-              : ""
-          }
-        </div>
-
-      </div>
-
-    `;
-
-
-  /*
-    印をまとめる
-  */
-
-  const grouped =
-    {};
-
-
-  results.forEach(
-    horse => {
-
-      if(
-        !horse.mark
-      ){
-
-        return;
-
-      }
-
-
-      if(
-        !grouped[
-          horse.mark
-        ]
-      ){
-
-        grouped[
-          horse.mark
-        ] = [];
-
-      }
-
-
-      grouped[
-        horse.mark
-      ].push(
-        horse.number
-      );
-
-    }
-  );
-
-
-  const markOrder =
-    [
-      "◎",
-      "○",
-      "▲",
-      "△",
-      "☆"
-    ];
-
-
-  document
-    .getElementById(
-      "marks"
-    )
-    .innerHTML =
-
-      markOrder
-
-        .filter(
-          mark =>
-            grouped[
-              mark
-            ] &&
-            grouped[
-              mark
-            ].length
-        )
-
-        .map(
-          mark => `
-
-            <div class="mark-row">
-
-              <span
-                class="mark-circle"
-              >
-                ${mark}
-              </span>
-
-              <strong>
-                ${
-                  grouped[
-                    mark
-                  ].join(
-                    "・"
-                  )
-                }番
-              </strong>
-
-            </div>
-
-          `
-        )
-
-        .join(
-          ""
-        );
-
-
-  /*
-    全馬ランキング
-  */
-
-  document
-    .getElementById(
-      "resultBody"
-    )
-    .innerHTML =
-
-      results
-
-        .map(
-          (
-            horse,
-            index
-          ) => `
-
-            <tr>
-
-              <td>
-                ${
-                  index + 1
-                }
-              </td>
-
-              <td>
-                ${
-                  horse.number
-                }
-              </td>
-
-              <td>
-                ${
-                  escapeHTML(
-                    horse.name
-                  )
-                }
-              </td>
-
-              <td>
-                ${
-                  Number.isFinite(
-                    horse.odds
-                  )
-                    ? horse.odds.toFixed(
-                        1
-                      )
-                    : "—"
-                }
-              </td>
-
-              <td>
-                ${
-                  horse.winRate.toFixed(
-                    2
-                  )
-                }%
-              </td>
-
-              <td>
-                ${
-                  horse.top3Rate.toFixed(
-                    2
-                  )
-                }%
-              </td>
-
-              <td>
-                ${
-                  horse.avgPosition.toFixed(
-                    2
-                  )
-                }
-              </td>
-
-              <td>
-                <strong>
-                  ${
-                    horse.mark
-                  }
-                </strong>
-              </td>
-
-            </tr>
-
-          `
-        )
-
-        .join(
-          ""
-        );
-
-
-  /*
-    買い目
-  */
-
-  createBetSuggestions(
-    results
-  );
+order.push(index);
+
+remaining.splice(
+selected,
+1
+);
+
+}
+
+
+order.forEach(
+(index,pos)=>{
+
+positionSum[index]+=pos+1;
+
+if(pos===0)
+wins[index]++;
+
+if(pos<3)
+top3[index]++;
+
+}
+);
+
+
+if(s%5000===0){
+
+await new Promise(
+r=>setTimeout(r,0)
+);
+
+}
+
+}
+
+
+const results=
+horses.map(
+(h,i)=>({
+
+...h,
+
+winRate:
+wins[i]/count*100,
+
+top3Rate:
+top3[i]/count*100,
+
+avgPosition:
+positionSum[i]/count,
+
+mark:""
+
+})
+);
+
+
+results.sort(
+(a,b)=>
+b.winRate-a.winRate
+);
+
+
+assignMarks(results);
+
+renderResults(results);
+
+status.textContent=
+`${count.toLocaleString()}回完了`;
 
 }
 
 
 /* =====================================================
-   買い目生成
+印
 ===================================================== */
 
-function createBetSuggestions(
-  results
-){
+function assignMarks(results){
 
-  /*
-    上位馬
-  */
+if(results[0])
+results[0].mark="◎";
 
-  const top =
-    results.slice(
-      0,
-      Math.min(
-        6,
-        results.length
-      )
-    );
+if(results[1])
+results[1].mark="○";
 
+if(results[2])
+results[2].mark="▲";
 
-  /*
-    ワイド
-  */
+if(results[3])
+results[3].mark="△";
 
-  const wide =
-    top
-      .slice(
-        0,
-        4
-      )
-      .map(
-        horse =>
-          horse.number
-      );
+if(results[4])
+results[4].mark="△";
 
+if(results[5])
+results[5].mark="△";
 
-  /*
-    馬連
-  */
-
-  const quinella = [];
-
-
-  for(
-    let i = 0;
-    i < Math.min(
-      4,
-      results.length
-    );
-    i++
-  ){
-
-    for(
-      let j = i + 1;
-      j < Math.min(
-        5,
-        results.length
-      );
-      j++
-    ){
-
-      quinella.push(
-
-        `${results[i].number}-${results[j].number}`
-
-      );
-
-    }
-
-  }
-
-
-  /*
-    3連複
-  */
-
-  const trio = [];
-
-
-  const trioLimit =
-    Math.min(
-      5,
-      results.length
-    );
-
-
-  for(
-    let i = 0;
-    i < trioLimit;
-    i++
-  ){
-
-    for(
-      let j = i + 1;
-      j < trioLimit;
-      j++
-    ){
-
-      for(
-        let k = j + 1;
-        k < trioLimit;
-        k++
-      ){
-
-        trio.push(
-
-          `${results[i].number}-${results[j].number}-${results[k].number}`
-
-        );
-
-      }
-
-    }
-
-  }
-
-
-  /*
-    3連単
-  */
-
-  const trifecta =
-    [];
-
-
-  const first =
-    results.slice(
-      0,
-      Math.min(
-        3,
-        results.length
-      )
-    );
-
-
-  const second =
-    results.slice(
-      0,
-      Math.min(
-        5,
-        results.length
-      )
-    );
-
-
-  const third =
-    results.slice(
-      0,
-      Math.min(
-        6,
-        results.length
-      )
-    );
-
-
-  first.forEach(
-    a => {
-
-      second.forEach(
-        b => {
-
-          third.forEach(
-            c => {
-
-              if(
-                a.number !==
-                  b.number &&
-                a.number !==
-                  c.number &&
-                b.number !==
-                  c.number
-              ){
-
-                trifecta.push(
-
-                  `${a.number}-${b.number}-${c.number}`
-
-                );
-
-              }
-
-            }
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-  /*
-    表示
-  */
-
-  document
-    .getElementById(
-      "bets"
-    )
-    .innerHTML = `
-
-      <div class="bet-box">
-
-        <strong>
-          🟢 ワイド候補
-        </strong>
-
-        <br>
-
-        ${
-          wide.join(
-            "・"
-          )
-        }番を中心
-
-      </div>
-
-
-      <div class="bet-box">
-
-        <strong>
-          🟡 馬連候補
-        </strong>
-
-        <br>
-
-        ${
-          quinella
-            .slice(
-              0,
-              6
-            )
-            .join(
-              " / "
-            )
-        }
-
-      </div>
-
-
-      <div class="bet-box">
-
-        <strong>
-          🔵 3連複候補
-        </strong>
-
-        <br>
-
-        ${
-          trio
-            .slice(
-              0,
-              10
-            )
-            .join(
-              " / "
-            )
-        }
-
-      </div>
-
-
-      <div class="bet-box">
-
-        <strong>
-          🔴 3連単候補
-        </strong>
-
-        <br>
-
-        ${
-          trifecta
-            .slice(
-              0,
-              12
-            )
-            .join(
-              " / "
-            )
-        }
-
-      </div>
-
-    `;
+if(results[6])
+results[6].mark="☆";
 
 }
 
 
 /* =====================================================
-   シミュレーションボタン
+結果表示
+===================================================== */
+
+function renderResults(results){
+
+document
+.getElementById("resultCard")
+.classList
+.remove("hidden");
+
+
+const top=results[0];
+const second=results[1];
+const third=results[2];
+
+
+document
+.getElementById("summary")
+.innerHTML=`
+
+<div class="result-box">
+
+<div class="result-mark">◎</div>
+
+<strong>
+${esc(top.name)}
+</strong>
+
+<div>
+${top.number}番
+</div>
+
+<div>
+1着率 ${top.winRate.toFixed(2)}%
+</div>
+
+<div>
+3着内率 ${top.top3Rate.toFixed(2)}%
+</div>
+
+</div>
+
+
+<div class="result-box">
+
+<div class="result-mark">○</div>
+
+<strong>
+${second?esc(second.name):"—"}
+</strong>
+
+<div>
+${second?second.number+"番":"—"}
+</div>
+
+<div>
+${second
+?second.winRate.toFixed(2)+"%"
+:""}
+</div>
+
+</div>
+
+
+<div class="result-box">
+
+<div class="result-mark">▲</div>
+
+<strong>
+${third?esc(third.name):"—"}
+</strong>
+
+<div>
+${third?third.number+"番":"—"}
+</div>
+
+<div>
+${third
+?third.winRate.toFixed(2)+"%"
+:""}
+</div>
+
+</div>
+
+`;
+
+
+/*
+印まとめ
+*/
+
+const groups={};
+
+results.forEach(h=>{
+
+if(!h.mark)return;
+
+if(!groups[h.mark])
+groups[h.mark]=[];
+
+groups[h.mark].push(
+h.number
+);
+
+});
+
+
+const order=
+["◎","○","▲","△","☆"];
+
+
+document
+.getElementById("marks")
+.innerHTML=
+
+order
+.filter(
+m=>groups[m]
+)
+.map(
+m=>`
+
+<div class="mark-row">
+
+<div class="mark-circle">
+${m}
+</div>
+
+<strong>
+${groups[m].join("・")}
+</strong>
+
+</div>
+
+`
+)
+.join("");
+
+
+/*
+ランキング
+*/
+
+document
+.getElementById("resultBody")
+.innerHTML=
+
+results.map(
+(h,i)=>`
+
+<tr>
+
+<td>${i+1}</td>
+
+<td>${h.number}</td>
+
+<td>${esc(h.name)}</td>
+
+<td>
+${h.odds
+?h.odds.toFixed(1)
+:"—"}
+</td>
+
+<td>
+${h.winRate.toFixed(2)}%
+</td>
+
+<td>
+${h.top3Rate.toFixed(2)}%
+</td>
+
+<td>
+${h.avgPosition.toFixed(2)}
+</td>
+
+<td>
+<strong>${h.mark}</strong>
+</td>
+
+</tr>
+
+`
+)
+.join("");
+
+
+createBets(results);
+
+}
+
+
+/* =====================================================
+買い目
+===================================================== */
+
+function createBets(results){
+
+const top=
+results.slice(
+0,
+Math.min(6,results.length)
+);
+
+
+/*
+ワイド
+*/
+
+const wide=
+top.slice(0,4)
+.map(h=>h.number);
+
+
+/*
+馬連
+*/
+
+const quinella=[];
+
+for(
+let i=0;
+i<Math.min(4,results.length);
+i++
+){
+
+for(
+let j=i+1;
+j<Math.min(5,results.length);
+j++
+){
+
+quinella.push(
+`${results[i].number}-${results[j].number}`
+);
+
+}
+
+}
+
+
+/*
+3連複
+*/
+
+const trio=[];
+
+for(
+let i=0;
+i<Math.min(5,results.length);
+i++
+){
+
+for(
+let j=i+1;
+j<Math.min(5,results.length);
+j++
+){
+
+for(
+let k=j+1;
+k<Math.min(5,results.length);
+k++
+){
+
+trio.push(
+`${results[i].number}-${results[j].number}-${results[k].number}`
+);
+
+}
+
+}
+
+}
+
+
+/*
+3連単
+*/
+
+const trifecta=[];
+
+const a=
+results.slice(
+0,
+Math.min(3,results.length)
+);
+
+const b=
+results.slice(
+0,
+Math.min(5,results.length)
+);
+
+const c=
+results.slice(
+0,
+Math.min(6,results.length)
+);
+
+
+a.forEach(x=>{
+
+b.forEach(y=>{
+
+c.forEach(z=>{
+
+if(
+x.number!==y.number &&
+x.number!==z.number &&
+y.number!==z.number
+){
+
+trifecta.push(
+`${x.number}-${y.number}-${z.number}`
+);
+
+}
+
+});
+
+});
+
+});
+
+
+document
+.getElementById("bets")
+.innerHTML=`
+
+<div class="bet-box">
+
+<strong>🟢 ワイド</strong>
+
+<br>
+
+${wide.join("・")}番
+
+</div>
+
+
+<div class="bet-box">
+
+<strong>🟡 馬連</strong>
+
+<br>
+
+${quinella
+.slice(0,8)
+.join(" / ")}
+
+</div>
+
+
+<div class="bet-box">
+
+<strong>🔵 3連複</strong>
+
+<br>
+
+${trio
+.slice(0,12)
+.join(" / ")}
+
+</div>
+
+
+<div class="bet-box">
+
+<strong>🔴 3連単</strong>
+
+<br>
+
+${trifecta
+.slice(0,15)
+.join(" / ")}
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+ボタン
 ===================================================== */
 
 document
-  .getElementById(
-    "runSimulation"
-  )
-  .onclick =
-    runSimulation;
+.getElementById("runSimulation")
+.onclick=
+runSimulation;
 
 
-/* =====================================================
-   初期状態
-===================================================== */
+/* 初期化 */
 
-/*
-  最初は8頭だけ用意。
-
-  OCRを使う場合は
-  OCR登録時に全置換される。
-*/
-
-for(
-  let i = 1;
-  i <= 8;
-  i++
-){
-
-  addHorse({
-
-    number:
-      i,
-
-    name:
-      "",
-
-    odds:
-      0,
-
-    recent:
-      75,
-
-    distance:
-      75,
-
-    course:
-      75,
-
-    going:
-      75,
-
-    pace:
-      75,
-
-    jockey:
-      75,
-
-    final3F:
-      75,
-
-    gate:
-      75,
-
-    style:
-      "差し"
-
-  });
-
-}
+renderHorses();
 
 </script>
 

@@ -1,1172 +1,739 @@
-
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>競馬予想アプリ 中央・地方対応</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 12px;
-      background: #f1f3f5;
-      color: #222;
-      font-family: -apple-system, BlinkMacSystemFont, "Yu Gothic", Meiryo, sans-serif;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-
-    h1 {
-      text-align: center;
-      color: #176b3a;
-      font-size: 24px;
-      margin: 10px 0 20px;
-    }
-
-    h2 {
-      font-size: 19px;
-      color: #176b3a;
-      border-bottom: 2px solid #176b3a;
-      padding-bottom: 7px;
-    }
-
-    .card {
-      background: #fff;
-      padding: 17px;
-      margin-bottom: 18px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px #00000012;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .form-group {
-      margin-bottom: 13px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #c8cdd2;
-      border-radius: 7px;
-      font-size: 15px;
-      background: #fff;
-    }
-
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 8px;
-      border: none;
-      border-radius: 8px;
-      background: #176b3a;
-      color: #fff;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      opacity: 0.88;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .blue {
-      background: #356aa8;
-    }
-
-    .orange {
-      background: #d4771c;
-    }
-
-    .gray {
-      background: #555;
-    }
-
-    .red {
-      background: #b52c2c;
-    }
-
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .status {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #edf6ef;
-      color: #176b3a;
-      white-space: pre-wrap;
-      font-size: 14px;
-    }
-
-    .warning {
-      background: #fff3dc;
-      color: #855500;
-    }
-
-    .error {
-      background: #ffe7e7;
-      color: #a00000;
-    }
-
-    .preview {
-      display: none;
-      width: 100%;
-      max-height: 350px;
-      object-fit: contain;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    .small {
-      color: #666;
-      font-size: 12px;
-    }
-
-    @media (max-width: 600px) {
-      .grid,
-      .button-grid {
-        grid-template-columns: 1fr;
-      }
-
-      body {
-        padding: 8px;
-      }
-
-      .card {
-        padding: 13px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>競馬予想シミュレーター</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  background:#f3f4f6;
+  color:#111827;
+}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+h1{margin:0 0 6px}
+h2{margin:0 0 14px;font-size:20px}
+.card{
+  background:white;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 3px 15px rgba(0,0,0,.06);
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+}
+label{
+  font-size:13px;
+  font-weight:bold;
+}
+input,select{
+  width:100%;
+  margin-top:6px;
+  padding:11px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  font-size:16px;
+  background:white;
+}
+button{
+  border:0;
+  border-radius:11px;
+  padding:12px 18px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.primary{
+  background:#111827;
+  color:white;
+}
+.secondary{
+  background:#e5e7eb;
+  color:#111827;
+}
+.danger{
+  background:#fee2e2;
+  color:#991b1b;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:15px;
+}
+.table-wrap{
+  overflow-x:auto;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:900px;
+}
+th,td{
+  border-bottom:1px solid #e5e7eb;
+  padding:9px 6px;
+  text-align:center;
+  font-size:13px;
+}
+th{
+  background:#f9fafb;
+}
+td:first-child,th:first-child{
+  position:sticky;
+  left:0;
+  background:white;
+}
+.result-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+}
+.stat{
+  background:#f9fafb;
+  padding:15px;
+  border-radius:12px;
+}
+.stat strong{
+  display:block;
+  font-size:24px;
+  margin-top:5px;
+}
+.mark{
+  font-size:20px;
+  font-weight:bold;
+}
+◎{color:#dc2626}
+○{color:#2563eb}
+▲{color:#d97706}
+△{color:#16a34a}
+.good{
+  font-weight:bold;
+  color:#dc2626;
+}
+.bad{
+  color:#6b7280;
+}
+.rank1{
+  background:#fff7ed;
+}
+.small{
+  font-size:12px;
+  color:#6b7280;
+}
+#status{
+  margin-top:10px;
+  font-weight:bold;
+}
+@media(max-width:600px){
+  .container{padding:12px}
+  .card{padding:14px}
+}
+</style>
 </head>
-
 <body>
-
-  <div class="container">
-
-    <h1>🏇 競馬予想分析アプリ</h1>
-
-    <!-- レース情報 -->
-
-    <section class="card">
-
-      <h2>① レース情報</h2>
-
-      <div class="grid">
-
-        <div class="form-group">
-          <label for="raceDate">開催日</label>
-          <input type="date" id="raceDate">
-        </div>
-
-        <div class="form-group">
-          <label for="category">開催区分</label>
-          <select id="category">
-            <option value="中央競馬（JRA）">中央競馬（JRA）</option>
-            <option value="地方競馬">地方競馬</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="track">競馬場</label>
-          <input id="track" placeholder="例：中山、阪神、笠松、浦和">
-        </div>
-
-        <div class="form-group">
-          <label for="raceNumber">レース番号</label>
-          <input id="raceNumber" type="number" min="1" max="12" placeholder="例：11">
-        </div>
-
-        <div class="form-group">
-          <label for="distance">距離</label>
-          <input id="distance" placeholder="例：芝1600m、ダート1400m">
-        </div>
-
-        <div class="form-group">
-          <label for="course">コース・条件</label>
-          <input id="course" placeholder="例：3歳未勝利、G1、右回り">
-        </div>
-
-        <div class="form-group">
-          <label for="weather">天気</label>
-          <select id="weather">
-            <option value="未確認">未確認</option>
-            <option value="晴れ">晴れ</option>
-            <option value="曇り">曇り</option>
-            <option value="雨">雨</option>
-            <option value="小雨">小雨</option>
-            <option value="雪">雪</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="trackCondition">馬場状態</label>
-          <select id="trackCondition">
-            <option value="未確認">未確認</option>
-            <option value="良">良</option>
-            <option value="稍重">稍重</option>
-            <option value="重">重</option>
-            <option value="不良">不良</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="predictionStyle">予想スタイル</label>
-          <select id="predictionStyle">
-            <option value="バランス型">バランス型</option>
-            <option value="堅実型">堅実型</option>
-            <option value="穴狙い">穴狙い</option>
-            <option value="回収率重視">回収率重視</option>
-            <option value="高配当狙い">高配当狙い</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="budget">想定購入金額</label>
-          <select id="budget">
-            <option value="1000円">1,000円</option>
-            <option value="2000円">2,000円</option>
-            <option value="3000円">3,000円</option>
-            <option value="5000円">5,000円</option>
-            <option value="10000円">10,000円</option>
-            <option value="指定なし">指定なし</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div class="form-group">
-        <label for="additionalInfo">追加情報</label>
-        <textarea id="additionalInfo"
-          placeholder="例：逃げ馬が多い、内枠有利、前走不利があった馬など"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="customPrompt">追加指示</label>
-        <textarea id="customPrompt"
-          placeholder="例：3連複を中心に考えて。買い目は少なめに。"></textarea>
-      </div>
-
-    </section>
-
-    <!-- OCR -->
-
-    <section class="card">
-
-      <h2>② 出馬表OCR</h2>
-
-      <p class="small">
-        出馬表のスクリーンショットを選択し、OCRを実行してください。
-      </p>
-
-      <div class="form-group">
-        <label for="imageInput">出馬表画像</label>
-        <input type="file" id="imageInput" accept="image/*">
-      </div>
-
-      <img id="imagePreview" class="preview" alt="出馬表プレビュー">
-
-      <button id="ocrButton" type="button" onclick="runOCR()">
-        🔍 OCRを実行
-      </button>
-
-      <div id="ocrStatus" class="status">
-        OCR待機中
-      </div>
-
-      <div class="form-group">
-        <label for="ocrText">OCR読み取り結果</label>
-        <textarea id="ocrText"
-          placeholder="OCR結果がここに表示されます。誤認識があれば手動で修正できます。"></textarea>
-      </div>
-
-      <button type="button" class="gray" onclick="formatOCRText()">
-        📝 OCR結果を整形
-      </button>
-
-    </section>
-
-    <!-- プロンプト -->
-
-    <section class="card">
-
-      <h2>③ 予想プロンプト</h2>
-
-      <textarea id="promptOutput"
-        placeholder="プロンプト作成ボタンを押すと、ここに予想指示が表示されます。"></textarea>
-
-      <div class="button-grid">
-
-        <button type="button" onclick="showPrompt()">
-          📄 プロンプト作成
-        </button>
-
-        <button type="button" class="blue" onclick="copyPrompt()">
-          📋 プロンプトをコピー
-        </button>
-
-        <button type="button" class="orange" onclick="openChatGPT()">
-          🤖 ChatGPTで予想する
-        </button>
-
-        <button type="button" class="gray" onclick="checkMarkCounts()">
-          🔎 印の頭数チェック
-        </button>
-
-      </div>
-
-      <div id="markCheck" class="status">
-        印のチェック待機中
-      </div>
-
-    </section>
-
+<div class="container">
+  <div class="card">
+    <h1>🏇 競馬予想シミュレーター</h1>
+    <div class="small">
+      過去走などから作成した能力値を入力し、レースを大量シミュレーションします。
+    </div>
   </div>
-
-  <script>
-
-    "use strict";
-
-    let selectedImage = null;
-
-    /*
-      ページ読み込み時
-    */
-
-    document.addEventListener("DOMContentLoaded", function () {
-
-      const dateInput = document.getElementById("raceDate");
-
-      if (dateInput) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, "0");
-        const dd = String(today.getDate()).padStart(2, "0");
-
-        dateInput.value = `${yyyy}-${mm}-${dd}`;
-      }
-
-      const imageInput = document.getElementById("imageInput");
-
-      if (imageInput) {
-        imageInput.addEventListener("change", function (event) {
-
-          const file = event.target.files[0];
-
-          if (!file) {
-            selectedImage = null;
-            return;
-          }
-
-          selectedImage = file;
-
-          const preview = document.getElementById("imagePreview");
-          const imageUrl = URL.createObjectURL(file);
-
-          preview.src = imageUrl;
-          preview.style.display = "block";
-
-          setStatus(
-            "ocrStatus",
-            "画像を読み込みました。OCRを実行してください。",
-            "normal"
-          );
-
-        });
-      }
-
+  <!-- レース条件 -->
+  <div class="card">
+    <h2>① レース条件</h2>
+    <div class="grid">
+      <label>
+        距離
+        <select id="distance">
+          <option value="1200">1200m</option>
+          <option value="1400">1400m</option>
+          <option value="1600" selected>1600m</option>
+          <option value="1800">1800m</option>
+          <option value="2000">2000m</option>
+          <option value="2200">2200m</option>
+          <option value="2400">2400m</option>
+          <option value="2500">2500m</option>
+          <option value="3000">3000m</option>
+        </select>
+      </label>
+      <label>
+        馬場
+        <select id="track">
+          <option value="good">良</option>
+          <option value="yield">稍重</option>
+          <option value="heavy">重</option>
+          <option value="bad">不良</option>
+        </select>
+      </label>
+      <label>
+        ペース
+        <select id="pace">
+          <option value="slow">スローペース</option>
+          <option value="normal" selected>平均ペース</option>
+          <option value="fast">ハイペース</option>
+        </select>
+      </label>
+      <label>
+        シミュレーション回数
+        <select id="simCount">
+          <option value="1000">1,000回</option>
+          <option value="5000">5,000回</option>
+          <option value="10000" selected>10,000回</option>
+          <option value="30000">30,000回</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <!-- 馬データ -->
+  <div class="card">
+    <h2>② 出走馬データ</h2>
+    <div class="small">
+      能力値は0〜100。近走・距離適性・コース適性・馬場適性・瞬発力・スタミナなどを入力。
+    </div>
+    <div class="table-wrap">
+      <table id="horseTable">
+        <thead>
+          <tr>
+            <th>馬番</th>
+            <th>馬名</th>
+            <th>脚質</th>
+            <th>近走</th>
+            <th>距離</th>
+            <th>コース</th>
+            <th>馬場</th>
+            <th>瞬発</th>
+            <th>スタミナ</th>
+            <th>騎手</th>
+            <th>オッズ</th>
+            <th>削除</th>
+          </tr>
+        </thead>
+        <tbody id="horseBody"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button
+        type="button"
+        class="secondary"
+        id="addHorse">
+        ＋ 馬を追加
+      </button>
+      <button
+        type="button"
+        class="danger"
+        id="clearHorses">
+        全削除
+      </button>
+    </div>
+  </div>
+  <!-- シミュレーション -->
+  <div class="card">
+    <h2>③ シミュレーション</h2>
+    <button
+      type="button"
+      class="primary"
+      id="runSimulation">
+      🚀 10,000回シミュレーション
+    </button>
+    <div id="status"></div>
+  </div>
+  <!-- 結果 -->
+  <div class="card" id="resultCard" style="display:none">
+    <h2>④ シミュレーション結果</h2>
+    <div class="result-grid">
+      <div class="stat">
+        ◎ 本命
+        <strong id="honmei">-</strong>
+      </div>
+      <div class="stat">
+        ○ 対抗
+        <strong id="taikou">-</strong>
+      </div>
+      <div class="stat">
+        ▲ 単穴
+        <strong id="tanana">-</strong>
+      </div>
+      <div class="stat">
+        △ 穴
+        <strong id="ana">-</strong>
+      </div>
+    </div>
+    <br>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>印</th>
+            <th>馬番</th>
+            <th>馬名</th>
+            <th>1着率</th>
+            <th>2着率</th>
+            <th>3着内率</th>
+            <th>平均着順</th>
+            <th>オッズ</th>
+            <th>市場確率</th>
+            <th>期待値判定</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- 馬券 -->
+  <div class="card" id="ticketCard" style="display:none">
+    <h2>⑤ シミュレーションから見る買い目</h2>
+    <div id="tickets"></div>
+  </div>
+</div>
+<script>
+const horseBody = document.getElementById("horseBody");
+const addHorse = document.getElementById("addHorse");
+const clearHorses = document.getElementById("clearHorses");
+const runSimulation = document.getElementById("runSimulation");
+let horseNumber = 0;
+/* =========================
+   馬追加
+========================= */
+function addHorseRow(
+  name="",
+  style="差し",
+  recent=75,
+  distance=75,
+  course=75,
+  ground=75,
+  speed=75,
+  stamina=75,
+  jockey=75,
+  odds=10
+){
+  horseNumber++;
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>
+      <input
+        class="num"
+        type="number"
+        value="${horseNumber}"
+        min="1"
+        max="18">
+    </td>
+    <td>
+      <input
+        class="name"
+        value="${name}"
+        placeholder="馬名">
+    </td>
+    <td>
+      <select class="style">
+        <option ${style==="逃げ"?"selected":""}>逃げ</option>
+        <option ${style==="先行"?"selected":""}>先行</option>
+        <option ${style==="差し"?"selected":""}>差し</option>
+        <option ${style==="追込"?"selected":""}>追込</option>
+      </select>
+    </td>
+    <td><input class="recent" type="number" value="${recent}" min="0" max="100"></td>
+    <td><input class="distanceFit" type="number" value="${distance}" min="0" max="100"></td>
+    <td><input class="courseFit" type="number" value="${course}" min="0" max="100"></td>
+    <td><input class="groundFit" type="number" value="${ground}" min="0" max="100"></td>
+    <td><input class="speed" type="number" value="${speed}" min="0" max="100"></td>
+    <td><input class="stamina" type="number" value="${stamina}" min="0" max="100"></td>
+    <td><input class="jockey" type="number" value="${jockey}" min="0" max="100"></td>
+    <td><input class="odds" type="number" value="${odds}" min="1.01" step="0.1"></td>
+    <td>
+      <button
+        type="button"
+        class="danger deleteHorse">
+        ×
+      </button>
+    </td>
+  `;
+  horseBody.appendChild(tr);
+}
+/* =========================
+   初期馬
+========================= */
+for(let i=0;i<8;i++){
+  addHorseRow(
+    "馬"+(i+1),
+    i===0 ? "逃げ" :
+    i===1 ? "先行" :
+    i===2 ? "差し" :
+    "追込",
+    75 + Math.floor(Math.random()*15),
+    70 + Math.floor(Math.random()*25),
+    70 + Math.floor(Math.random()*25),
+    70 + Math.floor(Math.random()*25),
+    70 + Math.floor(Math.random()*25),
+    70 + Math.floor(Math.random()*25),
+    70 + Math.floor(Math.random()*25),
+    4 + Math.random()*16
+  );
+}
+/* =========================
+   馬追加
+========================= */
+addHorse.addEventListener("click",()=>{
+  if(horseBody.children.length >= 18){
+    alert("最大18頭です。");
+    return;
+  }
+  addHorseRow("新馬");
+});
+/* =========================
+   削除
+========================= */
+horseBody.addEventListener("click",(e)=>{
+  if(!e.target.classList.contains("deleteHorse")) return;
+  e.target.closest("tr").remove();
+});
+/* =========================
+   全削除
+========================= */
+clearHorses.addEventListener("click",()=>{
+  if(!confirm("すべて削除しますか？")) return;
+  horseBody.innerHTML="";
+  horseNumber=0;
+});
+/* =========================
+   数値
+========================= */
+function num(value,min=0,max=100){
+  let n=parseFloat(value);
+  if(!Number.isFinite(n)) n=min;
+  return Math.max(min,Math.min(max,n));
+}
+/* =========================
+   能力指数
+========================= */
+function getPower(h){
+  const recent=num(h.querySelector(".recent").value);
+  const distance=num(h.querySelector(".distanceFit").value);
+  const course=num(h.querySelector(".courseFit").value);
+  const ground=num(h.querySelector(".groundFit").value);
+  const speed=num(h.querySelector(".speed").value);
+  const stamina=num(h.querySelector(".stamina").value);
+  const jockey=num(h.querySelector(".jockey").value);
+  /*
+    基本能力
+    近走       25%
+    距離適性   15%
+    コース適性 10%
+    馬場適性   10%
+    瞬発力     15%
+    スタミナ   10%
+    騎手       15%
+  */
+  return (
+    recent * .25 +
+    distance * .15 +
+    course * .10 +
+    ground * .10 +
+    speed * .15 +
+    stamina * .10 +
+    jockey * .15
+  );
+}
+/* =========================
+   展開補正
+========================= */
+function paceBonus(style,pace){
+  if(pace==="fast"){
+    if(style==="逃げ") return -5;
+    if(style==="先行") return -2;
+    if(style==="差し") return 4;
+    if(style==="追込") return 6;
+  }
+  if(pace==="slow"){
+    if(style==="逃げ") return 6;
+    if(style==="先行") return 4;
+    if(style==="差し") return -2;
+    if(style==="追込") return -5;
+  }
+  return 0;
+}
+/* =========================
+   距離補正
+========================= */
+function distanceBonus(style,distance){
+  if(distance<=1400){
+    if(style==="逃げ") return 2;
+    if(style==="先行") return 1;
+  }
+  if(distance>=2200){
+    if(style==="差し") return 1;
+    if(style==="追込") return 1;
+  }
+  return 0;
+}
+/* =========================
+   ランダム値
+========================= */
+function gaussianRandom(){
+  let u=0;
+  let v=0;
+  while(u===0) u=Math.random();
+  while(v===0) v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+/* =========================
+   シミュレーション
+========================= */
+function simulate(){
+  const rows=[...horseBody.querySelectorAll("tr")];
+  if(rows.length<2){
+    alert("2頭以上必要です。");
+    return null;
+  }
+  const pace=document.getElementById("pace").value;
+  const distance=parseInt(
+    document.getElementById("distance").value
+  );
+  const count=parseInt(
+    document.getElementById("simCount").value
+  );
+  const horses=rows.map(row=>{
+    const style=row.querySelector(".style").value;
+    return{
+      row,
+      num:row.querySelector(".num").value,
+      name:
+        row.querySelector(".name").value ||
+        "馬"+row.querySelector(".num").value,
+      style,
+      odds:num(
+        row.querySelector(".odds").value,
+        1.01,
+        999
+      ),
+      power:getPower(row),
+      win:0,
+      top3:0,
+      second:0,
+      third:0,
+      positionTotal:0
+    };
+  });
+  for(let i=0;i<count;i++){
+    const race=horses.map(h=>{
+      let score=h.power;
+      score += paceBonus(h.style,pace);
+      score += distanceBonus(h.style,distance);
+      /*
+        ランダム要素
+        能力が高い馬ほど安定
+        能力が低い馬ほどブレやすい
+      */
+      const variation =
+        gaussianRandom() *
+        (3 + (100-h.power)*0.055);
+      score += variation;
+      return{
+        horse:h,
+        score
+      };
     });
-
+    race.sort((a,b)=>b.score-a.score);
+    race.forEach((r,index)=>{
+      const h=r.horse;
+      h.positionTotal += index+1;
+      if(index===0) h.win++;
+      if(index===1) h.second++;
+      if(index===2) h.third++;
+      if(index<3) h.top3++;
+    });
+  }
+  horses.forEach(h=>{
+    h.winRate=h.win/count;
+    h.secondRate=h.second/count;
+    h.thirdRate=h.third/count;
+    h.top3Rate=h.top3/count;
+    h.averagePosition=
+      h.positionTotal/count;
     /*
-      ステータス表示
+      オッズから市場確率
+      1 / オッズ
     */
-
-    function setStatus(elementId, message, type = "normal") {
-
-      const element = document.getElementById(elementId);
-
-      if (!element) {
-        return;
-      }
-
-      element.textContent = message;
-
-      element.classList.remove("warning", "error");
-
-      if (type === "warning") {
-        element.classList.add("warning");
-      }
-
-      if (type === "error") {
-        element.classList.add("error");
-      }
-
+    h.marketProbability=
+      1/h.odds;
+    /*
+      簡易期待値
+      勝率 × オッズ
+    */
+    h.expectedValue=
+      h.winRate*h.odds;
+  });
+  horses.sort((a,b)=>{
+    /*
+      シミュレーション結果を中心に
+      期待値も少し考慮
+    */
+    const aScore=
+      a.winRate*.65+
+      a.top3Rate*.35;
+    const bScore=
+      b.winRate*.65+
+      b.top3Rate*.35;
+    return bScore-aScore;
+  });
+  return horses;
+}
+/* =========================
+   印
+========================= */
+function getMark(index){
+  if(index===0) return "◎";
+  if(index===1) return "○";
+  if(index===2) return "▲";
+  if(index<5) return "△";
+  return "";
+}
+/* =========================
+   結果表示
+========================= */
+function showResults(horses){
+  const resultCard=
+    document.getElementById("resultCard");
+  const ticketCard=
+    document.getElementById("ticketCard");
+  resultCard.style.display="block";
+  ticketCard.style.display="block";
+  document.getElementById("honmei").textContent=
+    horses[0].num+"番";
+  document.getElementById("taikou").textContent=
+    horses[1]?.num+"番" || "-";
+  document.getElementById("tanana").textContent=
+    horses[2]?.num+"番" || "-";
+  document.getElementById("ana").textContent=
+    horses[3]?.num+"番" || "-";
+  const body=document.getElementById("resultBody");
+  body.innerHTML="";
+  horses.forEach((h,index)=>{
+    const tr=document.createElement("tr");
+    if(index===0){
+      tr.className="rank1";
     }
-
-    /*
-      OCR実行
-    */
-
-    async function runOCR() {
-
-      const fileInput = document.getElementById("imageInput");
-      const button = document.getElementById("ocrButton");
-
-      const file = fileInput.files[0];
-
-      if (!file) {
-
-        setStatus(
-          "ocrStatus",
-          "先に出馬表の画像を選択してください。",
-          "warning"
-        );
-
-        return;
-      }
-
-      if (typeof Tesseract === "undefined") {
-
-        setStatus(
-          "ocrStatus",
-          "OCRライブラリの読み込みに失敗しました。ページを再読み込みしてください。",
-          "error"
-        );
-
-        return;
-      }
-
-      button.disabled = true;
-      button.textContent = "⏳ OCR処理中...";
-
-      setStatus(
-        "ocrStatus",
-        "画像を処理しています。しばらくお待ちください。",
-        "normal"
-      );
-
-      try {
-
-        const image = await loadImage(file);
-
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        const scale = 3;
-
-        canvas.width = image.width * scale;
-        canvas.height = image.height * scale;
-
-        context.drawImage(
-          image,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-        const imageData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-        const data = imageData.data;
-
-        for (let i = 0; i < data.length; i += 4) {
-
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-
-          const gray =
-            0.299 * r +
-            0.587 * g +
-            0.114 * b;
-
-          const contrast =
-            gray > 160 ? 255 : 0;
-
-          data[i] = contrast;
-          data[i + 1] = contrast;
-          data[i + 2] = contrast;
-
-        }
-
-        context.putImageData(imageData, 0, 0);
-
-        const result = await Tesseract.recognize(
-          canvas,
-          "jpn+eng",
-          {
-            logger: function (info) {
-
-              if (info.status && info.progress !== undefined) {
-
-                const progress =
-                  Math.round(info.progress * 100);
-
-                setStatus(
-                  "ocrStatus",
-                  `${info.status}\n進行状況：${progress}%`,
-                  "normal"
-                );
-
-              }
-
-            }
-          }
-        );
-
-        const text =
-          result &&
-          result.data &&
-          result.data.text
-            ? result.data.text.trim()
-            : "";
-
-        if (!text) {
-
-          setStatus(
-            "ocrStatus",
-            "文字を読み取れませんでした。画像を大きくするか、鮮明な画像を使用してください。",
-            "warning"
-          );
-
-          document.getElementById("ocrText").value = "";
-
-        } else {
-
-          document.getElementById("ocrText").value = text;
-
-          setStatus(
-            "ocrStatus",
-            "OCRが完了しました。読み取り結果を確認してください。",
-            "normal"
-          );
-
-        }
-
-      } catch (error) {
-
-        console.error("OCR error:", error);
-
-        setStatus(
-          "ocrStatus",
-          "OCR中にエラーが発生しました。\n" + error.message,
-          "error"
-        );
-
-      } finally {
-
-        button.disabled = false;
-        button.textContent = "🔍 OCRを実行";
-
-      }
-
+    const mark=getMark(index);
+    const market=
+      h.marketProbability*100;
+    const win=
+      h.winRate*100;
+    let valueText="";
+    let valueClass="";
+    if(h.expectedValue>=1){
+      valueText="買い候補";
+      valueClass="good";
+    }else{
+      valueText="妙味薄";
+      valueClass="bad";
     }
-
-    /*
-      画像読み込み
-    */
-
-    function loadImage(file) {
-
-      return new Promise(function (resolve, reject) {
-
-        const image = new Image();
-        const url = URL.createObjectURL(file);
-
-        image.onload = function () {
-
-          URL.revokeObjectURL(url);
-          resolve(image);
-
-        };
-
-        image.onerror = function () {
-
-          URL.revokeObjectURL(url);
-          reject(new Error("画像を読み込めませんでした。"));
-
-        };
-
-        image.src = url;
-
+    tr.innerHTML=`
+      <td class="mark">${mark}</td>
+      <td>${h.num}</td>
+      <td>${h.name}</td>
+      <td>${win.toFixed(1)}%</td>
+      <td>${(h.secondRate*100).toFixed(1)}%</td>
+      <td>${(h.top3Rate*100).toFixed(1)}%</td>
+      <td>${h.averagePosition.toFixed(2)}</td>
+      <td>${h.odds.toFixed(1)}</td>
+      <td>${market.toFixed(1)}%</td>
+      <td class="${valueClass}">
+        ${valueText}
+        <br>
+        <span class="small">
+          EV ${h.expectedValue.toFixed(2)}
+        </span>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+  createTickets(horses);
+}
+/* =========================
+   馬券候補
+========================= */
+function createTickets(horses){
+  const box=document.getElementById("tickets");
+  const a=horses[0];
+  const b=horses[1];
+  const c=horses[2];
+  const d=horses[3];
+  box.innerHTML=`
+    <div class="stat">
+      <strong>馬連</strong>
+      <div>
+        ${a.num}-${b.num}
+        <br>
+        ${a.num}-${c.num}
+        <br>
+        ${a.num}-${d.num}
+      </div>
+    </div>
+    <br>
+    <div class="stat">
+      <strong>ワイド</strong>
+      <div>
+        ${a.num}-${b.num}
+        <br>
+        ${a.num}-${c.num}
+        <br>
+        ${a.num}-${d.num}
+      </div>
+    </div>
+    <br>
+    <div class="stat">
+      <strong>3連複</strong>
+      <div>
+        ${a.num}-${b.num}-${c.num}
+        <br>
+        ${a.num}-${b.num}-${d.num}
+        <br>
+        ${a.num}-${c.num}-${d.num}
+      </div>
+    </div>
+    <br>
+    <div class="small">
+      ※買い目はシミュレーション順位だけから生成した参考候補です。
+      実際のオッズ・馬場・直前気配などを確認して最終判断してください。
+    </div>
+  `;
+}
+/* =========================
+   実行
+========================= */
+runSimulation.addEventListener("click",()=>{
+  const status=
+    document.getElementById("status");
+  status.textContent=
+    "シミュレーション中...";
+  /*
+    UIを一度更新してから実行
+  */
+  setTimeout(()=>{
+    const result=simulate();
+    if(!result){
+      status.textContent="エラー";
+      return;
+    }
+    showResults(result);
+    status.textContent=
+      document.getElementById("simCount").value+
+      "回のシミュレーション完了。";
+    document
+      .getElementById("resultCard")
+      .scrollIntoView({
+        behavior:"smooth"
       });
-
-    }
-
-    /*
-      OCR結果の簡易整形
-    */
-
-    function formatOCRText() {
-
-      const textarea = document.getElementById("ocrText");
-
-      const text = textarea.value.trim();
-
-      if (!text) {
-
-        setStatus(
-          "ocrStatus",
-          "整形するOCR結果がありません。",
-          "warning"
-        );
-
-        return;
-      }
-
-      const formatted = text
-        .replace(/\r/g, "")
-        .replace(/[ \t]+/g, " ")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
-
-      textarea.value = formatted;
-
-      setStatus(
-        "ocrStatus",
-        "OCR結果を整形しました。馬番・馬名・オッズなどを確認してください。",
-        "normal"
-      );
-
-    }
-
-    /*
-      入力値取得
-    */
-
-    function getValue(id, defaultValue = "未入力") {
-
-      const element = document.getElementById(id);
-
-      if (!element) {
-        return defaultValue;
-      }
-
-      const value = element.value.trim();
-
-      return value || defaultValue;
-
-    }
-
-    /*
-      プロンプト作成
-    */
-
-    function buildPrompt() {
-
-      const raceDate = getValue("raceDate");
-      const category = getValue("category");
-      const track = getValue("track");
-      const raceNumber = getValue("raceNumber");
-      const distance = getValue("distance");
-      const course = getValue("course");
-      const weather = getValue("weather");
-      const trackCondition = getValue("trackCondition");
-      const predictionStyle = getValue("predictionStyle");
-      const budget = getValue("budget");
-      const additionalInfo = getValue("additionalInfo");
-      const customPrompt = getValue("customPrompt");
-      const ocrText = getValue("ocrText", "OCR情報なし");
-
-      const prompt = `
-
-あなたは中央競馬・地方競馬に対応した競馬予想分析アシスタントです。
-
-━━━━━━━━━━━━━━━━━━
-【レース情報】
-━━━━━━━━━━━━━━━━━━
-
-開催日：${raceDate}
-開催区分：${category}
-競馬場：${track}
-レース番号：${raceNumber}R
-距離：${distance}
-コース・条件：${course}
-天気：${weather}
-馬場状態：${trackCondition}
-予想スタイル：${predictionStyle}
-想定購入金額：${budget}
-
-追加情報：
-${additionalInfo}
-
-追加指示：
-${customPrompt}
-
-━━━━━━━━━━━━━━━━━━
-【OCRで読み取った出馬表】
-━━━━━━━━━━━━━━━━━━
-
-${ocrText}
-
-━━━━━━━━━━━━━━━━━━
-【最重要確認事項】
-━━━━━━━━━━━━━━━━━━
-
-1. 開催日・競馬場・レース番号を最初に確認してください。
-2. OCRの誤認識がないか確認してください。
-3. 馬番・馬名・人気・単勝オッズの整合性を確認してください。
-4. OCRに存在しない馬を勝手に作らないでください。
-5. 確認できない情報は「未確認」と明記してください。
-6. 最新情報を確認できない場合は、そのことを明記してください。
-7. 推測と確認済みの情報を分けてください。
-
-━━━━━━━━━━━━━━━━━━
-【分析項目】
-━━━━━━━━━━━━━━━━━━
-
-・近走成績
-・過去の着順
-・距離適性
-・競馬場適性
-・コース適性
-・脚質
-・枠順
-・展開
-・想定ペース
-・逃げ馬と先行馬の数
-・騎手
-・斤量
-・血統
-・天気
-・馬場状態
-・人気
-・オッズ
-・穴馬
-・不安材料
-・買い時と危険な人気馬
-
-情報が不足している場合は、無理に断定しないでください。
-
-━━━━━━━━━━━━━━━━━━
-【印のルール】
-━━━━━━━━━━━━━━━━━━
-
-◎ 本命：必ず1頭
-○ 対抗：1～2頭
-▲ 単穴：1～2頭
-△ 連下：2～4頭
-☆ 穴馬：1～2頭
-注 注意馬：1～3頭
-
-◎本命は必ず1頭だけにしてください。
-
-各馬は必ず
-「馬番＋馬名」
-で記載してください。
-
-OCRにない馬番や馬名を勝手に作成しないでください。
-
-━━━━━━━━━━━━━━━━━━
-【出力形式】
-━━━━━━━━━━━━━━━━━━
-
-【レース確認】
-
-開催日：
-競馬場：
-レース番号：
-距離：
-馬場：
-天気：
-
-【展開予想】
-
-逃げ：
-先行：
-差し：
-追込：
-
-想定ペース：
-展開のポイント：
-
-【印】
-
-◎ 本命：
-馬番：
-馬名：
-理由：
-
-○ 対抗：
-馬番：
-馬名：
-理由：
-
-○ 対抗2：
-必要な場合のみ記載
-理由：
-
-▲ 単穴：
-馬番：
-馬名：
-理由：
-
-▲ 単穴2：
-必要な場合のみ記載
-理由：
-
-△ 連下：
-馬番：
-馬名：
-理由：
-
-△ 連下2：
-馬番：
-馬名：
-理由：
-
-△ 連下3：
-必要な場合のみ記載
-理由：
-
-△ 連下4：
-必要な場合のみ記載
-理由：
-
-☆ 穴馬：
-馬番：
-馬名：
-理由：
-
-☆ 穴馬2：
-必要な場合のみ記載
-理由：
-
-注 注意馬：
-馬番：
-馬名：
-理由：
-
-注 注意馬2：
-必要な場合のみ記載
-理由：
-
-注 注意馬3：
-必要な場合のみ記載
-理由：
-
-━━━━━━━━━━━━━━━━━━
-【買い目】
-━━━━━━━━━━━━━━━━━━
-
-想定購入金額は${budget}です。
-
-以下の買い目を検討してください。
-
-1. 単勝
-2. 複勝
-3. 馬連
-4. ワイド
-5. 3連複
-6. 3連単フォーメーション
-7. 穴狙いの買い目
-8. オッズを考慮した買い目
-
-買い目は広げすぎないでください。
-
-1点100円単位で計算してください。
-50円単位の買い目は作成しないでください。
-
-各買い目について、
-
-・券種
-・組み合わせ
-・点数
-・1点あたりの金額
-・合計金額
-・狙い
-・リスク
-
-を記載してください。
-
-想定購入金額を超えないようにしてください。
-
-━━━━━━━━━━━━━━━━━━
-【最終結論】
-━━━━━━━━━━━━━━━━━━
-
-最も期待する馬：
-馬番：
-馬名：
-
-穴で面白い馬：
-馬番：
-馬名：
-
-危険な人気馬：
-馬番：
-馬名：
-
-最もおすすめする券種：
-
-最終購入金額：
-
-━━━━━━━━━━━━━━━━━━
-【印の頭数チェック】
-━━━━━━━━━━━━━━━━━━
-
-◎：1頭
-○：1～2頭
-▲：1～2頭
-△：2～4頭
-☆：1～2頭
-注：1～3頭
-
-最後に、実際に付けた印の頭数がルール内か確認してください。
-
-`;
-
-      return prompt;
-
-    }
-
-    /*
-      プロンプト表示
-    */
-
-    function showPrompt() {
-
-      const prompt = buildPrompt();
-
-      document.getElementById("promptOutput").value = prompt;
-
-      setStatus(
-        "markCheck",
-        "プロンプトを作成しました。内容を確認してください。",
-        "normal"
-      );
-
-    }
-
-    /*
-      プロンプトコピー
-    */
-
-    async function copyPrompt() {
-
-      const output = document.getElementById("promptOutput");
-
-      if (!output.value.trim()) {
-        showPrompt();
-      }
-
-      const text = document.getElementById("promptOutput").value;
-
-      if (!text.trim()) {
-
-        setStatus(
-          "markCheck",
-          "コピーするプロンプトがありません。",
-          "warning"
-        );
-
-        return;
-      }
-
-      try {
-
-        await navigator.clipboard.writeText(text);
-
-        setStatus(
-          "markCheck",
-          "プロンプトをコピーしました。",
-          "normal"
-        );
-
-      } catch (error) {
-
-        output.focus();
-        output.select();
-
-        const copied = document.execCommand("copy");
-
-        if (copied) {
-
-          setStatus(
-            "markCheck",
-            "プロンプトをコピーしました。",
-            "normal"
-          );
-
-        } else {
-
-          setStatus(
-            "markCheck",
-            "自動コピーに失敗しました。選択された文章を手動でコピーしてください。",
-            "warning"
-          );
-
-        }
-
-      }
-
-    }
-
-    /*
-      ChatGPTを開く
-    */
-
-    function openChatGPT() {
-
-      let prompt = document.getElementById("promptOutput").value.trim();
-
-      if (!prompt) {
-
-        prompt = buildPrompt();
-
-        document.getElementById("promptOutput").value = prompt;
-
-      }
-
-      if (!prompt) {
-
-        setStatus(
-          "markCheck",
-          "プロンプトがありません。",
-          "warning"
-        );
-
-        return;
-      }
-
-      const url =
-        "https://chatgpt.com/?q=" +
-        encodeURIComponent(prompt);
-
-      window.open(url, "_blank");
-
-    }
-
-    /*
-      印の頭数チェック
-    */
-
-    function checkMarkCounts() {
-
-      const text = document.getElementById("promptOutput").value;
-
-      if (!text.trim()) {
-
-        setStatus(
-          "markCheck",
-          "先にプロンプトを作成してください。",
-          "warning"
-        );
-
-        return;
-      }
-
-      const result = [];
-
-      const rules = [
-        {
-          mark: "◎",
-          min: 1,
-          max: 1
-        },
-        {
-          mark: "○",
-          min: 1,
-          max: 2
-        },
-        {
-          mark: "▲",
-          min: 1,
-          max: 2
-        },
-        {
-          mark: "△",
-          min: 2,
-          max: 4
-        },
-        {
-          mark: "☆",
-          min: 1,
-          max: 2
-        },
-        {
-          mark: "注",
-          min: 1,
-          max: 3
-        }
-      ];
-
-      rules.forEach(function (rule) {
-
-        const count =
-          (text.match(new RegExp(escapeRegExp(rule.mark), "g")) || []).length;
-
-        const valid =
-          count >= rule.min &&
-          count <= rule.max;
-
-        result.push(
-          `${rule.mark}：${count}個 ` +
-          (valid ? "範囲内" : "要確認")
-        );
-
-      });
-
-      document.getElementById("markCheck").textContent =
-        result.join("\n");
-
-    }
-
-    /*
-      正規表現用の文字エスケープ
-    */
-
-    function escapeRegExp(text) {
-
-      return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    }
-
-  </script>
-
+  },50);
+});
+</script>
 </body>
 </html>

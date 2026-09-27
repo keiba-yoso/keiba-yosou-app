@@ -1,22 +1,616 @@
-  horses.splice(index,1);
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>競馬予想アシスタント</title>
 
-  renderHorseTable();
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f3f4f6;
+  color:#111827;
+  font-family:-apple-system,BlinkMacSystemFont,
+  "Noto Sans JP","Hiragino Kaku Gothic ProN",
+  Meiryo,sans-serif;
+}
+
+header{
+  background:#111827;
+  color:#fff;
+  padding:18px 14px;
+}
+
+header h1{
+  margin:0;
+  font-size:21px;
+}
+
+header p{
+  margin:6px 0 0;
+  color:#cbd5e1;
+  font-size:12px;
+}
+
+main{
+  max-width:900px;
+  margin:auto;
+  padding:12px;
+}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:15px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+h2{
+  margin:0 0 14px;
+  font-size:18px;
+}
+
+h3{
+  font-size:15px;
+  margin:18px 0 8px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+label{
+  display:block;
+  font-size:12px;
+  color:#64748b;
+  margin-bottom:5px;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:11px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  background:#fff;
+  color:#111827;
+  font-size:15px;
+}
+
+textarea{
+  min-height:180px;
+  resize:vertical;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 15px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+button:active{
+  transform:scale(.98);
+}
+
+.primary{
+  background:#111827;
+  color:#fff;
+}
+
+.chat{
+  background:#166534;
+  color:#fff;
+}
+
+.secondary{
+  background:#e2e8f0;
+  color:#111827;
+}
+
+.danger{
+  background:#b91c1c;
+  color:#fff;
+}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+
+.notice{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  padding:11px;
+  font-size:12px;
+  line-height:1.7;
+  margin-bottom:12px;
+}
+
+.status{
+  margin-top:10px;
+  padding:10px;
+  border-radius:9px;
+  background:#f1f5f9;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:600px;
+}
+
+th,td{
+  padding:7px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+  white-space:nowrap;
+}
+
+th{
+  background:#f1f5f9;
+  font-size:12px;
+}
+
+td input{
+  min-width:70px;
+  padding:8px;
+}
+
+.small{
+  color:#64748b;
+  font-size:12px;
+  line-height:1.7;
+}
+
+.hidden{
+  display:none;
+}
+
+.copy-box{
+  background:#111827;
+  color:#fff;
+  border-radius:10px;
+  padding:12px;
+  font-family:monospace;
+  font-size:11px;
+  line-height:1.6;
+  white-space:pre-wrap;
+  word-break:break-word;
+  max-height:350px;
+  overflow:auto;
+}
+
+@media(max-width:600px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  button{
+    width:100%;
+  }
+
+  .actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🏇 競馬予想アシスタント</h1>
+  <p>JRA・地方対応 / 馬名を入力してチャッピーに予想を依頼</p>
+</header>
+
+<main>
+
+<!-- レース情報 -->
+<section class="card">
+
+<h2>① レース情報</h2>
+
+<div class="grid">
+
+<div>
+<label>開催日</label>
+<input id="raceDate" type="date">
+</div>
+
+<div>
+<label>開催区分</label>
+<select id="raceType">
+<option value="JRA">JRA</option>
+<option value="地方">地方競馬</option>
+</select>
+</div>
+
+<div>
+<label>競馬場</label>
+<input id="raceTrack" placeholder="中山・大井・笠松など">
+</div>
+
+<div>
+<label>レース番号</label>
+<input id="raceNumber" type="number" min="1" max="12" placeholder="8">
+</div>
+
+<div>
+<label>距離</label>
+<input id="raceDistance" placeholder="1200">
+</div>
+
+<div>
+<label>コース</label>
+<select id="surface">
+<option value="">未入力</option>
+<option>芝</option>
+<option>ダート</option>
+</select>
+</div>
+
+<div>
+<label>馬場</label>
+<select id="going">
+<option value="">未入力</option>
+<option>良</option>
+<option>稍重</option>
+<option>重</option>
+<option>不良</option>
+</select>
+</div>
+
+<div>
+<label>天気</label>
+<input id="weather" placeholder="晴・曇・雨など">
+</div>
+
+</div>
+
+</section>
+
+
+<!-- 馬入力 -->
+<section class="card">
+
+<h2>② 出走馬</h2>
+
+<div class="notice">
+馬番と馬名を入力してください。<br>
+必要なら騎手・オッズも入力できます。<br>
+<strong>全部入力しなくてもチャッピーに聞けます。</strong>
+</div>
+
+<div class="actions">
+<button class="secondary" type="button" onclick="addHorse()">
+＋ 馬を追加
+</button>
+
+<button class="secondary" type="button" onclick="add16Horses()">
+16頭入力欄を作る
+</button>
+
+<button class="danger" type="button" onclick="clearHorses()">
+馬を全消去
+</button>
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>馬番</th>
+<th>馬名</th>
+<th>騎手</th>
+<th>単勝オッズ</th>
+<th>削除</th>
+</tr>
+</thead>
+
+<tbody id="horseTable"></tbody>
+
+</table>
+
+</div>
+
+<div class="status" id="horseStatus">
+馬を入力してください。
+</div>
+
+</section>
+
+
+<!-- チャッピー -->
+<section class="card">
+
+<h2>③ チャッピーに予想してもらう</h2>
+
+<div class="notice">
+<strong>やることはボタン1つです。</strong><br>
+入力したレース情報と馬名から、ChatGPTに渡す予想依頼文を自動作成します。<br>
+その文章をコピーしてChatGPTで検索・分析してもらえます。
+</div>
+
+<button
+  class="chat"
+  type="button"
+  onclick="askChatGPT()"
+>
+🤖 チャッピーに予想してもらう
+</button>
+
+<div
+  class="status"
+  id="chatStatus"
+>
+まだ予想依頼を作っていません。
+</div>
+
+</section>
+
+
+<!-- 作成されたプロンプト -->
+<section
+  class="card hidden"
+  id="promptSection"
+>
+
+<h2>④ ChatGPTに渡す内容</h2>
+
+<div
+  class="copy-box"
+  id="promptBox"
+></div>
+
+<div class="actions">
+
+<button
+  class="primary"
+  type="button"
+  onclick="copyPrompt()"
+>
+📋 予想文をコピー
+</button>
+
+<button
+  class="chat"
+  type="button"
+  onclick="openChatGPT()"
+>
+💬 ChatGPTを開く
+</button>
+
+</div>
+
+</section>
+
+
+<!-- 簡易メモ -->
+<section class="card">
+
+<h2>⑤ 自由メモ</h2>
+
+<textarea
+id="memo"
+placeholder="例：
+前走で出遅れ。
+逃げ馬が多そう。
+穴馬を1頭入れてほしい。
+3連単も考えてほしい。
+"></textarea>
+
+</section>
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   データ
+========================================================= */
+
+let horses = [];
+
+
+/* =========================================================
+   共通
+========================================================= */
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function escapeHTML(value){
+  return String(value ?? "")
+    .replace(/[&<>"']/g, function(match){
+      return {
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[match];
+    });
 }
 
 
 /* =========================================================
-   馬番順
+   馬追加
 ========================================================= */
 
-function sortHorses() {
+function addHorse(data = {}){
+
+  if(horses.length >= 18){
+    alert("最大18頭までです。");
+    return;
+  }
+
+  horses.push({
+    number:data.number || horses.length + 1,
+    name:data.name || "",
+    jockey:data.jockey || "",
+    odds:data.odds || ""
+  });
+
+  renderHorses();
+}
+
+
+/* =========================================================
+   16頭分
+========================================================= */
+
+function add16Horses(){
+
+  horses = [];
+
+  for(let i=1;i<=16;i++){
+
+    horses.push({
+      number:i,
+      name:"",
+      jockey:"",
+      odds:""
+    });
+
+  }
+
+  renderHorses();
+
+  $("horseStatus").textContent =
+    "16頭分の入力欄を作りました。";
+}
+
+
+/* =========================================================
+   表示
+========================================================= */
+
+function renderHorses(){
+
+  const table =
+    $("horseTable");
+
+  table.innerHTML =
+    horses.map(function(horse,index){
+
+      return `
+<tr>
+
+<td>
+<input
+type="number"
+min="1"
+max="18"
+data-index="${index}"
+data-key="number"
+value="${escapeHTML(horse.number)}">
+</td>
+
+<td>
+<input
+type="text"
+placeholder="馬名"
+data-index="${index}"
+data-key="name"
+value="${escapeHTML(horse.name)}">
+</td>
+
+<td>
+<input
+type="text"
+placeholder="騎手"
+data-index="${index}"
+data-key="jockey"
+value="${escapeHTML(horse.jockey)}">
+</td>
+
+<td>
+<input
+type="text"
+inputmode="decimal"
+placeholder="例 5.2"
+data-index="${index}"
+data-key="odds"
+value="${escapeHTML(horse.odds)}">
+</td>
+
+<td>
+<button
+class="danger"
+type="button"
+onclick="deleteHorse(${index})">
+削除
+</button>
+</td>
+
+</tr>
+`;
+
+    }).join("");
+
+  $("horseStatus").textContent =
+    horses.length + "頭の入力欄があります。";
+}
+
+
+/* =========================================================
+   表の内容を保存
+========================================================= */
+
+function syncHorses(){
+
+  document
+    .querySelectorAll("[data-index][data-key]")
+    .forEach(function(el){
+
+      const index =
+        Number(el.dataset.index);
+
+      const key =
+        el.dataset.key;
+
+      if(horses[index]){
+        horses[index][key] =
+          el.value.trim();
+      }
+
+    });
+}
+
+
+/* =========================================================
+   削除
+========================================================= */
+
+function deleteHorse(index){
 
   syncHorses();
 
-  horses.sort(
-    (a,b) => a.number - b.number
-  );
+  horses.splice(index,1);
 
-  renderHorseTable();
+  renderHorses();
 }
 
 
@@ -24,636 +618,351 @@ function sortHorses() {
    全消去
 ========================================================= */
 
-function clearAll() {
+function clearHorses(){
 
   horses = [];
 
-  renderHorseTable();
+  renderHorses();
 
-  $("resultSection")
+  $("horseStatus").textContent =
+    "馬を入力してください。";
+}
+
+
+/* =========================================================
+   プロンプト作成
+========================================================= */
+
+function createPrompt(){
+
+  syncHorses();
+
+  const date =
+    $("raceDate").value ||
+    "未入力";
+
+  const type =
+    $("raceType").value ||
+    "未入力";
+
+  const track =
+    $("raceTrack").value.trim() ||
+    "未入力";
+
+  const raceNumber =
+    $("raceNumber").value ||
+    "未入力";
+
+  const distance =
+    $("raceDistance").value.trim() ||
+    "未入力";
+
+  const surface =
+    $("surface").value ||
+    "未入力";
+
+  const going =
+    $("going").value ||
+    "未入力";
+
+  const weather =
+    $("weather").value.trim() ||
+    "未入力";
+
+  const memo =
+    $("memo").value.trim() ||
+    "なし";
+
+
+  const validHorses =
+    horses.filter(function(horse){
+
+      return (
+        horse.name &&
+        horse.name.trim()
+      );
+
+    });
+
+
+  if(validHorses.length < 2){
+
+    alert(
+      "馬名を2頭以上入力してください。"
+    );
+
+    return null;
+  }
+
+
+  const horseText =
+    validHorses
+      .map(function(horse){
+
+        let text =
+          horse.number +
+          "番 " +
+          horse.name;
+
+        if(horse.jockey){
+          text +=
+            "（騎手：" +
+            horse.jockey +
+            "）";
+        }
+
+        if(horse.odds){
+          text +=
+            "（単勝：" +
+            horse.odds +
+            "倍）";
+        }
+
+        return text;
+
+      })
+      .join("\n");
+
+
+  return `あなたは中央競馬（JRA）・地方競馬の両方に対応した競馬予想分析アシスタントです。
+
+以下のレースについて、可能な範囲で最新情報をWeb検索して、過去レースや競走馬情報を確認した上で予想してください。
+
+━━━━━━━━━━━━━━━━━━
+【レース情報】
+━━━━━━━━━━━━━━━━━━
+
+開催日：${date}
+開催区分：${type}
+競馬場：${track}
+レース番号：${raceNumber}R
+距離：${distance}m
+コース：${surface}
+馬場：${going}
+天気：${weather}
+
+━━━━━━━━━━━━━━━━━━
+【出走馬】
+━━━━━━━━━━━━━━━━━━
+
+${horseText}
+
+━━━━━━━━━━━━━━━━━━
+【ユーザーからのメモ】
+━━━━━━━━━━━━━━━━━━
+
+${memo}
+
+━━━━━━━━━━━━━━━━━━
+【調べてほしい内容】
+━━━━━━━━━━━━━━━━━━
+
+可能なら以下を確認してください。
+
+・各馬の近走成績
+・過去レース内容
+・距離適性
+・競馬場適性
+・コース適性
+・馬場適性
+・脚質
+・想定展開
+・ペース
+・上がり性能
+・騎手
+・枠順
+・斤量
+・人気、オッズ
+・相手関係
+・穴馬候補
+・レース傾向
+
+データが確認できない項目は推測で事実として扱わず、「不明」としてください。
+
+━━━━━━━━━━━━━━━━━━
+【最終回答】
+━━━━━━━━━━━━━━━━━━
+
+まず結論を簡潔に出してください。
+
+◎ → 馬番
+○ → 馬番
+▲ → 馬番
+△ → 馬番
+
+同じ印を複数頭につける場合は、
+
+△ → 3・7・11
+
+のようにまとめてください。
+
+その後、
+
+【本命】
+馬番・馬名
+理由を短く。
+
+【対抗】
+馬番・馬名
+理由を短く。
+
+【穴】
+馬番・馬名
+理由を短く。
+
+【危険な人気馬】
+いれば馬番と理由。
+
+【買い目】
+ワイド
+馬連
+3連複
+3連単
+
+について、無駄に点数を増やさず期待できる組み合わせを提示してください。
+
+最後に、
+「一番買いたい馬」
+「一番面白い穴馬」
+をそれぞれ1頭だけ選んでください。
+
+予想は簡潔かつズバッとお願いします。`;
+}
+
+
+/* =========================================================
+   ChatGPTに聞く
+========================================================= */
+
+async function askChatGPT(){
+
+  const prompt =
+    createPrompt();
+
+  if(!prompt){
+    return;
+  }
+
+
+  $("promptBox").textContent =
+    prompt;
+
+  $("promptSection")
     .classList
-    .add("hidden");
+    .remove("hidden");
 
-  $("importStatus").textContent =
-    "未読込";
 
-  $("narStatus").textContent =
-    "未読込";
+  try{
 
-  $("simStatus").textContent =
-    "待機中";
+    await navigator.clipboard.writeText(
+      prompt
+    );
+
+    $("chatStatus").innerHTML =
+      "✅ 予想文を作成してコピーしました。<br>" +
+      "下の「ChatGPTを開く」を押して、そのまま貼り付けてください。";
+
+  }catch(error){
+
+    $("chatStatus").textContent =
+      "予想文を作成しました。下のコピーを押してください。";
+
+  }
+
+
+  $("promptSection")
+    .scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
 }
 
 
 /* =========================================================
-   CSV 1行解析
+   コピー
 ========================================================= */
 
-function splitCSVLine(line, delimiter) {
+async function copyPrompt(){
 
-  const result = [];
+  const prompt =
+    $("promptBox").textContent;
 
-  let current = "";
-
-  let insideQuote = false;
-
-  for (
-    let i = 0;
-    i < line.length;
-    i++
-  ) {
-
-    const char = line[i];
-
-    if (char === '"') {
-
-      if (
-        insideQuote &&
-        line[i + 1] === '"'
-      ) {
-
-        current += '"';
-        i++;
-
-      } else {
-
-        insideQuote =
-          !insideQuote;
-
-      }
-
-      continue;
-    }
-
-    if (
-      char === delimiter &&
-      !insideQuote
-    ) {
-
-      result.push(
-        current.trim()
-      );
-
-      current = "";
-
-      continue;
-    }
-
-    current += char;
+  if(!prompt){
+    return;
   }
 
-  result.push(
-    current.trim()
+  try{
+
+    await navigator.clipboard.writeText(
+      prompt
+    );
+
+    $("chatStatus").textContent =
+      "✅ コピーしました。ChatGPTを開いて貼り付けてください。";
+
+  }catch(error){
+
+    alert(
+      "コピーできませんでした。文章を長押ししてコピーしてください。"
+    );
+
+  }
+}
+
+
+/* =========================================================
+   ChatGPTを開く
+========================================================= */
+
+function openChatGPT(){
+
+  const url =
+    "https://chatgpt.com/";
+
+  window.open(
+    url,
+    "_blank"
   );
-
-  return result;
 }
 
 
 /* =========================================================
-   CSV解析
+   初期表示
 ========================================================= */
 
-function parseCSV(text) {
-
-  text =
-    text
-      .replace(/^\uFEFF/,"")
-      .replace(/\r/g,"");
-
-  const lines =
-    text
-      .split("\n")
-      .filter(
-        line => line.trim()
-      );
-
-  if (!lines.length) {
-
-    return [];
-  }
-
-  let delimiter = ",";
-
-  if (lines[0].includes("\t")) {
-
-    delimiter = "\t";
-  }
-
-  const headers =
-    splitCSVLine(
-      lines[0],
-      delimiter
-    ).map(
-      header =>
-        header
-          .trim()
-          .toLowerCase()
-    );
-
-  const aliases = {
-
-    number:[
-      "number",
-      "馬番",
-      "馬番号",
-      "馬　番"
-    ],
-
-    name:[
-      "name",
-      "馬名",
-      "馬名略称",
-      "馬名（略称）"
-    ],
-
-    odds:[
-      "odds",
-      "単勝",
-      "単勝オッズ"
-    ],
-
-    jockey:[
-      "jockey",
-      "騎手",
-      "騎手名"
-    ],
-
-    weight:[
-      "weight",
-      "斤量",
-      "負担重量"
-    ],
-
-    recent:[
-      "recent",
-      "近走",
-      "近走指数"
-    ],
-
-    distance:[
-      "distance",
-      "距離",
-      "距離適性"
-    ],
-
-    course:[
-      "course",
-      "コース",
-      "コース適性"
-    ],
-
-    going:[
-      "going",
-      "馬場",
-      "馬場適性"
-    ],
-
-    pace:[
-      "pace",
-      "展開",
-      "展開適性"
-    ],
-
-    final3f:[
-      "final3f",
-      "上がり",
-      "上がり3f"
-    ],
-
-    style:[
-      "style",
-      "脚質"
-    ]
-  };
-
-
-  function findColumn(key) {
-
-    const candidates =
-      aliases[key];
-
-    for (
-      let i = 0;
-      i < headers.length;
-      i++
-    ) {
-
-      for (
-        const candidate of candidates
-      ) {
-
-        if (
-          headers[i] ===
-          candidate.toLowerCase()
-        ) {
-
-          return i;
-        }
-      }
-    }
-
-    for (
-      let i = 0;
-      i < headers.length;
-      i++
-    ) {
-
-      for (
-        const candidate of candidates
-      ) {
-
-        if (
-          headers[i].includes(
-            candidate.toLowerCase()
-          )
-        ) {
-
-          return i;
-        }
-      }
-    }
-
-    return -1;
-  }
-
-
-  const indexes = {};
-
-  Object.keys(aliases)
-    .forEach(
-      key => {
-
-        indexes[key] =
-          findColumn(key);
-      }
-    );
-
-
-  const result = [];
-
-  for (
-    let row = 1;
-    row < lines.length;
-    row++
-  ) {
-
-    const values =
-      splitCSVLine(
-        lines[row],
-        delimiter
-      );
-
-    const data = {};
-
-    Object.keys(indexes)
-      .forEach(
-        key => {
-
-          const index =
-            indexes[key];
-
-          if (index >= 0) {
-
-            data[key] =
-              values[index] ?? "";
-          }
-        }
-      );
-
-    if (
-      data.name ||
-      data.number
-    ) {
-
-      result.push(data);
-    }
-  }
-
-  return result;
-}
+renderHorses();
 
 
 /* =========================================================
-   JSON
+   今日の日付
 ========================================================= */
 
-function parseJSON(text) {
+(function(){
 
-  const data =
-    JSON.parse(text);
+  const now =
+    new Date();
 
-  if (Array.isArray(data)) {
+  const year =
+    now.getFullYear();
 
-    return data;
-  }
+  const month =
+    String(
+      now.getMonth()+1
+    ).padStart(2,"0");
 
-  if (
-    Array.isArray(data.horses)
-  ) {
+  const day =
+    String(
+      now.getDate()
+    ).padStart(2,"0");
 
-    return data.horses;
-  }
+  $("raceDate").value =
+    year + "-" +
+    month + "-" +
+    day;
 
-  if (
-    Array.isArray(data.entries)
-  ) {
+})();
 
-    return data.entries;
-  }
+</script>
 
-  if (
-    Array.isArray(data.data)
-  ) {
-
-    return data.data;
-  }
-
-  return [];
-}
-
-
-/* =========================================================
-   テキスト登録
-========================================================= */
-
-function importText(text) {
-
-  try {
-
-    /*
-     * ボタンから呼ばれた場合は
-     * textareaの内容を使用
-     */
-
-    if (
-      typeof text !== "string"
-    ) {
-
-      text =
-        $("dataText").value;
-    }
-
-    if (
-      !text ||
-      !text.trim()
-    ) {
-
-      throw new Error(
-        "データが空です。"
-      );
-    }
-
-    let data;
-
-    const trimmed =
-      text.trim();
-
-    if (
-      trimmed.startsWith("[") ||
-      trimmed.startsWith("{")
-    ) {
-
-      data =
-        parseJSON(trimmed);
-
-    } else {
-
-      data =
-        parseCSV(trimmed);
-    }
-
-    if (!data.length) {
-
-      throw new Error(
-        "馬データを検出できませんでした。"
-      );
-    }
-
-    horses =
-      data
-        .slice(0,18)
-        .map(
-          (data,index) =>
-            normalizeHorse(
-              data,
-              index
-            )
-        );
-
-    renderHorseTable();
-
-    $("importStatus")
-      .innerHTML =
-      '<span class="pill">成功</span>' +
-      horses.length +
-      "頭を登録しました。";
-
-  } catch(error) {
-
-    $("importStatus")
-      .textContent =
-      "読み込み失敗：" +
-      error.message;
-  }
-}
-
-
-/* =========================================================
-   通常ファイル読み込み
-========================================================= */
-
-async function loadSelectedFile() {
-
-  const file =
-    $("dataFile").files[0];
-
-  if (!file) {
-
-    alert(
-      "CSV / JSON / ZIPを選択してください。"
-    );
-
-    return;
-  }
-
-  try {
-
-    if (
-      file.name
-        .toLowerCase()
-        .endsWith(".zip")
-    ) {
-
-      await loadZIP(file);
-
-      return;
-    }
-
-    const text =
-      await file.text();
-
-    importText(text);
-
-  } catch(error) {
-
-    $("importStatus")
-      .textContent =
-      "ファイル読み込み失敗：" +
-      error.message;
-  }
-}
-
-
-/* =========================================================
-   ZIP読み込み
-========================================================= */
-
-async function loadZIP(file) {
-
-  if (
-    typeof JSZip ===
-    "undefined"
-  ) {
-
-    throw new Error(
-      "ZIPライブラリを読み込めませんでした。"
-    );
-  }
-
-  const zip =
-    await JSZip.loadAsync(file);
-
-  const files =
-    Object.values(zip.files)
-      .filter(
-        file =>
-          !file.dir &&
-          /\.(csv|txt|json)$/i
-            .test(file.name)
-      );
-
-  if (!files.length) {
-
-    throw new Error(
-      "ZIP内にCSV / TXT / JSONがありません。"
-    );
-  }
-
-  let allData = [];
-
-  for (
-    const zipFile of files
-  ) {
-
-    try {
-
-      const text =
-        await zipFile.async("text");
-
-      let data;
-
-      if (
-        /\.json$/i
-          .test(zipFile.name)
-      ) {
-
-        data =
-          parseJSON(text);
-
-      } else {
-
-        data =
-          parseCSV(text);
-      }
-
-      if (data.length) {
-
-        allData =
-          allData.concat(data);
-      }
-
-    } catch(error) {
-
-      console.warn(
-        "ZIP内ファイル読み込み失敗:",
-        zipFile.name,
-        error
-      );
-    }
-  }
-
-  if (!allData.length) {
-
-    throw new Error(
-      "ZIP内のCSVから馬データを検出できませんでした。"
-    );
-  }
-
-  horses =
-    allData
-      .slice(0,18)
-      .map(
-        (data,index) =>
-          normalizeHorse(
-            data,
-            index
-          )
-      );
-
-  renderHorseTable();
-
-  $("importStatus")
-    .innerHTML =
-    '<span class="pill">ZIP成功</span>' +
-    horses.length +
-    "頭を登録しました。";
-}
-
-
-/* =========================================================
-   地方競馬専用ファイル
-========================================================= */
-
-async function loadNARFile() {
-
-  const file =
-    $("narZipFile").files[0];
-
-  if (!file) {
-
-    alert(
-      "地方競馬のCSV / ZIPを選択してください。"
-    );
-
-    return;
-  }
-
-  try {
-
-    $("narStatus")
-      .textContent =
-      "地方競馬データを読み込み中…";
-
-
-    /*
-     * ZIP
-     */
-
-    if (
-      file.name
-        .toLowerCase()
-        .endsWith(".zip")
-    ) {
-
-      if (
-        typeof JSZip ===
-        "undefined"
-      ) {
-
-        throw new Error(
-          "ZIPライブラリが読み込まれていません。"
-        );
-      }
-
-      const
+</body>
+</html>
